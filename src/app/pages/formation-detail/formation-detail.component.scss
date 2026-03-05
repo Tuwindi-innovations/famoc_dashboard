@@ -1,0 +1,22 @@
+.border-left-info {
+  border-left: 5px solid #17a2b8 !important;
+}
+
+.border-left-warning {
+  border-left: 5px solid #ffc107 !important;
+}
+
+.btn-xs {
+  padding: 0.125rem 0.25rem;
+  font-size: 0.75rem;
+}
+
+.x-small {
+  font-size: 0.8rem;
+}
+
+.list-group-item-action:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+  transition: all 0.2s ease;
+}

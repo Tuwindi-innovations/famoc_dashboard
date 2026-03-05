@@ -1,0 +1,274 @@
+<div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body">
+      <div class="row align-items-center py-4">
+        <div class="col-lg-6 col-7">
+          <h6 class="h2 text-white d-inline-block mb-0">Communauté</h6>
+          <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+            <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+              <li>
+                <a href="#"><i class="fas fa-home"></i></a>
+              </li>
+              <li class="breadcrumb-item active text-white">Utilisateurs</li>
+            </ol>
+          </nav>
+        </div>
+        <div class="col-lg-6 col-5 text-right">
+          <button class="btn btn-sm btn-neutral" (click)="loadUsers()">
+            Actualiser
+          </button>
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="openAddModal(addUserModal)"
+          >
+            <i class="fas fa-plus"></i> Nouvel Utilisateur
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col">
+      <div class="card shadow border-0">
+        <div class="card-header border-0">
+          <h3 class="mb-0">Répertoire des comptes</h3>
+        </div>
+
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-grow text-primary" role="status"></div>
+          <p class="mt-2 text-muted font-italic">
+            Synchronisation avec la base de données...
+          </p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table align-items-center table-flush table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>Identité</th>
+                <th>Contact</th>
+                <th>Statut</th>
+                <th>Rôle</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of users">
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div
+                      class="avatar avatar-sm rounded-circle mr-3 bg-gradient-info text-white"
+                    >
+                      {{ u.prenom?.charAt(0) }}{{ u.nom?.charAt(0) }}
+                    </div>
+                    <div>
+                      <span class="mb-0 text-sm font-weight-bold d-block"
+                        >{{ u.prenom }} {{ u.nom }}</span
+                      >
+                      <small class="text-muted"
+                        >ID: {{ u.id.substring(0, 8) }}...</small
+                      >
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="text-sm">
+                    <div class="mb-1">
+                      <i class="ni ni-email-83 mr-2 text-primary"></i
+                      >{{ u.email }}
+                    </div>
+                    <div>
+                      <i class="ni ni-mobile-button mr-2 text-success"></i
+                      >{{ u.telephone || "Non renseigné" }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge badge-dot mr-4">
+                    <i [class]="u.active ? 'bg-success' : 'bg-danger'"></i>
+                    <span class="status">{{
+                      u.active ? "Actif" : "Suspendu"
+                    }}</span>
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="badge badge-pill shadow-sm"
+                    [ngClass]="{
+                      'badge-primary': u.role === 'ADMIN',
+                      'badge-secondary': u.role !== 'ADMIN'
+                    }"
+                  >
+                    {{ u.role }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <div ngbDropdown placement="bottom-right">
+                    <button
+                      class="btn btn-sm btn-icon-only text-light"
+                      ngbDropdownToggle
+                    >
+                      <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div
+                      ngbDropdownMenu
+                      class="dropdown-menu-right dropdown-menu-arrow"
+                    >
+                      <button
+                        class="dropdown-item"
+                        (click)="editUser(u, addUserModal)"
+                      >
+                        <i class="ni ni-tag text-blue"></i> Modifier les infos
+                      </button>
+
+                      <!-- <button class="dropdown-item" (click)="toggleStatus(u)">
+                        <i
+                          class="ni"
+                          [ngClass]="
+                            u.active
+                              ? 'ni-button-power text-warning'
+                              : 'ni-check-bold text-success'
+                          "
+                        ></i>
+                        {{
+                          u.active
+                            ? "Désactiver le compte"
+                            : "Réactiver le compte"
+                        }}
+                      </button> -->
+
+                      <div class="dropdown-divider"></div>
+                      <button
+                        class="dropdown-item text-danger"
+                        (click)="delete(u.id)"
+                      >
+                        <i class="ni ni-basket text-danger"></i> Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-footer py-4 bg-secondary">
+          <p class="text-sm text-muted mb-0">
+            Total : <strong>{{ users.length }}</strong> utilisateurs trouvés.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #addUserModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title">
+      {{ isEditMode ? "Modifier le compte" : "Créer un nouveau compte" }}
+    </h4>
+    <button
+      type="button"
+      class="close"
+      aria-label="Close"
+      (click)="modal.dismiss()"
+    >
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body bg-secondary">
+    <form (ngSubmit)="onSubmitUser(modal)">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-control-label">Prénom</label>
+            <input
+              type="text"
+              [(ngModel)]="newUser.prenom"
+              name="prenom"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-control-label">Nom</label>
+            <input
+              type="text"
+              [(ngModel)]="newUser.nom"
+              name="nom"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-control-label">Adresse Email</label>
+        <input
+          type="email"
+          [(ngModel)]="newUser.email"
+          name="email"
+          class="form-control"
+          placeholder="exemple@mail.com"
+          required
+        />
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-control-label">Téléphone</label>
+            <input
+              type="text"
+              [(ngModel)]="newUser.telephone"
+              name="telephone"
+              class="form-control"
+            />
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-control-label">Rôle</label>
+            <select [(ngModel)]="newUser.role" name="role" class="form-control">
+              <option value="ADMIN">Administrateur (ADMIN)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-control-label">Mot de passe provisoire</label>
+        <input
+          type="password"
+          [(ngModel)]="newUser.password"
+          name="password"
+          class="form-control"
+          required
+        />
+      </div>
+
+      <div class="text-right mt-4">
+        <button
+          type="button"
+          class="btn btn-link text-muted"
+          (click)="modal.close('Close click')"
+        >
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary px-5">
+          {{
+            isEditMode
+              ? "Enregistrer les modifications"
+              : "Enregistrer le compte"
+          }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

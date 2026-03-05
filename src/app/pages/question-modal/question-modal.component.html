@@ -1,0 +1,99 @@
+<div class="modal-header bg-warning">
+  <h4 class="modal-title text-white">Nouvelle Question</h4>
+</div>
+
+<div class="modal-body">
+  <form [formGroup]="questionForm">
+    <div class="form-group mb-3">
+      <label>Texte de la question</label>
+      <textarea
+        class="form-control"
+        formControlName="texte"
+        rows="2"
+      ></textarea>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group mb-3">
+          <label>Type de question</label>
+          <select class="form-control" formControlName="type">
+            <option value="QCM">QCM (Choix multiple)</option>
+            <option value="VRAI_FAUX">Vrai / Faux</option>
+            <option value="REPONSE_COURTE">Réponse courte</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group mb-3">
+          <label>Points</label>
+          <input type="number" class="form-control" formControlName="points" />
+        </div>
+      </div>
+    </div>
+
+    <h5 class="border-bottom pb-2 mt-4">Options de réponse</h5>
+    <div formArrayName="reponseOptions">
+      <div
+        *ngFor="let opt of options.controls; let i = index"
+        [formGroupName]="i"
+        class="card p-2 mb-2 bg-light"
+      >
+        <div class="d-flex align-items-center">
+          <input
+            type="text"
+            class="form-control form-control-sm mr-2"
+            formControlName="texte"
+            placeholder="Réponse {{ i + 1 }}"
+          />
+
+          <div class="custom-control custom-checkbox mr-3">
+            <input
+              type="checkbox"
+              class="custom-control-input"
+              [id]="'check' + i"
+              formControlName="estCorrecte"
+            />
+            <label class="custom-control-label" [for]="'check' + i"
+              >Correcte</label
+            >
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-danger"
+            (click)="removeOption(i)"
+          >
+            <i class="fa fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-sm btn-info mt-2"
+      (click)="addOption()"
+    >
+      <i class="fa fa-plus"></i> Ajouter une option
+    </button>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button
+    type="button"
+    class="btn btn-secondary"
+    (click)="activeModal.dismiss()"
+  >
+    Annuler
+  </button>
+  <button
+    type="button"
+    class="btn btn-primary"
+    [disabled]="questionForm.invalid"
+    (click)="submit()"
+  >
+    Enregistrer la question
+  </button>
+</div>

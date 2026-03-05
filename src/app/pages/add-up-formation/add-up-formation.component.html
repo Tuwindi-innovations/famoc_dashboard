@@ -1,0 +1,89 @@
+<div class="header bg-gradient-info pb-8 pt-5 pt-md-8"></div>
+
+<div class="container-fluid mt--7">
+  <div class="row justify-content-center">
+    <div class="col-xl-8">
+      <div class="card bg-secondary shadow border-0">
+        <div class="card-header bg-white border-0">
+          <h3 class="mb-0">Ajouter une nouvelle formation</h3>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="pl-lg-4">
+              <div class="form-group">
+                <label class="form-control-label">Nom de la formation</label>
+                <input
+                  type="text"
+                  name="nom"
+                  [(ngModel)]="formation.titre"
+                  class="form-control form-control-alternative"
+                  placeholder="Ex: Maîtriser Angular de A à Z"
+                />
+              </div>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label">Durée estimée</label>
+                    <input
+                      type="text"
+                      name="duree"
+                      [(ngModel)]="formation.dureeEstimee"
+                      class="form-control form-control-alternative"
+                      placeholder="Ex: 20 heures, 3 mois..."
+                    />
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label">Niveau requis</label>
+                    <select
+                      name="niveau"
+                      [(ngModel)]="formation.niveau"
+                      class="form-control form-control-alternative"
+                    >
+                      <option value="DEBUTANT">Débutant</option>
+                      <option value="Intermediaire">Intermédiaire</option>
+                      <option value="AVANCER">Avancé</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-control-label"
+                  >Description du programme</label
+                >
+                <textarea
+                  rows="4"
+                  name="description"
+                  [(ngModel)]="formation.description"
+                  class="form-control form-control-alternative"
+                  placeholder="Détaillez les modules de la formation..."
+                ></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-control-label"
+                  >Supports / Médias (Images)</label
+                >
+                <input
+                  type="file"
+                  (change)="onFileSelect($event)"
+                  multiple
+                  class="form-control form-control-alternative"
+                />
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-info px-6">
+                Enregistrer la formation
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

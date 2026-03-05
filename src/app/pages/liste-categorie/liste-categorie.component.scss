@@ -1,0 +1,21 @@
+.bg-soft-info {
+  background-color: #e0f4ff !important;
+  color: #11cdef !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-sm i {
+  font-size: 1rem;
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+}
+
+// Pour adoucir le modal
+.modal-content {
+  border-radius: 0.5rem;
+}

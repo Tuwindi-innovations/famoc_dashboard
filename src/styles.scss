@@ -1,0 +1,10 @@
+/* You can add global styles to this file, and also import other style files */
+/* On force le fond sombre à être en dessous */
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+/* On force la fenêtre de la modale à être au-dessus du fond sombre */
+.modal {
+  z-index: 1060 !important;
+}

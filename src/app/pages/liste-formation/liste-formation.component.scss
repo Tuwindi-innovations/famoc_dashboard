@@ -1,0 +1,41 @@
+.card-lift--hover:hover {
+  transform: translateY(-10px);
+  transition: all 0.25s ease;
+  box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07) !important;
+}
+
+.icon-shape-info {
+  color: #11cdef;
+  background-color: rgba(17, 205, 239, 0.1);
+  width: 3rem;
+  height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-soft-info {
+  background-color: #e0f4ff;
+  color: #11cdef;
+}
+
+.transition-hover {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+.card-img-top {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.badge-pill {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.5em 0.8em;
+}

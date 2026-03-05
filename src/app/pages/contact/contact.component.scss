@@ -1,0 +1,19 @@
+.bg-soft-danger {
+  background-color: #fce4e4;
+  color: #f5365c !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.table td {
+  white-space: normal;
+  max-width: 300px;
+}
+
+.avatar {
+  font-size: 14px;
+  text-transform: uppercase;
+}

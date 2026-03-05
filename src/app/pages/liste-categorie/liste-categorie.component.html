@@ -1,0 +1,208 @@
+<div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body text-center mb-4">
+      <h1 class="text-white">Configuration du Système</h1>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt--7">
+  <div class="card shadow border-0">
+    <div
+      class="card-header border-0 d-flex justify-content-between align-items-center"
+    >
+      <h3 class="mb-0">Liste des Catégories</h3>
+      <div>
+        <button
+          class="btn btn-sm btn-success btn-icon mr-2"
+          (click)="openAddModal(addModalContent)"
+        >
+          <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+          <span class="btn-inner--text">Ajouter une catégorie</span>
+        </button>
+        <button class="btn btn-sm btn-secondary btn-icon" (click)="reload()">
+          <span class="btn-inner--icon"><i class="fas fa-sync-alt"></i></span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-muted">Mise à jour de la liste...</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading && categories.length > 0">
+      <table class="table align-items-center table-flush">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Catégorie</th>
+            <!-- <th scope="col">Type / Tag</th> -->
+            <th scope="col">Description</th>
+            <th scope="col">Status</th>
+            <th scope="col" class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of categories">
+            <th scope="row">
+              <div class="media align-items-center">
+                <div
+                  class="avatar avatar-sm rounded-circle mr-3 bg-soft-info text-info"
+                >
+                  <i
+                    [class]="
+                      cat.typeCategorie === 'BLOG'
+                        ? 'ni ni-books'
+                        : 'ni ni-calendar-grid-58'
+                    "
+                  ></i>
+                </div>
+                <div class="media-body">
+                  <span class="name mb-0 text-sm font-weight-bold">{{
+                    cat.nom
+                  }}</span>
+                </div>
+              </div>
+            </th>
+            <!-- <td>
+              <span
+                class="badge badge-pill"
+                [ngClass]="{
+                  'badge-primary': cat.typeCategorie === 'BLOG',
+                  'badge-warning': cat.typeCategorie === 'EVENT'
+                }"
+              >
+                {{ cat.typeCategorie }}
+              </span>
+            </td> -->
+            <td>
+              <small
+                class="text-muted d-block"
+                style="
+                  max-width: 250px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                "
+              >
+                {{ cat.description || "Pas de description fournie" }}
+              </small>
+            </td>
+            <td>
+              <span class="badge badge-dot mr-4">
+                <i class="bg-success"></i>
+                <span class="status">Active</span>
+              </span>
+            </td>
+            <td class="text-right">
+              <div ngbDropdown placement="bottom-right">
+                <a
+                  class="btn btn-sm btn-icon-only text-light"
+                  ngbDropdownToggle
+                >
+                  <i class="fas fa-ellipsis-v"></i>
+                </a>
+                <div
+                  ngbDropdownMenu
+                  class="dropdown-menu-right dropdown-menu-arrow"
+                >
+                  <a
+                    class="dropdown-item"
+                    (click)="editCategorie(cat, addModalContent)"
+                  >
+                    <i class="ni ni-settings text-primary"></i> Modifier
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a
+                    class="dropdown-item text-danger"
+                    (click)="deleteCategorie(cat.id)"
+                  >
+                    <i class="ni ni-fat-remove"></i> Supprimer
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="!isLoading && categories.length === 0"
+      class="card-body text-center py-5"
+    >
+      <div class="avatar avatar-lg bg-soft-secondary mb-3">
+        <i class="ni ni-folder-17 text-muted"></i>
+      </div>
+      <p class="text-muted">
+        Aucune catégorie n'est configurée pour le moment.
+      </p>
+    </div>
+  </div>
+</div>
+
+<ng-template #addModalContent let-modal>
+  <div class="modal-content border-0">
+    <div class="modal-header bg-secondary">
+      <h5 class="modal-title font-weight-bold">
+        {{ isEditMode ? "Modifier la catégorie" : "Nouvelle Catégorie" }}
+      </h5>
+      <button type="button" class="close" (click)="modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body bg-secondary">
+      <form>
+        <div class="form-group">
+          <label class="form-control-label">Nom de la catégorie</label>
+          <input
+            type="text"
+            [(ngModel)]="newCategorie.nom"
+            name="nom"
+            class="form-control form-control-alternative"
+            placeholder="Ex: Actualités IT"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-control-label">Type de contenu</label>
+          <select
+            [(ngModel)]="newCategorie.typeCategorie"
+            name="typeCategorie"
+            class="form-control form-control-alternative"
+          >
+            <option value="BLOG">BLOG</option>
+            <option value="EVENT">EVENT</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label">Description détaillée</label>
+          <textarea
+            [(ngModel)]="newCategorie.description"
+            name="desc"
+            class="form-control form-control-alternative"
+            rows="3"
+            placeholder="À quoi sert cette catégorie ?"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer bg-secondary border-0">
+      <button
+        type="button"
+        class="btn btn-link text-muted"
+        (click)="modal.dismiss()"
+      >
+        Annuler
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary px-4"
+        (click)="saveCategorie(modal)"
+      >
+        {{
+          isEditMode ? "Enregistrer les modifications" : "Créer la catégorie"
+        }}
+      </button>
+    </div>
+  </div>
+</ng-template>

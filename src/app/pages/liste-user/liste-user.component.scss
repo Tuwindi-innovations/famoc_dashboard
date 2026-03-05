@@ -1,0 +1,50 @@
+.avatar.bg-soft-primary {
+  background-color: #e2e5ff !important;
+  color: #5e72e4 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 0.875rem;
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+}
+
+.transition-hover:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+.modal {
+  // z-index: 1050 !important;
+  border-radius: 0.5rem;
+}
+
+// .bg-soft-info {
+//   background-color: #e0f4ff !important;
+//   color: #11cdef !important;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .avatar-sm i {
+//   font-size: 1rem;
+// }
+
+// .table th,
+// .table td {
+//   vertical-align: middle !important;
+// }
+
+// // Pour adoucir le modal
+// .modal-content {
+//   border-radius: 0.5rem;
+// }

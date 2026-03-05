@@ -1,0 +1,169 @@
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8"></div>
+
+<div class="container-fluid mt--7">
+  <div class="row justify-content-center">
+    <div class="col-xl-10">
+      <div class="card bg-secondary shadow border-0">
+        <div class="card-header bg-white border-0">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h3 class="mb-0">Organiser un nouvel événement</h3>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <h6 class="heading-small text-muted mb-4">
+              Détails de l'événement
+            </h6>
+
+            <div class="pl-lg-4">
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-group">
+                    <label class="form-control-label"
+                      >Titre de l'événement</label
+                    >
+                    <input
+                      type="text"
+                      name="titre"
+                      [(ngModel)]="eventRequest.titre"
+                      class="form-control form-control-alternative"
+                      placeholder="Ex: Salon du Numérique 2026"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label"
+                      ><i class="ni ni-calendar-grid-58 mr-2"></i>Date de
+                      début</label
+                    >
+                    <input
+                      type="date"
+                      name="dateDebut"
+                      [(ngModel)]="eventRequest.dateDebutEvent"
+                      class="form-control form-control-alternative"
+                    />
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label"
+                      ><i class="ni ni-time-alarm mr-2"></i>Date de fin</label
+                    >
+                    <input
+                      type="date"
+                      name="dateFin"
+                      [(ngModel)]="eventRequest.dateFinEvent"
+                      class="form-control form-control-alternative"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label"
+                      ><i class="ni ni-pin-3 mr-2"></i>Lieu</label
+                    >
+                    <input
+                      type="text"
+                      name="lieu"
+                      [(ngModel)]="eventRequest.lieu"
+                      class="form-control form-control-alternative"
+                      placeholder="Ex: CICB, Bamako"
+                    />
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label"
+                      ><i class="ni ni-badge mr-2"></i>Organisateur</label
+                    >
+                    <input
+                      type="text"
+                      name="organisateur"
+                      [(ngModel)]="eventRequest.organisateur"
+                      class="form-control form-control-alternative"
+                      placeholder="Nom de l'entité"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4" />
+            <h6 class="heading-small text-muted mb-4">
+              Classification & Médias
+            </h6>
+            <div class="pl-lg-4">
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label">Catégorie</label>
+                    <select
+                      name="cat"
+                      [(ngModel)]="eventRequest.categorieId"
+                      class="form-control form-control-alternative"
+                    >
+                      <option value="" disabled>Choisir une catégorie</option>
+                      <option *ngFor="let c of categories" [value]="c.id">
+                        {{ c.nom }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="form-group">
+                    <label class="form-control-label">Affiche / Photos</label>
+                    <input
+                      type="file"
+                      (change)="onFileSelect($event)"
+                      multiple
+                      class="form-control form-control-alternative"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-control-label"
+                  >Description de l'événement</label
+                >
+                <textarea
+                  rows="4"
+                  name="desc"
+                  [(ngModel)]="eventRequest.description"
+                  class="form-control form-control-alternative"
+                  placeholder="Décrivez le programme..."
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="text-right mt-4">
+              <button
+                type="button"
+                class="btn btn-link text-muted"
+                [routerLink]="['/liste-event']"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                [disabled]="isSubmitting"
+                class="btn btn-danger px-5"
+              >
+                {{ isSubmitting ? "Publication..." : "Publier l'événement" }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

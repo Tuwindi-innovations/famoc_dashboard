@@ -1,0 +1,23 @@
+.transition-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1),
+      0 5px 15px rgba(0, 0, 0, 0.07) !important;
+  }
+}
+
+.badge-soft-success {
+  background-color: #e6fffa;
+  color: #2dce89;
+}
+
+.badge-soft-warning {
+  background-color: #fffaf0;
+  color: #fb6340;
+}
+
+.card-img-top {
+  border-top-left-radius: calc(0.375rem - 1px);
+  border-top-right-radius: calc(0.375rem - 1px);
+}

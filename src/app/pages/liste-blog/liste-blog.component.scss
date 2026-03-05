@@ -1,0 +1,36 @@
+// blog-list.component.scss
+.transition-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1),
+      0 5px 15px rgba(0, 0, 0, 0.07) !important;
+  }
+}
+
+.avatar-sm {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-control-label {
+  cursor: pointer;
+  &::before {
+    background-color: #adb5bd; // Couleur quand désactivé
+    border: none;
+  }
+}
+
+.custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #2dce89; // Couleur Succès quand activé (Vert Argon)
+}
+
+.transition-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+  }
+}

@@ -1,0 +1,88 @@
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body">
+      <h1 class="text-white">
+        <i class="ni ni-email-83 mr-3"></i>Messages de Contact
+      </h1>
+      <p class="text-white opacity-8">
+        Gérez les demandes et messages envoyés via le formulaire du site.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col">
+      <div class="card shadow">
+        <div
+          class="card-header border-0 d-flex justify-content-between align-items-center"
+        >
+          <h3 class="mb-0">Boîte de réception</h3>
+          <span class="badge badge-pill badge-info"
+            >{{ contacts.length }} messages</span
+          >
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Expéditeur</th>
+                <th scope="col">Email</th>
+                <th scope="col">Message</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of contacts">
+                <th scope="row">
+                  <div class="media align-items-center">
+                    <div
+                      class="avatar rounded-circle mr-3 bg-soft-danger text-danger font-weight-bold"
+                    >
+                      {{ c.firstName[0] }}{{ c.lastName[0] }}
+                    </div>
+                    <div class="media-body">
+                      <span class="mb-0 text-sm font-weight-bold"
+                        >{{ c.firstName }} {{ c.lastName }}</span
+                      >
+                    </div>
+                  </div>
+                </th>
+                <td>{{ c.email }}</td>
+                <td>
+                  <span class="text-muted text-sm" title="{{ c.message }}">
+                    {{ c.message | slice : 0 : 50
+                    }}{{ c.message.length > 50 ? "..." : "" }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button
+                    class="btn btn-sm btn-icon-only text-light"
+                    (click)="viewContact(c)"
+                  >
+                    <i class="fas fa-eye text-primary"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-icon-only text-light"
+                    (click)="deleteContact(c.id)"
+                  >
+                    <i class="fas fa-trash text-danger"></i>
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="contacts.length === 0 && !isLoading">
+                <td colspan="4" class="text-center py-5">
+                  <i class="ni ni-archive-2 text-muted fa-3x"></i>
+                  <p class="mt-3 text-muted">Aucun message pour le moment.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

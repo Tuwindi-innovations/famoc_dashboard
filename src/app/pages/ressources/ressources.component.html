@@ -1,0 +1,137 @@
+<div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <h1 class="text-white">Gestion des Ressources</h1>
+  </div>
+</div>
+
+<div class="container-fluid mt--7">
+  <div class="row">
+    <div class="col-xl-4 mb-5">
+      <div class="card shadow">
+        <div class="card-header border-0">
+          <h3 class="mb-0">Ajouter une ressource</h3>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label>Titre de la ressource</label>
+              <input
+                type="text"
+                [(ngModel)]="ressourceForm.titre"
+                name="titre"
+                class="form-control"
+                placeholder="Ex: Guide de survie PDF"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea
+                [(ngModel)]="ressourceForm.description"
+                name="description"
+                class="form-control"
+                rows="3"
+                placeholder="Brève description du contenu..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label>Auteur</label>
+              <input
+                type="text"
+                [(ngModel)]="ressourceForm.auteur"
+                name="auteur"
+                class="form-control"
+                placeholder="Nom de l'auteur ou organisation"
+              />
+            </div>
+            <div class="form-group">
+              <label>Image / Icône</label>
+              <input
+                type="file"
+                (change)="onFileSelected($event)"
+                class="form-control"
+                accept="image/*"
+              />
+              <small class="text-muted" *ngIf="selectedFile"
+                >Fichier sélectionné : {{ selectedFile.name }}</small
+              >
+            </div>
+            <button type="submit" class="btn btn-primary w-100 shadow">
+              <i class="fas fa-plus-circle mr-2"></i> Enregistrer la ressource
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8">
+      <div class="card shadow">
+        <div
+          class="card-header border-0 d-flex justify-content-between align-items-center"
+        >
+          <h3 class="mb-0">Ressources disponibles</h3>
+          <span class="badge badge-pill badge-info"
+            >{{ ressources.length }} ressources</span
+          >
+        </div>
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th>Aperçu</th>
+                <th>Titre / Auteur</th>
+                <th>Description</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let res of ressources">
+                <td>
+                  <img
+                    [src]="getImageFullUrl(res.imageUrl)"
+                    class="rounded shadow-sm"
+                    style="width: 50px; height: 50px; object-fit: cover"
+                    alt="Aperçu ressource"
+                  />
+                </td>
+                <td>
+                  <div class="media align-items-center">
+                    <div class="media-body">
+                      <span class="mb-0 text-sm font-weight-bold d-block">{{
+                        res.titre
+                      }}</span>
+                      <small class="text-muted">Par : {{ res.auteur }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div
+                    class="text-truncate"
+                    style="max-width: 200px"
+                    [title]="res.description"
+                  >
+                    {{ res.description }}
+                  </div>
+                </td>
+                <td class="text-right">
+                  <button
+                    (click)="onDelete(res.id)"
+                    class="btn btn-sm btn-outline-danger"
+                    title="Supprimer"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="ressources.length === 0">
+                <td colspan="4" class="text-center py-4">
+                  <p class="text-muted mb-0">Aucune ressource trouvée.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
