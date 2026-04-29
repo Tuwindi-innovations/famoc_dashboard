@@ -15,6 +15,7 @@ import { catchError, tap, filter, switchMap, take } from "rxjs/operators";
 interface LoginRequest {
   identifiant: string;
   motDePasse: string;
+  token: string;
 }
 
 // 2. Requête d'inscription (SignupRequest)
@@ -31,6 +32,7 @@ interface SignupRequest {
 interface JwtResponse {
   accessToken: string;
   refreshToken: string;
+  token: string;
 }
 
 @Injectable({
@@ -56,7 +58,7 @@ export class AuthService {
   }
 
   signIn(identifiant: string, motDePasse: string): Observable<JwtResponse> {
-    const authRequest: LoginRequest = { identifiant, motDePasse };
+    const authRequest: LoginRequest = { identifiant, motDePasse, token: "" };
     return this.http
       .post<JwtResponse>(
         `${this.serviceUrl}/${this.baseUrl}/login`,

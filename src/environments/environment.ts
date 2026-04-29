@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: "https://tuwindi.app/api/famoc",
+  // apiUrl: "https://tuwindi.app/api/famoc",
+  apiUrl: "http://localhost:7070/api/v1",
   // apiUrl: "https://tuwindi.app:8443/nepal",
 };
 

@@ -1,0 +1,46 @@
+.card-img-top {
+  height: 200px; /* Conserve ta hauteur fixe actuelle */
+  width: 100%; /* Assure-toi qu'elle prend toute la largeur */
+
+  /* --- C'est LA propriété magique --- */
+  object-fit: cover;
+  /* ---------------------------------- */
+
+  /* Optionnel pour le style */
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background-color: #f8f9fa; /* Couleur de fond si l'image charge mal */
+}
+
+.badge {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+// Pour les icônes Bootstrap si tu ne les as pas
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css");
+
+.mt--7 {
+  margin-top: -6rem !important;
+}
+
+.transition-hover {
+  transition: all 0.25s ease-in-out;
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1),
+      0 5px 15px rgba(0, 0, 0, 0.07) !important;
+  }
+}
+
+.bg-soft-primary {
+  background-color: rgba(94, 114, 228, 0.15);
+}
+
+.bg-secondary-light {
+  background-color: #f7fafc;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}

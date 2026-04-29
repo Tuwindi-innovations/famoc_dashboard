@@ -30,6 +30,8 @@ import { FormationDetailComponent } from "./pages/formation-detail/formation-det
 import { FormModalComponent } from "./pages/form-modal/form-modal.component";
 import { QuestionModalComponent } from "./pages/question-modal/question-modal.component";
 import { RessourcesComponent } from './pages/ressources/ressources.component';
+import { AprenantsComponent } from './pages/aprenants/aprenants.component';
+import { AlerteComponent } from './pages/alerte/alerte.component';
 
 @NgModule({
   imports: [
@@ -77,6 +79,8 @@ import { RessourcesComponent } from './pages/ressources/ressources.component';
     ContactComponent,
     FormationDetailComponent,
     RessourcesComponent,
+    AprenantsComponent,
+    AlerteComponent,
   ],
   providers: [
     {

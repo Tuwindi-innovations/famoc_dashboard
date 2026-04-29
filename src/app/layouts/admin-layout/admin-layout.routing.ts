@@ -14,6 +14,8 @@ import { AuthGuard } from "src/app/guards/auth.guard";
 import { ListeFormationComponent } from "src/app/pages/liste-formation/liste-formation.component";
 import { ContactComponent } from "src/app/pages/contact/contact.component";
 import { RessourcesComponent } from "src/app/pages/ressources/ressources.component";
+import { AlerteComponent } from "src/app/pages/alerte/alerte.component";
+import { AprenantsComponent } from "src/app/pages/aprenants/aprenants.component";
 
 export const AdminLayoutRoutes: Routes = [
   {
@@ -67,6 +69,16 @@ export const AdminLayoutRoutes: Routes = [
   {
     path: "ressource",
     component: RessourcesComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: "alerte",
+    component: AlerteComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: "apprenants",
+    component: AprenantsComponent,
     canActivate: [AuthGuard],
   },
 ];
