@@ -40,6 +40,11 @@ export class ListeHeadimageComponent implements OnInit {
     "Galeri4",
     "Galeri5",
     "Galeri6",
+    "aya1",
+    "aya2",
+    "aya3",
+    "aya4",
+    "aya5",
   ];
 
   ngOnInit() {
