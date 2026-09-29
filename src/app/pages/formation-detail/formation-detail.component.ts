@@ -34,6 +34,13 @@ interface ModuleAffiche extends ModuleResponse {
   questions: QuestionResponseDTO[];
 }
 
+/** Libellés lisibles des niveaux renvoyés par l'API. */
+const LIBELLE_NIVEAU: Record<string, string> = {
+  DEBUTANT: 'Débutant',
+  Intermediaire: 'Intermédiaire',
+  AVANCER: 'Avancé',
+};
+
 /** Libellés lisibles des formats de leçon. */
 const LIBELLE_FORMAT: Record<TypeContenu, string> = {
   [TypeContenu.TEXTE]: 'Article',
@@ -74,6 +81,10 @@ export class FormationDetailComponent {
   protected readonly erreur = signal('');
 
   protected readonly libelleFormat = LIBELLE_FORMAT;
+
+  protected libelleNiveau(niveau: string): string {
+    return LIBELLE_NIVEAU[niveau] ?? niveau;
+  }
   protected readonly iconeFormat = ICONE_FORMAT;
 
   protected readonly totalCours = computed(() =>

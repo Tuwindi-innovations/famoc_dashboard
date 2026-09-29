@@ -119,6 +119,21 @@
   background-image: none !important;
 }
 
+// `text-white` hors de l'en-tête (écrans de chargement, états vides) : sans le
+// fond coloré d'Argon, ces textes s'écrivaient en blanc sur blanc, donc
+// invisibles. On les ramène à une encre lisible.
+.app-content .text-white,
+.app-content .spinner-border.text-white,
+.app-content .text-light {
+  color: var(--ink-secondary) !important;
+}
+
+// Le spinner Bootstrap reprend la couleur d'accent.
+.spinner-border {
+  color: var(--accent);
+  border-right-color: transparent;
+}
+
 // Les vignettes rondes d'Argon, encore utilisées dans quelques listes.
 .avatar {
   display: inline-grid;
@@ -149,4 +164,62 @@
     height: 3rem;
     font-size: var(--text-sm);
   }
+}
+
+// --- Icônes : poids imposé --------------------------------------------------
+// FontAwesome sélectionne ses glyphes par la graisse de la police : 900 pour
+// le style « solid », 400 pour « regular » et « brands ». Or certaines classes
+// utilitaires de Bootstrap en imposent une autre (`.display-1` met 300), et le
+// navigateur cherche alors le glyphe dans une graisse qui ne le contient pas :
+// il affiche un carré vide. On verrouille donc la graisse des icônes.
+.fa-solid,
+.fas {
+  font-weight: 900 !important;
+}
+
+.fa-regular,
+.far,
+.fa-brands,
+.fab {
+  font-weight: 400 !important;
+}
+
+// --- Fil d'Ariane -----------------------------------------------------------
+// Argon s'appuyait sur un <ol> stylé ; sans son thème, la numérotation
+// automatique de la liste réapparaissait à l'écran.
+.breadcrumb {
+  list-style: none;
+
+  li,
+  .breadcrumb-item {
+    list-style: none;
+  }
+}
+
+// --- Fonds hérités ----------------------------------------------------------
+// `bg-secondary` et consorts peignaient des bandeaux gris sombre sous les
+// pieds de carte et les totaux.
+.card-footer.bg-secondary,
+.bg-secondary,
+.bg-light,
+.bg-white {
+  background-color: var(--surface) !important;
+  color: var(--ink) !important;
+}
+
+.card-footer.bg-secondary {
+  border-top: 1px solid var(--border);
+}
+
+// --- Images de contenu ------------------------------------------------------
+// Une vignette absente côté serveur ne doit pas afficher l'icône « image
+// cassée » du navigateur : le conteneur garde simplement sa teinte de fond.
+.card-img-top {
+  background: var(--surface-sunken);
+  object-fit: cover;
+}
+
+img[src=''],
+img:not([src]) {
+  visibility: hidden;
 }

@@ -2,9 +2,9 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { catchError, finalize, Observable, share, tap, throwError } from 'rxjs';
+import { catchError, finalize, Observable, of, share, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { User } from '../models/User';
+import { User, UserResponseDTO } from '../models/User';
 
 interface LoginRequest {
   identifiant: string;
@@ -136,6 +136,37 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.jetonValide();
+  }
+
+  /** Identifiant du compte connecté, lu dans la revendication `sub` du jeton. */
+  getUserId(): string | null {
+    const jeton = this.getAccessToken();
+    if (!jeton) {
+      return null;
+    }
+    try {
+      return this.jwt.decodeToken<ChargeJwt>(jeton)?.sub ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Nom complet du compte connecté.
+   *
+   * Le jeton émis par cette API ne porte que `iss`, `sub`, `role`, `exp`,
+   * `token_type` et `iat` : aucun nom ni e-mail. On interroge donc
+   * `GET /user/{id}` pour obtenir un libellé lisible, faute de quoi la barre
+   * supérieure afficherait l'UUID du compte.
+   */
+  getCurrentUser(): Observable<UserResponseDTO | null> {
+    const id = this.getUserId();
+    if (!id) {
+      return of(null);
+    }
+    return this.http
+      .get<UserResponseDTO>(`${environment.apiUrl}/user/${id}`)
+      .pipe(catchError(() => of(null)));
   }
 
   /** Nom lisible extrait du jeton, ou chaîne vide si indisponible. */

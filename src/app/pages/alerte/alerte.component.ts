@@ -19,6 +19,8 @@ export class AlerteComponent implements OnInit {
   alertes: AlerteResponse[] = [];
 
   isLoading = true;
+  /** Vrai quand l'API n'a pas répondu : à ne pas confondre avec « 0 alerte ». */
+  chargementEchoue = false;
 
   ngOnInit(): void {
     this.loadAlertes();
@@ -26,13 +28,14 @@ export class AlerteComponent implements OnInit {
 
   loadAlertes() {
     this.isLoading = true;
+    this.chargementEchoue = false;
     this.alerteService.getAllAlertes().subscribe({
       next: (res) => {
         this.alertes = res;
         this.isLoading = false;
       },
       error: () => {
-        this.toastr.error("Erreur de chargement");
+        this.chargementEchoue = true;
         this.isLoading = false;
       },
     });

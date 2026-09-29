@@ -78,9 +78,11 @@ export class TopbarComponent {
   );
 
   /**
-   * Nom lu dans le jeton JWT. L'ancienne version lisait
-   * `sessionStorage.getItem('user')`, une clé que rien n'écrivait : le menu
-   * restait donc toujours vide.
+   * Nom du compte connecté.
+   *
+   * Le jeton ne contient pas de nom : on affiche d'abord ce qu'il donne (au
+   * pire l'identifiant), puis on le remplace par le nom réel dès que
+   * `GET /user/{id}` répond.
    */
   protected readonly nomAffiche = signal(this.auth.getDisplayName() || 'Administrateur');
 
@@ -95,6 +97,16 @@ export class TopbarComponent {
   });
 
   protected readonly themeUi = computed(() => THEME_UI[this.themeService.theme()]);
+
+  constructor() {
+    this.auth.getCurrentUser().subscribe((utilisateur) => {
+      if (!utilisateur) {
+        return;
+      }
+      const nom = [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(' ').trim();
+      this.nomAffiche.set(nom || utilisateur.email || 'Administrateur');
+    });
+  }
 
   protected basculerTheme(): void {
     this.themeService.suivant();

@@ -1,5 +1,5 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   provideRouter,
@@ -13,6 +13,16 @@ import { authInterceptor } from './services/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    // À partir d'Angular 21, `bootstrapApplication` active le mode zoneless
+    // PAR DÉFAUT. Or plusieurs pages pilotent encore leur affichage par des
+    // propriétés de classe modifiées dans un `subscribe` : sans zone.js, ces
+    // mutations ne déclenchent aucun rafraîchissement et les listes restent
+    // bloquées sur leur écran de chargement.
+    //
+    // On réactive donc explicitement la détection par zone. Cette ligne pourra
+    // disparaître le jour où toutes les pages auront basculé sur des signals,
+    // comme l'ont déjà fait le tableau de bord, les formations et les contacts.
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
     provideRouter(
       routes,

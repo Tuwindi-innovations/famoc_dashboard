@@ -105,10 +105,25 @@
     </div>
     }
   </div>
-  } @if (!isLoading && alertes.length === 0) {
-  <div class="card shadow border-0 py-5 text-center">
-    <i class="fa-solid fa-clipboard-check text-muted display-1"></i>
-    <p class="text-muted mt-3">Tout est en ordre. Aucune alerte active.</p>
+  } @if (!isLoading && chargementEchoue) {
+  <div class="empty-state">
+    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <h3 class="empty-state__title">Alertes indisponibles</h3>
+    <p class="empty-state__text">
+      L'API n'expose pas encore les alertes citoyennes sur cette instance.
+      Le compteur ci-dessus ne reflète donc pas la réalité.
+    </p>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="loadAlertes()">
+      Réessayer
+    </button>
+  </div>
+  } @if (!isLoading && !chargementEchoue && alertes.length === 0) {
+  <div class="empty-state">
+    <i class="fa-solid fa-clipboard-check fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <h3 class="empty-state__title">Aucune alerte active</h3>
+    <p class="empty-state__text">
+      Les signalements remontés par les apprenants apparaîtront ici.
+    </p>
   </div>
   }
 </div>

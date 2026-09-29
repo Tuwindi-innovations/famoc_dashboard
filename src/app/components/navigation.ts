@@ -57,10 +57,25 @@ export const NAVIGATION: readonly GroupeNav[] = [
   },
 ];
 
+/**
+ * Pages sans entrée de menu, mais qui méritent un titre propre en barre
+ * supérieure (écrans de détail et d'édition atteints depuis une liste).
+ */
+const TITRES_HORS_MENU: readonly ElementNav[] = [
+  { chemin: '/formations/detail', titre: 'Détail de la formation', icone: '' },
+  { chemin: '/add-formation', titre: 'Nouvelle formation', icone: '' },
+  { chemin: '/formations', titre: 'Modifier la formation', icone: '' },
+  { chemin: '/create-blog', titre: 'Nouvel article', icone: '' },
+  { chemin: '/update-blog', titre: "Modifier l'article", icone: '' },
+  { chemin: '/create-event', titre: 'Nouvel évènement', icone: '' },
+  { chemin: '/evenements', titre: "Modifier l'évènement", icone: '' },
+];
+
 /** Tous les éléments à plat, pour la résolution du titre de page. */
-export const ELEMENTS_NAV: readonly ElementNav[] = NAVIGATION.flatMap(
-  (groupe) => groupe.elements,
-);
+export const ELEMENTS_NAV: readonly ElementNav[] = [
+  ...NAVIGATION.flatMap((groupe) => groupe.elements),
+  ...TITRES_HORS_MENU,
+];
 
 /**
  * Titre de la page correspondant à une URL.

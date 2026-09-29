@@ -15,6 +15,8 @@ export class AprenantsComponent implements OnInit {
 
   apprenants: UserResponseDTO[] = [];
   isLoading = true;
+  /** Vrai quand l'API n'a pas répondu : à ne pas confondre avec « 0 apprenant ». */
+  chargementEchoue = false;
 
   ngOnInit(): void {
     this.loadAll();
@@ -22,13 +24,14 @@ export class AprenantsComponent implements OnInit {
 
   loadAll() {
     this.isLoading = true;
+    this.chargementEchoue = false;
     this.service.getAllApprenants().subscribe({
       next: (data) => {
         this.apprenants = data;
         this.isLoading = false;
       },
       error: () => {
-        this.toastr.error("Erreur de récupération");
+        this.chargementEchoue = true;
         this.isLoading = false;
       },
     });
