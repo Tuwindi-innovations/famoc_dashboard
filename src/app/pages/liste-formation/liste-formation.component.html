@@ -2,10 +2,10 @@
   <div class="container-fluid">
     <div class="header-body text-center mb-5">
       <h1 class="text-white">
-        <i class="ni ni-hat-3 mr-3"></i>Catalogue des Formations
+        <i class="fa-solid fa-graduation-cap mr-3"></i>Catalogue des Formations
       </h1>
       <button class="btn btn-neutral btn-sm mt-3" (click)="reload()">
-        <i class="fas fa-sync-alt text-info"></i> Actualiser
+        <i class="fa-solid fa-rotate text-info"></i> Actualiser
       </button>
 
       <button
@@ -13,7 +13,7 @@
         [routerLink]="['/add-formation']"
       >
         <span class="btn-inner--icon"
-          ><i class="fas fa-plus-circle text-info"></i
+          ><i class="fa-solid fa-circle-plus text-info"></i
         ></span>
         <span class="btn-inner--text text-info font-weight-bold"
           >Ajouter une formation</span
@@ -72,7 +72,7 @@
             <div class="row">
               <div class="col">
                 <small class="text-muted"
-                  ><i class="ni ni-time-alarm mr-1"></i> Durée</small
+                  ><i class="fa-solid fa-clock mr-1"></i> Durée</small
                 >
                 <span class="d-block font-weight-600 text-sm">
                   {{ f.dureeEstimee }} h
@@ -84,21 +84,21 @@
                     class="btn btn-sm btn-icon-only text-light"
                     ngbDropdownToggle
                   >
-                    <i class="fas fa-ellipsis-v"></i>
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
                   </a>
                   <div
                     ngbDropdownMenu
                     class="dropdown-menu-right dropdown-menu-arrow"
                   >
                     <!-- <button class="dropdown-item" (click)="editFormation(f)">
-                            <i class="ni ni-settings-gear-65 text-primary"></i>
+                            <i class="fa-solid fa-gear text-primary"></i>
                             Modifier
                           </button> -->
                     <button
                       class="dropdown-item text-danger"
                       (click)="deleteFormation(f.id)"
                     >
-                      <i class="ni ni-fat-remove text-danger"></i> Supprimer
+                      <i class="fa-solid fa-xmark text-danger"></i> Supprimer
                     </button>
                   </div>
                 </div>

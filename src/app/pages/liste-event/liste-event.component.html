@@ -12,7 +12,7 @@
           [routerLink]="['/create-event']"
         >
           <span class="btn-inner--icon"
-            ><i class="ni ni-calendar-grid-58 text-danger"></i
+            ><i class="fa-solid fa-calendar-days text-danger"></i
           ></span>
           <span class="btn-inner--text text-danger font-weight-bold"
             >Créer un événement</span
@@ -67,14 +67,14 @@
             <div class="text-center">
               <small class="text-muted d-block">Début</small>
               <span class="badge badge-soft-success font-weight-bold">
-                <i class="ni ni-time-alarm mr-1"></i>
+                <i class="fa-solid fa-clock mr-1"></i>
                 {{ event.dateDebutEvent | date : "dd MMM yyyy" }}
               </span>
             </div>
             <div class="text-center">
               <small class="text-muted d-block">Fin</small>
               <span class="badge badge-soft-warning font-weight-bold">
-                <i class="ni ni-watch-time mr-1"></i>
+                <i class="fa-solid fa-stopwatch mr-1"></i>
                 {{ event.dateFinEvent | date : "dd MMM yyyy" }}
               </span>
             </div>
@@ -114,7 +114,7 @@
     </div>
     } @if (!isLoading && events.length === 0) {
     <div class="alert alert-info text-center shadow border-0">
-      <span class="alert-icon"><i class="ni ni-info-83"></i></span>
+      <span class="alert-icon"><i class="fa-solid fa-circle-info"></i></span>
       <span class="alert-text"
         >Aucun événement n'est prévu pour le moment.</span
       >

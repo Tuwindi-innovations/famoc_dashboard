@@ -7,7 +7,7 @@
           <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
             <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
               <li>
-                <a href="#"><i class="fas fa-home"></i></a>
+                <a href="#"><i class="fa-solid fa-house"></i></a>
               </li>
               <li class="breadcrumb-item active text-white">Utilisateurs</li>
             </ol>
@@ -21,7 +21,7 @@
             class="btn btn-sm btn-primary"
             (click)="openAddModal(addUserModal)"
           >
-            <i class="fas fa-plus"></i> Nouvel Utilisateur
+            <i class="fa-solid fa-plus"></i> Nouvel Utilisateur
           </button>
         </div>
       </div>
@@ -79,11 +79,11 @@
                 <td>
                   <div class="text-sm">
                     <div class="mb-1">
-                      <i class="ni ni-email-83 mr-2 text-primary"></i
+                      <i class="fa-solid fa-envelope mr-2 text-primary"></i
                       >{{ u.email }}
                     </div>
                     <div>
-                      <i class="ni ni-mobile-button mr-2 text-success"></i
+                      <i class="fa-solid fa-mobile-screen-button mr-2 text-success"></i
                       >{{ u.telephone || "Non renseigné" }}
                     </div>
                   </div>
@@ -113,7 +113,7 @@
                       class="btn btn-sm btn-icon-only text-light"
                       ngbDropdownToggle
                     >
-                      <i class="fas fa-ellipsis-v"></i>
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div
                       ngbDropdownMenu
@@ -123,7 +123,7 @@
                         class="dropdown-item"
                         (click)="editUser(u, addUserModal)"
                       >
-                        <i class="ni ni-tag text-blue"></i> Modifier les infos
+                        <i class="fa-solid fa-tag text-blue"></i> Modifier les infos
                       </button>
                       <!-- <button class="dropdown-item" (click)="toggleStatus(u)">
                                   <i
@@ -145,7 +145,7 @@
                         class="dropdown-item text-danger"
                         (click)="delete(u.id)"
                       >
-                        <i class="ni ni-basket text-danger"></i> Supprimer
+                        <i class="fa-solid fa-basket-shopping text-danger"></i> Supprimer
                       </button>
                     </div>
                   </div>

@@ -17,11 +17,11 @@
           class="btn btn-sm btn-success btn-icon mr-2"
           (click)="openAddModal(addModalContent)"
         >
-          <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+          <span class="btn-inner--icon"><i class="fa-solid fa-plus"></i></span>
           <span class="btn-inner--text">Ajouter une catégorie</span>
         </button>
         <button class="btn btn-sm btn-secondary btn-icon" (click)="reload()">
-          <span class="btn-inner--icon"><i class="fas fa-sync-alt"></i></span>
+          <span class="btn-inner--icon"><i class="fa-solid fa-rotate"></i></span>
         </button>
       </div>
     </div>
@@ -54,8 +54,8 @@
                   <i
                     [class]="
                       cat.typeCategorie === 'BLOG'
-                        ? 'ni ni-books'
-                        : 'ni ni-calendar-grid-58'
+                        ? 'fa-solid fa-book'
+                        : 'fa-solid fa-calendar-days'
                     "
                   ></i>
                 </div>
@@ -102,7 +102,7 @@
                   class="btn btn-sm btn-icon-only text-light"
                   ngbDropdownToggle
                 >
-                  <i class="fas fa-ellipsis-v"></i>
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
                 </a>
                 <div
                   ngbDropdownMenu
@@ -112,14 +112,14 @@
                     class="dropdown-item"
                     (click)="editCategorie(cat, addModalContent)"
                   >
-                    <i class="ni ni-settings text-primary"></i> Modifier
+                    <i class="fa-solid fa-sliders text-primary"></i> Modifier
                   </a>
                   <div class="dropdown-divider"></div>
                   <a
                     class="dropdown-item text-danger"
                     (click)="deleteCategorie(cat.id)"
                   >
-                    <i class="ni ni-fat-remove"></i> Supprimer
+                    <i class="fa-solid fa-xmark"></i> Supprimer
                   </a>
                 </div>
               </div>
@@ -132,7 +132,7 @@
     } @if (!isLoading && categories.length === 0) {
     <div class="card-body text-center py-5">
       <div class="avatar avatar-lg bg-soft-secondary mb-3">
-        <i class="ni ni-folder-17 text-muted"></i>
+        <i class="fa-solid fa-folder text-muted"></i>
       </div>
       <p class="text-muted">
         Aucune catégorie n'est configurée pour le moment.

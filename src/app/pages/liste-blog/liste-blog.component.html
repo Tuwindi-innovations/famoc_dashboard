@@ -12,7 +12,7 @@
           [routerLink]="['/create-blog']"
         >
           <span class="btn-inner--icon"
-            ><i class="ni ni-fat-add text-primary"></i
+            ><i class="fa-solid fa-plus text-primary"></i
           ></span>
           <span class="btn-inner--text text-primary font-weight-bold"
             >Ajouter un article</span
@@ -68,13 +68,13 @@
                     class="btn btn-sm btn-outline-primary btn-icon-only rounded-circle"
                     (click)="onEdit(blog.id)"
                     >
-                    <i class="ni ni-ruler-pencil"></i>
+                    <i class="fa-solid fa-pen-ruler"></i>
                   </button>
                   <button
                     class="btn btn-sm btn-outline-danger btn-icon-only rounded-circle"
                     (click)="onDelete(blog.id)"
                     >
-                    <i class="ni ni-basket"></i>
+                    <i class="fa-solid fa-basket-shopping"></i>
                   </button>
                 </div> -->
             <div class="d-flex align-items-center">
@@ -83,14 +83,14 @@
                   (click)="onEdit(blog.id)"
                   title="Modifier"
                   >
-                  <i class="ni ni-ruler-pencil"></i>
+                  <i class="fa-solid fa-pen-ruler"></i>
                 </button> -->
               <button
                 class="btn btn-sm btn-outline-danger btn-icon-only rounded-circle"
                 (click)="onDelete(blog.id)"
                 title="Supprimer"
               >
-                <i class="ni ni-basket"></i>
+                <i class="fa-solid fa-basket-shopping"></i>
               </button>
             </div>
           </div>
@@ -114,7 +114,7 @@
                   {{ blog.auteur }}
                 </span>
                 <small class="text-muted">
-                  <i class="ni ni-calendar-grid-58 mr-1"></i>
+                  <i class="fa-solid fa-calendar-days mr-1"></i>
                   {{ blog.datePublication | date : "dd MMM yyyy" }}
                 </small>
               </div>
@@ -143,7 +143,7 @@
   </div>
   } @if (!isLoading && blogs.length === 0) {
   <div class="alert alert-info text-center shadow border-0">
-    <span class="alert-icon"><i class="ni ni-info-83"></i></span>
+    <span class="alert-icon"><i class="fa-solid fa-circle-info"></i></span>
     <span class="alert-text"
       >Aucun article n'est disponible pour le moment.</span
     >
