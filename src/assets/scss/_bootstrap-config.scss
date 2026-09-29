@@ -105,6 +105,14 @@ $modal-content-border-color: rgba(11, 11, 11, 0.1);
 $modal-content-border-radius: 12px;
 $modal-backdrop-opacity: 0.45;
 
+// ng-bootstrap 20 vise l'echelle de z-index de Bootstrap 5 : il pose
+// `z-index: 1055` EN STYLE INLINE sur son backdrop. Avec la valeur par defaut
+// de Bootstrap 4 ($zindex-modal: 1050), le voile passait donc devant la
+// fenetre et interceptait tous les clics et la saisie.
+// La fenetre doit rester au-dessus de 1055.
+$zindex-modal-backdrop: 1050;
+$zindex-modal: 1060;
+
 $dropdown-border-color: rgba(11, 11, 11, 0.1);
 $dropdown-border-radius: 8px;
 $dropdown-link-hover-bg: rgba(11, 11, 11, 0.04);
