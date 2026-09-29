@@ -1,7 +1,7 @@
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { RouterModule } from "@angular/router";
 import { AppComponent } from "./app.component";
 import { AdminLayoutComponent } from "./layouts/admin-layout/admin-layout.component";
@@ -33,64 +33,58 @@ import { RessourcesComponent } from './pages/ressources/ressources.component';
 import { AprenantsComponent } from './pages/aprenants/aprenants.component';
 import { AlerteComponent } from './pages/alerte/alerte.component';
 
-@NgModule({
-  imports: [
-    BrowserAnimationsModule,
-    FormsModule,
-    HttpClientModule,
-    ComponentsModule,
-    NgbModule,
-    ReactiveFormsModule,
-    CommonModule,
-    RouterModule,
-    AppRoutingModule,
-    HttpClientModule,
-    FormModalComponent,
-    QuestionModalComponent,
-    JwtModule.forRoot({
-      config: {
-        tokenGetter: tokenGetter,
-        allowedDomains: ["localhost:7070"], // Remplace par ton domaine backend
-        disallowedRoutes: ["http://localhost:7070/api/v1/auth/login"],
-      },
-    }),
-    ToastrModule.forRoot({
-      timeOut: 3000,
-      positionClass: "toast-bottom-right",
-      preventDuplicates: true,
-    }),
-  ],
-  declarations: [
-    AppComponent,
-    AdminLayoutComponent,
-    AuthLayoutComponent,
-    ListeUserComponent,
-    ListeCategorieComponent,
-    ListeBlogComponent,
-    ListeEventComponent,
-    ListeHeadimageComponent,
-    AddUpUserComponent,
-    AddUpCategorieComponent,
-    AddUpHeadeimageComponent,
-    AddUpBlogComponent,
-    AddUpEventComponent,
-    ListeFormationComponent,
-    AddUpFormationComponent,
-    ContactComponent,
-    FormationDetailComponent,
-    RessourcesComponent,
-    AprenantsComponent,
-    AlerteComponent,
-  ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true,
-    },
-  ],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        AdminLayoutComponent,
+        AuthLayoutComponent,
+        ListeUserComponent,
+        ListeCategorieComponent,
+        ListeBlogComponent,
+        ListeEventComponent,
+        ListeHeadimageComponent,
+        AddUpUserComponent,
+        AddUpCategorieComponent,
+        AddUpHeadeimageComponent,
+        AddUpBlogComponent,
+        AddUpEventComponent,
+        ListeFormationComponent,
+        AddUpFormationComponent,
+        ContactComponent,
+        FormationDetailComponent,
+        RessourcesComponent,
+        AprenantsComponent,
+        AlerteComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserAnimationsModule,
+        FormsModule,
+        HttpClientModule,
+        ComponentsModule,
+        NgbModule,
+        ReactiveFormsModule,
+        CommonModule,
+        RouterModule,
+        AppRoutingModule,
+        FormModalComponent,
+        QuestionModalComponent,
+        JwtModule.forRoot({
+            config: {
+                tokenGetter: tokenGetter,
+                allowedDomains: ["localhost:7070"], // Remplace par ton domaine backend
+                disallowedRoutes: ["http://localhost:7070/api/v1/auth/login"],
+            },
+        }),
+        ToastrModule.forRoot({
+            timeOut: 3000,
+            positionClass: "toast-bottom-right",
+            preventDuplicates: true,
+        })], providers: [
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptor,
+            multi: true,
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule {}
 
 export function tokenGetter() {
