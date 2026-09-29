@@ -1,6 +1,7 @@
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from "src/app/services/confirm.service";
 import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from "ngx-toastr";
 import { UserResponseDTO } from "src/app/models/User";
@@ -21,11 +22,10 @@ export class ListeUserComponent implements OnInit {
     telephone: "",
     role: "ADMIN",
   };
-  constructor(
-    private userService: UserService,
-    private toastr: ToastrService,
-    private modalService: NgbModal
-  ) {}
+  private userService = inject(UserService);
+  private toastr = inject(ToastrService);
+  private modalService = inject(NgbModal);
+  private confirmation = inject(ConfirmService);
   users: UserResponseDTO[] = [];
   isLoading = true;
   isEditMode = false;
@@ -49,19 +49,24 @@ export class ListeUserComponent implements OnInit {
     });
   }
 
-  delete(id: string): void {
-    if (confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) {
-      this.userService.deleteUser(id).subscribe({
-        next: () => {
-          this.toastr.success("Catégorie supprimée");
-          this.loadUsers();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toastr.error("Erreur lors de la suppression");
-        },
-      });
+  async delete(id: string): Promise<void> {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cet utilisateur.',
+      detail: 'Le compte et ses accès seront définitivement retirés.',
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
     }
+
+    this.userService.deleteUser(id).subscribe({
+      next: () => {
+        this.toastr.success("Utilisateur supprimé");
+        this.loadUsers();
+      },
+      error: () => this.toastr.error("Erreur lors de la suppression"),
+    });
   }
 
   // Basculer l'état (Activer / Désactiver)

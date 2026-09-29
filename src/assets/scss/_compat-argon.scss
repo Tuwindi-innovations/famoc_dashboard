@@ -1,0 +1,152 @@
+// =============================================================================
+// Couche d'adaptation du balisage Argon
+// -----------------------------------------------------------------------------
+// Les pages de liste portent encore l'en-tête du thème Argon :
+//
+//   <div class="header bg-gradient-primary pb-8 pt-5">
+//     <div class="header-body"> … <h6 class="h2 text-white">Titre</h6> … </div>
+//   </div>
+//   <div class="container-fluid mt--7"> … </div>
+//
+// Ce balisage s'appuyait sur un bandeau coloré suivi d'une remontée par marge
+// négative. Sans le thème, `text-white` (utilitaire Bootstrap toujours actif)
+// écrirait en blanc sur fond blanc, et les `mt--7` décaleraient le contenu.
+//
+// Cette couche remappe ce balisage sur l'apparence du design system, ce qui
+// aligne toutes les pages sans réécrire chaque template. Elle est destinée à
+// disparaître au fur et à mesure que les pages passent au balisage `page-head`.
+// =============================================================================
+
+.header {
+  // Le bandeau devient un simple en-tête de page, sans fond ni dégradé.
+  padding: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+
+  .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .header-body {
+    margin-bottom: var(--space-5);
+  }
+
+  .row {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    align-items: flex-start;
+  }
+
+  // Le titre reprend l'encre normale et la taille des autres pages.
+  h1,
+  h2,
+  h3,
+  h6,
+  .h2 {
+    color: var(--ink) !important;
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.02em;
+  }
+
+  // `text-white` n'a plus de fond coloré derrière lui : on rétablit un
+  // contraste lisible plutôt que du blanc sur blanc.
+  .text-white {
+    color: var(--ink-secondary) !important;
+  }
+
+  .breadcrumb {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    font-size: var(--text-xs);
+
+    a,
+    .breadcrumb-item {
+      color: var(--ink-muted) !important;
+    }
+  }
+
+  .text-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+}
+
+// Les marges négatives d'Argon remontaient le contenu sur le bandeau coloré ;
+// sans bandeau, elles n'ont plus lieu d'être.
+.mt--4,
+.mt--5,
+.mt--6,
+.mt--7,
+.mt--8,
+.mt--9 {
+  margin-top: 0 !important;
+}
+
+// Les conteneurs pleine largeur sont déjà bornés par `.app-content`.
+.container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+// Le bouton « neutre » d'Argon (blanc sur fond coloré) devient un bouton
+// secondaire standard.
+.btn-neutral {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--ink);
+
+  &:hover {
+    background: var(--surface-hover);
+    color: var(--ink);
+  }
+}
+
+// Argon empilait des ombres portées ; le design system s'appuie sur les traits.
+.shadow,
+.shadow-sm,
+.shadow-lg {
+  box-shadow: none !important;
+}
+
+// Les aplats de dégradé n'existent plus : on retombe sur les surfaces.
+[class*='bg-gradient-'] {
+  background-image: none !important;
+}
+
+// Les vignettes rondes d'Argon, encore utilisées dans quelques listes.
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--surface-sunken);
+  color: var(--ink-secondary);
+  border-radius: var(--radius-sm);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &.rounded-circle {
+    border-radius: 50%;
+  }
+
+  &-sm {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--text-xs);
+  }
+
+  &-lg {
+    width: 3rem;
+    height: 3rem;
+    font-size: var(--text-sm);
+  }
+}

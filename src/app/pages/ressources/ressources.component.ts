@@ -1,5 +1,6 @@
 import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from 'src/app/services/confirm.service';
 import { ToastrService } from "ngx-toastr";
 import { Ressource } from "src/app/models/Ressource";
 import { RessourceService } from "src/app/services/ressource.service";
@@ -12,6 +13,7 @@ import { environment } from "src/environments/environment";
     styleUrls: ["./ressources.component.scss"]})
 export class RessourcesComponent implements OnInit {
   private ressourceService = inject(RessourceService);
+  private confirmation = inject(ConfirmService);
   private toastr = inject(ToastrService);
 
   ressources: Ressource[] = [];
@@ -64,16 +66,22 @@ export class RessourcesComponent implements OnInit {
       });
   }
 
-  onDelete(id: string | undefined): void {
+  async onDelete(id: string | undefined): Promise<void> {
     if (!id) return;
-    if (confirm("Voulez-vous vraiment supprimer cette ressource ?")) {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cette ressource.',
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
+    }
       this.ressourceService.deleteRessource(id).subscribe({
         next: () => {
           this.toastr.success("Supprimé !");
           this.loadRessources();
         },
       });
-    }
   }
 
   resetForm(): void {

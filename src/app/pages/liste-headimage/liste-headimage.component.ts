@@ -1,5 +1,6 @@
 import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from 'src/app/services/confirm.service';
 import { ToastrService } from "ngx-toastr";
 import { map, catchError, of, forkJoin } from "rxjs";
 import { HeadImage } from "src/app/models/HeadImage";
@@ -12,6 +13,7 @@ import { HeadImageService } from "src/app/services/head-image.service";
     styleUrls: ["./liste-headimage.component.scss"]})
 export class ListeHeadimageComponent implements OnInit {
   private headService = inject(HeadImageService);
+  private confirmation = inject(ConfirmService);
   private toastr = inject(ToastrService);
 
   headImages: HeadImage[] = [];
@@ -131,13 +133,19 @@ export class ListeHeadimageComponent implements OnInit {
     this.selectedFile = null;
   }
 
-  onDelete(id: string) {
-    if (confirm("Supprimer cette bannière ?")) {
+  async onDelete(id: string): Promise<void> {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cette bannière.',
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
+    }
       this.headService.deleteHeadImage(id).subscribe(() => {
         this.toastr.warning("Bannière supprimée");
         this.loadAllHeadImages();
       });
-    }
   }
 
   resetForm() {

@@ -1,5 +1,6 @@
 import { DatePipe, SlicePipe } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from 'src/app/services/confirm.service';
 import { FormBuilder } from "@angular/forms";
 import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from "ngx-toastr";
@@ -14,6 +15,7 @@ import { environment } from "src/environments/environment";
     styleUrls: ["./liste-event.component.scss"]})
 export class ListeEventComponent implements OnInit {
   private eventService = inject(EventService);
+  private confirmation = inject(ConfirmService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private toastr = inject(ToastrService);
@@ -57,13 +59,16 @@ export class ListeEventComponent implements OnInit {
     return "assets/img/theme/img-1-1000x600.jpg";
   }
 
-  deleteEvent(id: string): void {
+  async deleteEvent(id: string): Promise<void> {
     // Utilisation d'une boîte de dialogue de confirmation
-    if (
-      confirm(
-        "Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible."
-      )
-    ) {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cet évènement.',
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
+    }
       this.isLoading = true; // Activer le loader pendant l'opération
 
       this.eventService.deleteEvent(id).subscribe({
@@ -84,7 +89,6 @@ export class ListeEventComponent implements OnInit {
           this.isLoading = false;
         },
       });
-    }
   }
 
   // Activer ou Désactiver un blog

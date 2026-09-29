@@ -1,5 +1,6 @@
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from "@angular/core";
+import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from "src/app/services/confirm.service";
 import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from "ngx-toastr";
 import { Categorie } from "src/app/models/Categorie";
@@ -25,11 +26,10 @@ export class ListeCategorieComponent implements OnInit {
     active: true,
   };
 
-  constructor(
-    private categorieService: CategorieService,
-    private modalService: NgbModal,
-    private toastr: ToastrService
-  ) {}
+  private categorieService = inject(CategorieService);
+  private modalService = inject(NgbModal);
+  private toastr = inject(ToastrService);
+  private confirmation = inject(ConfirmService);
 
   ngOnInit(): void {
     this.loadCategories();
@@ -75,19 +75,24 @@ export class ListeCategorieComponent implements OnInit {
     });
   }
 
-  deleteCategorie(id: string): void {
-    if (confirm("Voulez-vous vraiment supprimer cette catégorie ?")) {
-      this.categorieService.delete(id).subscribe({
-        next: () => {
-          this.toastr.success("Catégorie supprimée avec succès");
-          this.loadCategories();
-        },
-        error: (err) => {
-          console.error("Erreur suppression:", err);
-          this.toastr.error("Erreur lors de la suppression");
-        },
-      });
+  async deleteCategorie(id: string): Promise<void> {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cette catégorie.',
+      detail: "Les contenus rattachés à cette catégorie ne seront plus classés.",
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
     }
+
+    this.categorieService.delete(id).subscribe({
+      next: () => {
+        this.toastr.success("Catégorie supprimée");
+        this.loadCategories();
+      },
+      error: () => this.toastr.error("Erreur lors de la suppression"),
+    });
   }
 
   openAddModal(content: any) {

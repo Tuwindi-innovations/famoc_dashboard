@@ -460,3 +460,85 @@
     }
   }
 }
+
+// --- Liste de messages ------------------------------------------------------
+.messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.message {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+
+  &__ligne {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  &__resume {
+    display: grid;
+    grid-template-columns: minmax(8rem, auto) minmax(8rem, auto) minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--surface-hover);
+    }
+  }
+
+  &__expediteur {
+    color: var(--ink);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+  }
+
+  &__email {
+    color: var(--ink-secondary);
+    font-size: var(--text-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Extrait sur une ligne ; le texte complet s'ouvre au clic.
+  &__extrait {
+    color: var(--ink-muted);
+    font-size: var(--text-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__corps {
+    margin: 0;
+    padding: var(--space-4);
+    border-top: 1px solid var(--border);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    white-space: pre-wrap;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .message__resume {
+    grid-template-columns: 1fr;
+    gap: 0.125rem;
+  }
+}

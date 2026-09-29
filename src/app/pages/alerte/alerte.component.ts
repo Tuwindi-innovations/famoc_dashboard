@@ -1,5 +1,6 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from 'src/app/services/confirm.service';
 import { ToastrService } from "ngx-toastr";
 import { AlerteResponse } from "src/app/models/Alerte";
 import { AlertService } from "src/app/services/alert.service";
@@ -12,6 +13,7 @@ import { environment } from "src/environments/environment";
     styleUrls: ["./alerte.component.scss"]})
 export class AlerteComponent implements OnInit {
   private alerteService = inject(AlertService);
+  private confirmation = inject(ConfirmService);
   private toastr = inject(ToastrService);
 
   alertes: AlerteResponse[] = [];
@@ -60,13 +62,19 @@ export class AlerteComponent implements OnInit {
     });
   }
 
-  onDelete(id: number) {
-    if (confirm("Supprimer cette alerte ?")) {
+  async onDelete(id: number): Promise<void> {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cette alerte.',
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
+    }
       this.alerteService.deleteAlerte(id).subscribe(() => {
         this.alertes = this.alertes.filter((a) => a.id !== id);
         this.toastr.success("Alerte supprimée");
       });
-    }
   }
 
   get alertesEnAttente() {

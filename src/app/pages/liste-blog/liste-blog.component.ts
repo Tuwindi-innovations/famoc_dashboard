@@ -1,5 +1,6 @@
 import { DatePipe, SlicePipe } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
+import { ConfirmService } from 'src/app/services/confirm.service';
 import { FormBuilder } from "@angular/forms";
 import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from "ngx-toastr";
@@ -14,6 +15,7 @@ import { environment } from "src/environments/environment";
     styleUrls: ["./liste-blog.component.scss"]})
 export class ListeBlogComponent implements OnInit {
   private blogService = inject(BlogService);
+  private confirmation = inject(ConfirmService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private toastr = inject(ToastrService);
@@ -52,8 +54,15 @@ export class ListeBlogComponent implements OnInit {
   }
 
   // Suppression d'un blog
-  onDelete(id: string): void {
-    if (confirm("Voulez-vous vraiment supprimer cet article ?")) {
+  async onDelete(id: string): Promise<void> {
+    const confirme = await this.confirmation.demander({
+      titre: 'Supprimer définitivement ?',
+      message: 'Vous êtes sur le point de supprimer cet article.',
+      libelleConfirmer: 'Supprimer',
+    });
+    if (!confirme) {
+      return;
+    }
       this.blogService.deleteBlog(id).subscribe({
         next: () => {
           this.toastr.success("Article supprimé avec succès");
@@ -63,7 +72,6 @@ export class ListeBlogComponent implements OnInit {
           this.toastr.error("Erreur lors de la suppression");
         },
       });
-    }
   }
 
   // Activer ou Désactiver un blog
