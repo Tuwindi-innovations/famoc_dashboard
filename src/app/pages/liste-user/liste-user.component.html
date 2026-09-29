@@ -37,14 +37,15 @@
           <h3 class="mb-0">Répertoire des comptes</h3>
         </div>
 
-        <div *ngIf="isLoading" class="text-center py-5">
+        @if (isLoading) {
+        <div class="text-center py-5">
           <div class="spinner-grow text-primary" role="status"></div>
           <p class="mt-2 text-muted font-italic">
             Synchronisation avec la base de données...
           </p>
         </div>
-
-        <div class="table-responsive" *ngIf="!isLoading">
+        } @if (!isLoading) {
+        <div class="table-responsive">
           <table class="table align-items-center table-flush table-hover">
             <thead class="thead-light">
               <tr>
@@ -56,7 +57,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of users">
+              @for (u of users; track u) {
+              <tr>
                 <td>
                   <div class="d-flex align-items-center">
                     <div
@@ -123,23 +125,21 @@
                       >
                         <i class="ni ni-tag text-blue"></i> Modifier les infos
                       </button>
-
                       <!-- <button class="dropdown-item" (click)="toggleStatus(u)">
-                        <i
-                          class="ni"
+                                  <i
+                                    class="ni"
                           [ngClass]="
                             u.active
                               ? 'ni-button-power text-warning'
                               : 'ni-check-bold text-success'
                           "
-                        ></i>
-                        {{
-                          u.active
-                            ? "Désactiver le compte"
-                            : "Réactiver le compte"
-                        }}
-                      </button> -->
-
+                                  ></i>
+                                  {{
+                                  u.active
+                                  ? "Désactiver le compte"
+                                  : "Réactiver le compte"
+                                  }}
+                                </button> -->
                       <div class="dropdown-divider"></div>
                       <button
                         class="dropdown-item text-danger"
@@ -151,9 +151,11 @@
                   </div>
                 </td>
               </tr>
+              }
             </tbody>
           </table>
         </div>
+        }
 
         <div class="card-footer py-4 bg-secondary">
           <p class="text-sm text-muted mb-0">

@@ -26,12 +26,13 @@
       </div>
     </div>
 
-    <div *ngIf="isLoading" class="text-center py-5">
+    @if (isLoading) {
+    <div class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
       <p class="mt-2 text-muted">Mise à jour de la liste...</p>
     </div>
-
-    <div class="table-responsive" *ngIf="!isLoading && categories.length > 0">
+    } @if (!isLoading && categories.length > 0) {
+    <div class="table-responsive">
       <table class="table align-items-center table-flush">
         <thead class="thead-light">
           <tr>
@@ -43,7 +44,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let cat of categories">
+          @for (cat of categories; track cat) {
+          <tr>
             <th scope="row">
               <div class="media align-items-center">
                 <div
@@ -65,16 +67,16 @@
               </div>
             </th>
             <!-- <td>
-              <span
-                class="badge badge-pill"
+                <span
+                  class="badge badge-pill"
                 [ngClass]="{
                   'badge-primary': cat.typeCategorie === 'BLOG',
                   'badge-warning': cat.typeCategorie === 'EVENT'
                 }"
-              >
-                {{ cat.typeCategorie }}
-              </span>
-            </td> -->
+                  >
+                  {{ cat.typeCategorie }}
+                </span>
+              </td> -->
             <td>
               <small
                 class="text-muted d-block"
@@ -123,14 +125,12 @@
               </div>
             </td>
           </tr>
+          }
         </tbody>
       </table>
     </div>
-
-    <div
-      *ngIf="!isLoading && categories.length === 0"
-      class="card-body text-center py-5"
-    >
+    } @if (!isLoading && categories.length === 0) {
+    <div class="card-body text-center py-5">
       <div class="avatar avatar-lg bg-soft-secondary mb-3">
         <i class="ni ni-folder-17 text-muted"></i>
       </div>
@@ -138,6 +138,7 @@
         Aucune catégorie n'est configurée pour le moment.
       </p>
     </div>
+    }
   </div>
 </div>
 

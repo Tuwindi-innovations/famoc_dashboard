@@ -112,9 +112,11 @@
                       class="form-control form-control-alternative"
                     >
                       <option value="" disabled>Choisir une catégorie</option>
-                      <option *ngFor="let c of categories" [value]="c.id">
+                      @for (c of categories; track c) {
+                      <option [value]="c.id">
                         {{ c.nom }}
                       </option>
+                      }
                     </select>
                   </div>
                 </div>

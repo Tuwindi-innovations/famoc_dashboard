@@ -35,7 +35,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let c of contacts">
+              @for (c of contacts; track c) {
+              <tr>
                 <th scope="row">
                   <div class="media align-items-center">
                     <div
@@ -72,13 +73,14 @@
                   </button>
                 </td>
               </tr>
-
-              <tr *ngIf="contacts.length === 0 && !isLoading">
+              } @if (contacts.length === 0 && !isLoading) {
+              <tr>
                 <td colspan="4" class="text-center py-5">
                   <i class="ni ni-archive-2 text-muted fa-3x"></i>
                   <p class="mt-3 text-muted">Aucun message pour le moment.</p>
                 </td>
               </tr>
+              }
             </tbody>
           </table>
         </div>

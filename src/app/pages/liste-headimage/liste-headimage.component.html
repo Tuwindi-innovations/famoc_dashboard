@@ -55,22 +55,25 @@
             <button type="submit" class="btn btn-primary mt-4 w-100">
               {{ isEdit ? "Mettre à jour" : "Enregistrer" }}
             </button>
+            @if (isEdit) {
             <button
-              *ngIf="isEdit"
               type="button"
               (click)="resetForm()"
               class="btn btn-link text-muted mt-2 w-100"
             >
               Annuler
             </button>
+            }
           </form>
         </div>
       </div>
     </div>
 
     <div class="col-xl-8">
-      <div class="row" *ngIf="headImages.length > 0; else noData">
-        <div class="col-md-6 mb-4" *ngFor="let head of headImages">
+      @if (headImages.length > 0) {
+      <div class="row">
+        @for (head of headImages; track head) {
+        <div class="col-md-6 mb-4">
           <div class="card card-stats shadow border-0 overflow-hidden">
             <div class="position-relative">
               <img
@@ -101,14 +104,14 @@
             </div>
           </div>
         </div>
+        }
       </div>
-
-      <ng-template #noData>
-        <div class="card bg-secondary shadow border-0 text-center p-5">
-          <h3 class="text-muted">Aucune bannière trouvée</h3>
-          <p>Les images s'afficheront ici une fois créées.</p>
-        </div>
-      </ng-template>
+      } @else {
+      <div class="card bg-secondary shadow border-0 text-center p-5">
+        <h3 class="text-muted">Aucune bannière trouvée</h3>
+        <p>Les images s'afficheront ici une fois créées.</p>
+      </div>
+      }
     </div>
   </div>
 </div>

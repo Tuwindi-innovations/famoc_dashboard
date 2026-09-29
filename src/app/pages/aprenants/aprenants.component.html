@@ -46,7 +46,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let user of apprenants">
+              @for (user of apprenants; track user) {
+              <tr>
                 <th scope="row">
                   <div class="d-flex align-items-center">
                     <div class="avatar rounded-circle me-3">
@@ -87,6 +88,7 @@
                   </div>
                 </td>
               </tr>
+              }
             </tbody>
           </table>
         </div>

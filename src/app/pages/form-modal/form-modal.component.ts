@@ -1,4 +1,3 @@
-import { CommonModule } from "@angular/common";
 import { Component, inject, Input, OnInit } from "@angular/core";
 import {
   FormBuilder,
@@ -9,10 +8,10 @@ import {
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-    selector: "app-form-modal",
-    imports: [ReactiveFormsModule, CommonModule],
-    templateUrl: "./form-modal.component.html",
-    styleUrls: ["./form-modal.component.scss"]
+  selector: "app-form-modal",
+  imports: [ReactiveFormsModule],
+  templateUrl: "./form-modal.component.html",
+  styleUrls: ["./form-modal.component.scss"],
 })
 export class FormModalComponent implements OnInit {
   activeModal = inject(NgbActiveModal);

@@ -139,10 +139,8 @@
       </form>
       <!-- Navigation -->
       <ul class="navbar-nav">
-        <li
-          *ngFor="let menuItem of menuItems"
-          class="{{ menuItem.class }} nav-item"
-        >
+        @for (menuItem of menuItems; track menuItem) {
+        <li class="{{ menuItem.class }} nav-item">
           <a
             routerLinkActive="active"
             [routerLink]="[menuItem.path]"
@@ -152,6 +150,7 @@
             {{ menuItem.title }}
           </a>
         </li>
+        }
       </ul>
 
       <hr class="my-3" />

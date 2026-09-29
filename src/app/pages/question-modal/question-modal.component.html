@@ -34,11 +34,8 @@
 
     <h5 class="border-bottom pb-2 mt-4">Options de réponse</h5>
     <div formArrayName="reponseOptions">
-      <div
-        *ngFor="let opt of options.controls; let i = index"
-        [formGroupName]="i"
-        class="card p-2 mb-2 bg-light"
-      >
+      @for (opt of options.controls; track opt; let i = $index) {
+      <div [formGroupName]="i" class="card p-2 mb-2 bg-light">
         <div class="d-flex align-items-center">
           <input
             type="text"
@@ -46,7 +43,6 @@
             formControlName="texte"
             placeholder="Réponse {{ i + 1 }}"
           />
-
           <div class="custom-control custom-checkbox mr-3">
             <input
               type="checkbox"
@@ -58,7 +54,6 @@
               >Correcte</label
             >
           </div>
-
           <button
             type="button"
             class="btn btn-sm btn-outline-danger"
@@ -68,6 +63,7 @@
           </button>
         </div>
       </div>
+      }
     </div>
 
     <button
