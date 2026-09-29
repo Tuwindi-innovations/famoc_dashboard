@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 import { Ressource } from "src/app/models/Ressource";
@@ -5,11 +6,10 @@ import { RessourceService } from "src/app/services/ressource.service";
 import { environment } from "src/environments/environment";
 
 @Component({
+    imports: [FormsModule],
     selector: "app-ressources",
     templateUrl: "./ressources.component.html",
-    styleUrls: ["./ressources.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./ressources.component.scss"]})
 export class RessourcesComponent implements OnInit {
   private ressourceService = inject(RessourceService);
   private toastr = inject(ToastrService);

@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 import { map, catchError, of, forkJoin } from "rxjs";
@@ -5,11 +6,10 @@ import { HeadImage } from "src/app/models/HeadImage";
 import { HeadImageService } from "src/app/services/head-image.service";
 
 @Component({
+    imports: [FormsModule],
     selector: "app-liste-headimage",
     templateUrl: "./liste-headimage.component.html",
-    styleUrls: ["./liste-headimage.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./liste-headimage.component.scss"]})
 export class ListeHeadimageComponent implements OnInit {
   private headService = inject(HeadImageService);
   private toastr = inject(ToastrService);

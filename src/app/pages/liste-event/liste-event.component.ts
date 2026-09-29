@@ -1,17 +1,17 @@
+import { DatePipe, SlicePipe } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
 import { FormBuilder } from "@angular/forms";
-import { Router } from "@angular/router";
+import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from "ngx-toastr";
 import { EventResponse } from "src/app/models/Event";
 import { EventService } from "src/app/services/event.service";
 import { environment } from "src/environments/environment";
 
 @Component({
+    imports: [DatePipe, RouterLink, SlicePipe],
     selector: "app-liste-event",
     templateUrl: "./liste-event.component.html",
-    styleUrls: ["./liste-event.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./liste-event.component.scss"]})
 export class ListeEventComponent implements OnInit {
   private eventService = inject(EventService);
   private fb = inject(FormBuilder);

@@ -1,15 +1,15 @@
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from "ngx-toastr";
 import { Categorie } from "src/app/models/Categorie";
 import { CategorieService } from "src/app/services/categorie.service";
 
 @Component({
+    imports: [FormsModule, NgbDropdownModule],
     selector: "app-liste-categorie",
     templateUrl: "./liste-categorie.component.html",
-    styleUrls: ["./liste-categorie.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./liste-categorie.component.scss"]})
 export class ListeCategorieComponent implements OnInit {
   categories: Categorie[] = [];
   isLoading = true;

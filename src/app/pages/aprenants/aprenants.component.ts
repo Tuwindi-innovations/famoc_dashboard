@@ -6,9 +6,7 @@ import { AprenantsService } from "src/app/services/aprenants.service";
 @Component({
     selector: "app-aprenants",
     templateUrl: "./aprenants.component.html",
-    styleUrls: ["./aprenants.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./aprenants.component.scss"]})
 export class AprenantsComponent implements OnInit {
   private service = inject(AprenantsService);
   private toastr = inject(ToastrService);

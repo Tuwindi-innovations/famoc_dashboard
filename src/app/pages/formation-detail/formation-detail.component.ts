@@ -1,3 +1,4 @@
+import { NgClass, SlicePipe } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -24,11 +25,10 @@ interface ModuleUI extends ModuleResponse {
 }
 
 @Component({
+    imports: [NgClass, SlicePipe],
     selector: "app-formation-detail",
     templateUrl: "./formation-detail.component.html",
-    styleUrls: ["./formation-detail.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./formation-detail.component.scss"]})
 export class FormationDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private modalService = inject(NgbModal);

@@ -1,3 +1,4 @@
+import { DatePipe, NgClass } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 import { AlerteResponse } from "src/app/models/Alerte";
@@ -5,11 +6,10 @@ import { AlertService } from "src/app/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
+    imports: [DatePipe, NgClass],
     selector: "app-alerte",
     templateUrl: "./alerte.component.html",
-    styleUrls: ["./alerte.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./alerte.component.scss"]})
 export class AlerteComponent implements OnInit {
   private alerteService = inject(AlertService);
   private toastr = inject(ToastrService);

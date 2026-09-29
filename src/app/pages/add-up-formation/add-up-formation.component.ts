@@ -1,3 +1,4 @@
+import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { ToastrService } from "ngx-toastr";
@@ -5,11 +6,10 @@ import { FormationRequest, Niveau } from "src/app/models/Formation";
 import { FormationService } from "src/app/services/formation.service";
 
 @Component({
+    imports: [FormsModule],
     selector: "app-add-up-formation",
     templateUrl: "./add-up-formation.component.html",
-    styleUrls: ["./add-up-formation.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./add-up-formation.component.scss"]})
 export class AddUpFormationComponent implements OnInit {
   private toastr = inject(ToastrService);
   private formationService = inject(FormationService);

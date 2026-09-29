@@ -1,14 +1,14 @@
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from "@angular/core";
-import { Router, ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BlogService } from "src/app/services/blog.service";
 import { CategorieService } from "src/app/services/categorie.service";
 
 @Component({
+    imports: [FormsModule, RouterLink],
     selector: "app-add-up-blog",
     templateUrl: "./add-up-blog.component.html",
-    styleUrls: ["./add-up-blog.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./add-up-blog.component.scss"]})
 export class AddUpBlogComponent implements OnInit {
   blogRequest: any = {
     titre: "",

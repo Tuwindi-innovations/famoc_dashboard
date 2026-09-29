@@ -1,10 +1,5 @@
 import { Component, inject, Input, OnInit } from "@angular/core";
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from "@angular/forms";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({

@@ -1,15 +1,16 @@
+import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from "@angular/core";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from "ngx-toastr";
 import { UserResponseDTO } from "src/app/models/User";
 import { UserService } from "src/app/services/user.service";
 
 @Component({
+    imports: [FormsModule, NgClass, NgbDropdownModule],
     selector: "app-liste-user",
     templateUrl: "./liste-user.component.html",
-    styleUrls: ["./liste-user.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./liste-user.component.scss"]})
 export class ListeUserComponent implements OnInit {
   newUser = {
     id: "",

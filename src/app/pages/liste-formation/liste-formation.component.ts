@@ -1,3 +1,6 @@
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgClass, SlicePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Component, inject, OnInit } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
 import { FormationResponse } from "src/app/models/Formation";
@@ -5,11 +8,10 @@ import { FormationService } from "src/app/services/formation.service";
 import { environment } from "src/environments/environment";
 
 @Component({
+    imports: [NgClass, NgbDropdownModule, RouterLink, SlicePipe],
     selector: "app-liste-formation",
     templateUrl: "./liste-formation.component.html",
-    styleUrls: ["./liste-formation.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./liste-formation.component.scss"]})
 export class ListeFormationComponent implements OnInit {
   private toastr = inject(ToastrService);
   private formationService = inject(FormationService);

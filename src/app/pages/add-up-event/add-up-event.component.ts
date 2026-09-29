@@ -1,15 +1,15 @@
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from "@angular/core";
-import { Router } from "@angular/router";
+import { Router, RouterLink } from '@angular/router';
 import { ToastrService } from "ngx-toastr";
 import { CategorieService } from "src/app/services/categorie.service";
 import { EventService } from "src/app/services/event.service";
 
 @Component({
+    imports: [FormsModule, RouterLink],
     selector: "app-add-up-event",
     templateUrl: "./add-up-event.component.html",
-    styleUrls: ["./add-up-event.component.scss"],
-    standalone: false
-})
+    styleUrls: ["./add-up-event.component.scss"]})
 export class AddUpEventComponent implements OnInit {
   eventRequest: any = {
     titre: "",
