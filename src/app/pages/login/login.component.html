@@ -1,86 +1,78 @@
-<div class="header bg-gradient-danger py-7 py-lg-8">
-  <!-- <p-toast position="top-right"></p-toast> -->
+<div class="auth__card">
+  <h1 class="auth__title">Connexion</h1>
+  <p class="auth__subtitle">Accédez à l'administration de la plateforme.</p>
 
-  <div class="container">
-    <div class="header-body text-center mb-7">
-      <div class="row justify-content-center">
-        <div class="col-lg-5 col-md-6">
-          <h1 class="text-white">Welcome!</h1>
-          <!-- <p class="text-lead text-light">Use these awesome forms to login or create new account in your project for free.</p> -->
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="separator separator-bottom separator-skew zindex-100">
-    <svg
-      x="0"
-      y="0"
-      viewBox="0 0 2560 100"
-      preserveAspectRatio="none"
-      version="1.1"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <polygon class="fill-default" points="2560 0 2560 100 0 100"></polygon>
-    </svg>
-  </div>
-</div>
-<!-- Page content -->
-<div class="container mt--8 pb-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-5 col-md-7">
-      <div class="card bg-secondary shadow border-0">
-        <div class="card-body px-lg-5 py-lg-5">
-          <div class="text-center text-muted mb-4">
-            <small>Se connecter</small>
-          </div>
-          <form role="form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-            <div class="form-group mb-3">
-              <div class="input-group input-group-alternative">
-                <div class="input-group-prepend">
-                  <span class="input-group-text"
-                    ><i class="ni ni-email-83"></i
-                  ></span>
-                </div>
-                <input
-                  class="form-control"
-                  formControlName="identifiant"
-                  placeholder="Entrez votre email"
-                  type="email"
-                />
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="input-group input-group-alternative">
-                <div class="input-group-prepend">
-                  <span class="input-group-text"
-                    ><i class="ni ni-lock-circle-open"></i
-                  ></span>
-                </div>
-                <input
-                  class="form-control"
-                  formControlName="motDePasse"
-                  placeholder="Saisissez votre mot de passe"
-                  type="password"
-                />
-              </div>
-            </div>
-            <div class="text-center">
-              <button type="submit" class="btn btn-primary my-4">
-                Se connecter
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+  @if (messageErreur()) {
+    <p class="auth-error" role="alert">
+      <i class="auth-error__icon fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+      <span>{{ messageErreur() }}</span>
+    </p>
+  }
 
-      <div class="row mt-3">
-        <!-- <div class="col-6"> -->
-        <!-- <a href="javascript:void(0)" class="text-light"><small>Forgot password?</small></a> -->
-        <!-- </div> -->
-        <!-- <div class="col-6 text-right">
-          <a routerLink="/register"  class="text-light"><small>Creer un compte</small></a>
-        </div> -->
-      </div>
+  <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+    <div class="form-group">
+      <label for="identifiant">Identifiant ou adresse e-mail</label>
+      <input
+        id="identifiant"
+        class="form-control"
+        type="text"
+        formControlName="identifiant"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        [attr.aria-invalid]="estInvalide('identifiant')"
+        [attr.aria-describedby]="estInvalide('identifiant') ? 'erreur-identifiant' : null"
+      />
+      @if (estInvalide('identifiant')) {
+        <span class="form-error" id="erreur-identifiant">
+          Saisissez votre identifiant.
+        </span>
+      }
     </div>
-  </div>
+
+    <div class="form-group">
+      <label for="motDePasse">Mot de passe</label>
+      <div class="password-field">
+        <input
+          id="motDePasse"
+          class="form-control"
+          [type]="motDePasseVisible() ? 'text' : 'password'"
+          formControlName="motDePasse"
+          autocomplete="current-password"
+          [attr.aria-invalid]="estInvalide('motDePasse')"
+          [attr.aria-describedby]="estInvalide('motDePasse') ? 'erreur-motdepasse' : null"
+        />
+        <button
+          type="button"
+          class="password-field__toggle"
+          (click)="motDePasseVisible.set(!motDePasseVisible())"
+          [attr.aria-label]="
+            motDePasseVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+          "
+          [attr.aria-pressed]="motDePasseVisible()"
+        >
+          <i
+            class="fa-solid"
+            [class.fa-eye]="!motDePasseVisible()"
+            [class.fa-eye-slash]="motDePasseVisible()"
+            aria-hidden="true"
+          ></i>
+        </button>
+      </div>
+      @if (estInvalide('motDePasse')) {
+        <span class="form-error" id="erreur-motdepasse">
+          Le mot de passe doit comporter au moins 6 caractères.
+        </span>
+      }
+    </div>
+
+    <button type="submit" class="btn btn-primary auth__submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+        Connexion…
+      } @else {
+        Se connecter
+      }
+    </button>
+  </form>
 </div>

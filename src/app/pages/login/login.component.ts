@@ -1,55 +1,61 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { Router } from "@angular/router";
-import { AuthService } from "src/app/services/auth.service";
-import { finalize } from "rxjs/operators";
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
-    selector: "app-login",
-    templateUrl: "./login.component.html",
-    styleUrls: ["./login.component.scss"],
-    standalone: false
+  selector: 'app-login',
+  imports: [ReactiveFormsModule],
+  templateUrl: './login.component.html',
 })
-export class LoginComponent implements OnInit {
-  constructor(
-    private router: Router,
-    private fb: FormBuilder,
-    private authService: AuthService
-  ) {}
+export class LoginComponent {
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
 
-  loginForm!: FormGroup;
-  isLoading = false;
-  errorMessage = "";
+  protected readonly formulaire = this.fb.nonNullable.group({
+    identifiant: ['', [Validators.required]],
+    motDePasse: ['', [Validators.required, Validators.minLength(6)]],
+  });
 
-  ngOnInit() {
-    this.loginForm = this.fb.group({
-      identifiant: ["", Validators.required],
-      motDePasse: ["", [Validators.required, Validators.minLength(6)]],
-    });
-  }
+  protected readonly enCours = signal(false);
+  protected readonly messageErreur = signal('');
+  protected readonly motDePasseVisible = signal(false);
 
-  onSubmit() {
-    this.errorMessage = "";
-    const { identifiant, motDePasse } = this.loginForm.value;
-    this.authService
+  protected soumettre(): void {
+    // Un envoi au clavier peut contourner l'état désactivé du bouton : on
+    // revalide ici et on affiche les erreurs plutôt que d'échouer en silence.
+    if (this.formulaire.invalid) {
+      this.formulaire.markAllAsTouched();
+      return;
+    }
+
+    this.messageErreur.set('');
+    this.enCours.set(true);
+
+    const { identifiant, motDePasse } = this.formulaire.getRawValue();
+
+    this.auth
       .signIn(identifiant, motDePasse)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-          // Réactiver les champs après la fin de la requête
-          this.loginForm.get("identifiant")?.enable();
-          this.loginForm.get("motDePasse")?.enable();
-        })
-      )
+      .pipe(finalize(() => this.enCours.set(false)))
       .subscribe({
         next: () => {
-          this.router.navigate(["/dashboard"]);
+          // `redirectTo` est posé par `authGuard` : on ramène l'utilisateur là
+          // où il allait avant d'être renvoyé vers la connexion.
+          const destination =
+            this.route.snapshot.queryParamMap.get('redirectTo') ?? '/dashboard';
+          this.router.navigateByUrl(destination);
         },
-        error: (error) => {
-          console.error("Login error:", error);
-          this.errorMessage =
-            error.message || "Une erreur est survenue lors de la connexion";
+        error: (erreur: Error) => {
+          this.messageErreur.set(erreur.message || 'La connexion a échoué.');
         },
       });
+  }
+
+  protected estInvalide(champ: 'identifiant' | 'motDePasse'): boolean {
+    const controle = this.formulaire.controls[champ];
+    return controle.invalid && controle.touched;
   }
 }
