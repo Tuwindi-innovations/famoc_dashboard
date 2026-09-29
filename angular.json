@@ -9,10 +9,10 @@
       "projectType": "application",
       "prefix": "app",
       "schematics": {
-  "@schematics/angular:component": {
-    "style": "scss"
-  }
-},
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -30,12 +30,17 @@
               "src/assets"
             ],
             "styles": [
+              "src/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css",
               "src/styles.scss",
-              "src/assets/scss/argon.scss"
+              "src/assets/scss/app.scss"
             ],
-            "scripts": [
-              "node_modules/chart.js/dist/Chart.min.js"
-            ]
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules",
+                "src/assets/scss"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -107,13 +112,21 @@
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.css"
+              "src/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css",
+              "src/styles.scss",
+              "src/assets/scss/app.scss"
             ],
             "scripts": [],
             "assets": [
               "src/favicon.ico",
               "src/assets"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules",
+                "src/assets/scss"
+              ]
+            }
           }
         },
         "lint": {
@@ -158,11 +171,11 @@
       }
     }
   },
-"schematics": {
-  "@schematics/angular:component": {
-    "style": "scss"
-  }
-},
+  "schematics": {
+    "@schematics/angular:component": {
+      "style": "scss"
+    }
+  },
   "cli": {
     "analytics": false
   }

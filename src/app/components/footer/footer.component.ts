@@ -1,17 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
-    selector: 'app-footer',
-    templateUrl: './footer.component.html',
-    styleUrls: ['./footer.component.scss'],
-    standalone: false
+  selector: 'app-footer',
+  template: `
+    <footer class="app-footer">
+      FAMOC &middot; Espace d'administration &middot; {{ annee }}
+    </footer>
+  `,
 })
-export class FooterComponent implements OnInit {
-  test: Date = new Date();
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class FooterComponent {
+  /**
+   * Calculé une fois à la construction. `new Date()` est acceptable ici : le
+   * composant ne tourne que dans le navigateur.
+   */
+  protected readonly annee = new Date().getFullYear();
 }
