@@ -81,12 +81,12 @@
           </div>
         </div>
         <div class="card-footer bg-secondary d-flex justify-content-between">
-          <!-- <button
-                class="btn btn-sm btn-outline-primary"
-                (click)="editEvent(event)"
-                >
-                Modifier
-              </button> -->
+          <a
+            class="btn btn-sm btn-secondary"
+            [routerLink]="['/evenements', event.id, 'modifier']"
+          >
+            Modifier
+          </a>
           <button
             class="btn btn-sm btn-outline-danger"
             (click)="deleteEvent(event.id)"

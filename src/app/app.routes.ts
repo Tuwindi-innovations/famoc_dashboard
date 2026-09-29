@@ -116,6 +116,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'evenements/:id/modifier',
+        title: "Modifier l'évènement · FAMOC",
+        loadComponent: () =>
+          import('./pages/add-up-event/add-up-event.component').then(
+            (m) => m.AddUpEventComponent,
+          ),
+      },
+      {
         path: 'ressource',
         title: 'Ressources · FAMOC',
         loadComponent: () =>

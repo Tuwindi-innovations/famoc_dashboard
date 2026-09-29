@@ -1,6 +1,6 @@
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from "@angular/core";
-import { Router, RouterLink } from '@angular/router';
+import { Component, inject, OnInit } from "@angular/core";
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ToastrService } from "ngx-toastr";
 import { CategorieService } from "src/app/services/categorie.service";
 import { EventService } from "src/app/services/event.service";
@@ -25,16 +25,44 @@ export class AddUpEventComponent implements OnInit {
   categories: any[] = [];
   previews: string[] = [];
   isSubmitting = false;
+  isEditMode = false;
+  eventId: string | null = null;
 
-  constructor(
-    private eventService: EventService,
-    private categorieService: CategorieService,
-    private router: Router,
-    private toastr: ToastrService
-  ) {}
+  private eventService = inject(EventService);
+  private categorieService = inject(CategorieService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
     this.loadCategories();
+
+    this.eventId = this.route.snapshot.paramMap.get("id");
+    if (this.eventId) {
+      this.isEditMode = true;
+      this.loadEvent(this.eventId);
+    }
+  }
+
+  /** Recharge l'évènement à modifier dans le formulaire. */
+  loadEvent(id: string): void {
+    this.eventService.getEventById(id).subscribe({
+      next: (evenement) => {
+        this.eventRequest = {
+          titre: evenement.titre,
+          description: evenement.description,
+          dateDebutEvent: evenement.dateDebutEvent?.slice(0, 10) ?? "",
+          dateFinEvent: evenement.dateFinEvent?.slice(0, 10) ?? "",
+          organisateur: evenement.organisateur,
+          categorieId: evenement.categorieId,
+          lieu: evenement.lieu,
+        };
+      },
+      error: () => {
+        this.toastr.error("Cet évènement est introuvable.");
+        this.router.navigate(["/liste-event"]);
+      },
+    });
   }
 
   loadCategories() {
@@ -60,30 +88,29 @@ export class AddUpEventComponent implements OnInit {
 
   onSubmit() {
     this.isSubmitting = true;
-    const formData = new FormData();
 
-    // Ajout du JSON de l'événement
-    formData.append(
-      "event",
-      new Blob([JSON.stringify(this.eventRequest)], {
-        type: "application/json",
-      })
-    );
+    // `EventService` construit lui-même son FormData : on lui passe l'objet et
+    // les fichiers, rien de plus.
+    const operation =
+      this.isEditMode && this.eventId
+        ? this.eventService.updateEvent(this.eventId, this.eventRequest)
+        : this.eventService.ajouterUnEvent(this.eventRequest, this.selectedFiles);
 
-    // Ajout des images
-    this.selectedFiles.forEach((file) => formData.append("images", file));
-
-    this.eventService
-      .ajouterUnEvent(this.eventRequest, this.selectedFiles)
-      .subscribe({
-        next: () => {
-          this.toastr.success("Événement créé avec succès");
-          this.router.navigate(["/liste-event"]);
-        },
-        error: (err) => {
-          this.toastr.error("Erreur lors de la création");
-          this.isSubmitting = false;
-        },
-      });
+    operation.subscribe({
+      next: () => {
+        this.toastr.success(
+          this.isEditMode ? "Évènement mis à jour" : "Évènement créé"
+        );
+        this.router.navigate(["/liste-event"]);
+      },
+      error: () => {
+        this.toastr.error(
+          this.isEditMode
+            ? "Erreur lors de la modification"
+            : "Erreur lors de la création"
+        );
+        this.isSubmitting = false;
+      },
+    });
   }
 }

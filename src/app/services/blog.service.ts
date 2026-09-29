@@ -42,22 +42,24 @@ export class BlogService {
     );
   }
 
+  /**
+   * Met à jour un article.
+   *
+   * La version précédente construisait un `FormData` puis envoyait `blogData`
+   * en JSON : les images sélectionnées étaient donc silencieusement perdues.
+   */
   updateBlog(
     idBlog: string,
     blogData: blogRequest,
     images: File[]
   ): Observable<BlogResponse> {
     const formData = new FormData();
-
     formData.append("blog", JSON.stringify(blogData));
-
-    images.forEach((file) => {
-      formData.append("images", file, file.name);
-    });
+    images.forEach((file) => formData.append("images", file, file.name));
 
     return this.http.put<BlogResponse>(
       `${this.serviceUrl}/${this.baseUrl}/${idBlog}`,
-      blogData
+      formData
     );
   }
 
