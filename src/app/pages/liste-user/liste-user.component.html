@@ -99,10 +99,8 @@
                 <td>
                   <span
                     class="badge badge-pill shadow-sm"
-                    [ngClass]="{
-                      'badge-primary': u.role === 'ADMIN',
-                      'badge-secondary': u.role !== 'ADMIN'
-                    }"
+                    [class.badge-primary]="u.role === 'ADMIN'"
+                    [class.badge-secondary]="u.role !== 'ADMIN'"
                   >
                     {{ u.role }}
                   </span>
@@ -127,12 +125,9 @@
                       </button>
                       <!-- <button class="dropdown-item" (click)="toggleStatus(u)">
                                   <i
-                                    class="ni"
-                          [ngClass]="
-                            u.active
-                              ? 'ni-button-power text-warning'
-                              : 'ni-check-bold text-success'
-                          "
+                                    class="fa-solid"
+                          [class.fa-power-off]="u.active"
+                          [class.fa-circle-check]="!u.active"
                                   ></i>
                                   {{
                                   u.active

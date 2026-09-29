@@ -1,4 +1,4 @@
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
 import { ConfirmService } from 'src/app/services/confirm.service';
 import { ToastrService } from "ngx-toastr";
@@ -7,7 +7,7 @@ import { AlertService } from "src/app/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-    imports: [DatePipe, NgClass],
+    imports: [DatePipe],
     selector: "app-alerte",
     templateUrl: "./alerte.component.html",
     styleUrls: ["./alerte.component.scss"]})

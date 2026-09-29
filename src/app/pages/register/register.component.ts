@@ -1,11 +1,10 @@
-import { NgClass } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "src/app/services/auth.service";
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
-    imports: [FormsModule, NgClass, ReactiveFormsModule],
+    imports: [FormsModule, ReactiveFormsModule],
     selector: "app-register",
     templateUrl: "./register.component.html",
     styleUrls: ["./register.component.scss"]})

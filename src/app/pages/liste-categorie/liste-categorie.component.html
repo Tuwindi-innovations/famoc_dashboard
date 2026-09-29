@@ -69,10 +69,8 @@
             <!-- <td>
                 <span
                   class="badge badge-pill"
-                [ngClass]="{
-                  'badge-primary': cat.typeCategorie === 'BLOG',
-                  'badge-warning': cat.typeCategorie === 'EVENT'
-                }"
+                [class.badge-primary]="cat.typeCategorie === 'BLOG'"
+                [class.badge-warning]="cat.typeCategorie === 'EVENT'"
                   >
                   {{ cat.typeCategorie }}
                 </span>

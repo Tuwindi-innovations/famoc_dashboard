@@ -170,10 +170,9 @@
                 >
                   <span class="input-group-text">
                     <i
-                      class="ni"
-                      [ngClass]="
-                        showPassword ? 'ni-zoom-split-in' : 'ni-zoom-split-out'
-                      "
+                      class="fa-solid"
+                      [class.fa-eye-slash]="showPassword"
+                      [class.fa-eye]="!showPassword"
                     ></i>
                   </span>
                 </div>

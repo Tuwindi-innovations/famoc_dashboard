@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from "@angular/core";
 import { ConfirmService } from "src/app/services/confirm.service";
@@ -8,7 +7,7 @@ import { UserResponseDTO } from "src/app/models/User";
 import { UserService } from "src/app/services/user.service";
 
 @Component({
-    imports: [FormsModule, NgClass, NgbDropdownModule],
+    imports: [FormsModule, NgbDropdownModule],
     selector: "app-liste-user",
     templateUrl: "./liste-user.component.html",
     styleUrls: ["./liste-user.component.scss"]})
