@@ -12,6 +12,7 @@ import { RouterLink } from '@angular/router';
 import { Chart, type ChartConfiguration } from 'chart.js/auto';
 import type { DashboardStats, PointTemporel, RepartitionItem } from '../../models/DashboardStats';
 import { DashboardStatsService } from '../../services/dashboard-stats.service';
+import { ThemeService } from '../../services/theme.service';
 
 /** Libellés lisibles pour les niveaux renvoyés par l'API. */
 const LIBELLES_NIVEAU: Record<string, string> = {
@@ -30,6 +31,7 @@ const ORDRE_NIVEAU = ['DEBUTANT', 'Intermediaire', 'AVANCER'];
 })
 export class DashboardComponent {
   private readonly statsService = inject(DashboardStatsService);
+  private readonly themeService = inject(ThemeService);
 
   private readonly canvasCreations =
     viewChild<ElementRef<HTMLCanvasElement>>('canvasCreations');
@@ -46,9 +48,12 @@ export class DashboardComponent {
   constructor() {
     this.charger();
 
-    // Le graphique est (re)construit après chaque rendu où les données ou la
-    // vue changent ; `afterRenderEffect` garantit que le canvas existe.
+    // Le graphique est (re)construit après chaque rendu où les données, la vue
+    // ou le thème changent ; `afterRenderEffect` garantit que le canvas existe.
+    // Chart.js fige les couleurs à la construction : sans la dépendance au
+    // thème, la grille et les axes resteraient dans la palette précédente.
     afterRenderEffect(() => {
+      this.themeService.theme();
       const donnees = this.stats()?.formations.creationsParMois;
       const canvas = this.canvasCreations()?.nativeElement;
 
