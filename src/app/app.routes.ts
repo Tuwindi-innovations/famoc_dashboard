@@ -46,6 +46,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'formations/:id/modifier',
+        title: 'Modifier la formation · FAMOC',
+        loadComponent: () =>
+          import('./pages/add-up-formation/add-up-formation.component').then(
+            (m) => m.AddUpFormationComponent,
+          ),
+      },
+      {
         path: 'formations/detail/:id',
         title: 'Détail de la formation · FAMOC',
         loadComponent: () =>

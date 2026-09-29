@@ -1,116 +1,144 @@
-<div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
-  <div class="container-fluid">
-    <div class="header-body text-center mb-5">
-      <h1 class="text-white">
-        <i class="fa-solid fa-graduation-cap mr-3"></i>Catalogue des Formations
-      </h1>
-      <button class="btn btn-neutral btn-sm mt-3" (click)="reload()">
-        <i class="fa-solid fa-rotate text-info"></i> Actualiser
-      </button>
-
-      <button
-        class="btn btn-neutral btn-icon shadow"
-        [routerLink]="['/add-formation']"
-      >
-        <span class="btn-inner--icon"
-          ><i class="fa-solid fa-circle-plus text-info"></i
-        ></span>
-        <span class="btn-inner--text text-info font-weight-bold"
-          >Ajouter une formation</span
-        >
-      </button>
-    </div>
+<div class="page-head">
+  <div>
+    <h2 class="page-head__title">Formations</h2>
+    <p class="page-head__subtitle">
+      Le catalogue proposé aux apprenants. Ouvrez une formation pour gérer ses
+      modules, ses leçons et son quiz.
+    </p>
+  </div>
+  <div class="page-head__actions">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="charger()">
+      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+      Actualiser
+    </button>
+    <a class="btn btn-primary btn-sm" [routerLink]="['/add-formation']">
+      <i class="fa-solid fa-plus" aria-hidden="true"></i>
+      Nouvelle formation
+    </a>
   </div>
 </div>
 
-<div class="container-fluid mt--7">
-  @if (!isLoading) {
-  <div class="row">
-    @for (f of formations; track f) {
-    <div class="col-xl-4 col-lg-6 mb-4">
-      <div class="card card-stats shadow border-0 h-100 transition-hover">
-        <div
-          class="position-relative"
-          [routerLink]="['/formations/detail', f.id]"
-          style="cursor: pointer"
-        >
-          <img
-            [src]="getImageFullUrl(f.imageUrl)"
-            class="card-img-top"
-            style="height: 200px; object-fit: cover"
-            alt="Formation Image"
-          />
-          <div class="position-absolute" style="top: 15px; left: 15px">
-            <span
-              class="badge badge-pill"
-              [ngClass]="{
-                'badge-success': f.niveau === 'DEBUTANT',
-                'badge-warning': f.niveau === 'INTERMEDIAIRE',
-                'badge-danger': f.niveau === 'AVANCE'
-              }"
-            >
-              {{ f.niveau }}
-            </span>
-          </div>
-        </div>
-        <div class="card-body d-flex flex-column">
-          <div class="row">
-            <div class="col">
-              <h5 class="card-title text-uppercase text-muted mb-0">
-                Formation
-              </h5>
-              <span class="h3 font-weight-bold mb-0 text-info">{{
-                f.titre
-              }}</span>
-            </div>
-          </div>
-          <p class="mt-3 mb-4 text-sm text-dark flex-grow-1">
-            {{ f.description | slice : 0 : 100
-            }}{{ f.description.length > 100 ? "..." : "" }}
-          </p>
-          <div class="border-top pt-3 mt-auto">
-            <div class="row">
-              <div class="col">
-                <small class="text-muted"
-                  ><i class="fa-solid fa-clock mr-1"></i> Durée</small
-                >
-                <span class="d-block font-weight-600 text-sm">
-                  {{ f.dureeEstimee }} h
-                </span>
-              </div>
-              <div class="col-auto text-right">
-                <div ngbDropdown placement="top-right">
-                  <a
-                    class="btn btn-sm btn-icon-only text-light"
-                    ngbDropdownToggle
-                  >
-                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                  </a>
-                  <div
-                    ngbDropdownMenu
-                    class="dropdown-menu-right dropdown-menu-arrow"
-                  >
-                    <!-- <button class="dropdown-item" (click)="editFormation(f)">
-                            <i class="fa-solid fa-gear text-primary"></i>
-                            Modifier
-                          </button> -->
-                    <button
-                      class="dropdown-item text-danger"
-                      (click)="deleteFormation(f.id)"
-                    >
-                      <i class="fa-solid fa-xmark text-danger"></i> Supprimer
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+@if (chargement()) {
+  <div class="grille-cartes" aria-hidden="true">
+    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+      <div class="skeleton" style="height: 13rem; border-radius: var(--radius-lg)"></div>
     }
   </div>
-  } @if (!isLoading && formations.length === 0) {
-  <div class="alert alert-secondary text-center">Aucune formation trouvée.</div>
+  <p role="status" class="visually-hidden">Chargement des formations…</p>
+} @else if (erreur()) {
+  <div class="empty-state">
+    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <h3 class="empty-state__title">Catalogue indisponible</h3>
+    <p class="empty-state__text">{{ erreur() }}</p>
+    <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
+  </div>
+} @else if (!formations().length) {
+  <div class="empty-state">
+    <i class="fa-solid fa-graduation-cap fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <h3 class="empty-state__title">Aucune formation</h3>
+    <p class="empty-state__text">
+      Créez votre première formation, puis ajoutez-lui des modules et des leçons.
+    </p>
+    <a class="btn btn-primary btn-sm" [routerLink]="['/add-formation']">
+      Créer une formation
+    </a>
+  </div>
+} @else {
+  <div class="barre-filtres">
+    <label for="recherche-formation" class="visually-hidden">
+      Rechercher une formation
+    </label>
+    <div class="champ-recherche">
+      <i class="champ-recherche__icone fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input
+        id="recherche-formation"
+        class="form-control"
+        type="search"
+        placeholder="Rechercher par titre, description ou catégorie…"
+        [value]="recherche()"
+        (input)="surRecherche($event)"
+      />
+    </div>
+    <p class="barre-filtres__compte" role="status">
+      {{ resultats().length }} formation(s)
+      @if (recherche()) {
+        sur {{ formations().length }}
+      }
+    </p>
+  </div>
+
+  @if (!resultats().length) {
+    <div class="empty-state">
+      <h3 class="empty-state__title">Aucun résultat</h3>
+      <p class="empty-state__text">
+        Aucune formation ne correspond à « {{ recherche() }} ».
+      </p>
+    </div>
+  } @else {
+    <div class="grille-cartes">
+      @for (formation of resultats(); track formation.id) {
+        <article class="carte-formation">
+          <div class="carte-formation__visuel">
+            @if (urlImage(formation.imageUrl); as image) {
+              <img [src]="image" alt="" (error)="imageIndisponible($event)" />
+            }
+            <span
+              class="status carte-formation__statut"
+              [class.status--good]="formation.active"
+            >
+              {{ formation.active ? 'Publiée' : 'Hors ligne' }}
+            </span>
+          </div>
+
+          <div class="carte-formation__corps">
+            <h3 class="carte-formation__titre">
+              <a [routerLink]="['/formations', 'detail', formation.id]">
+                {{ formation.titre }}
+              </a>
+            </h3>
+            <p class="carte-formation__description">{{ formation.description }}</p>
+
+            <ul class="carte-formation__meta">
+              <li>
+                <i class="fa-solid fa-signal" aria-hidden="true"></i>
+                {{ libelleNiveau(formation.niveau) }}
+              </li>
+              <li>
+                <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                {{ formation.dureeEstimee }} h
+              </li>
+              <li>
+                <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                {{ formation.nombreModules }} module(s)
+              </li>
+            </ul>
+          </div>
+
+          <div class="carte-formation__actions">
+            <a
+              class="btn btn-secondary btn-sm"
+              [routerLink]="['/formations', 'detail', formation.id]"
+            >
+              Gérer le programme
+            </a>
+            <a
+              class="btn btn-ghost btn-sm btn-icon-only"
+              [routerLink]="['/formations', formation.id, 'modifier']"
+              [attr.aria-label]="'Modifier ' + formation.titre"
+            >
+              <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+            </a>
+            <button
+              type="button"
+              class="btn btn-ghost btn-sm btn-icon-only"
+              (click)="supprimer(formation)"
+              [attr.aria-label]="'Supprimer ' + formation.titre"
+            >
+              <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+            </button>
+          </div>
+        </article>
+      }
+    </div>
   }
-</div>
+}

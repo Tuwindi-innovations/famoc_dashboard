@@ -1,211 +1,344 @@
-@if (formation) {
-<div class="container-fluid py-4">
-  <div class="card shadow mb-4">
-    <div class="card-body d-flex align-items-center">
+@if (chargement()) {
+  <div class="skeleton" style="height: 8rem; border-radius: var(--radius-lg)"></div>
+  <p role="status" class="visually-hidden">Chargement de la formation…</p>
+} @else if (erreur()) {
+  <div class="empty-state">
+    <i class="fa-solid fa-circle-exclamation fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <h2 class="empty-state__title">Formation introuvable</h2>
+    <p class="empty-state__text">{{ erreur() }}</p>
+    <a class="btn btn-secondary btn-sm" [routerLink]="['/liste-formation']">
+      Retour au catalogue
+    </a>
+  </div>
+} @else if (formation(); as f) {
+  <!-- En-tête de la formation -->
+  <div class="page-head">
+    <div>
+      <a class="fil-ariane" [routerLink]="['/liste-formation']">
+        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        Catalogue des formations
+      </a>
+      <h2 class="page-head__title">{{ f.titre }}</h2>
+      <p class="page-head__subtitle">{{ f.description }}</p>
+    </div>
+    <div class="page-head__actions">
+      <a class="btn btn-secondary btn-sm" [routerLink]="['/formations', f.id, 'modifier']">
+        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+        Modifier la formation
+      </a>
+    </div>
+  </div>
+
+  <div class="fiche">
+    @if (urlImage(f.imageUrl); as image) {
       <img
-        [src]="getImageFullUrl(formation.imageUrl)"
-        class="rounded mr-4"
-        style="width: 100px; height: 100px; object-fit: cover"
+        class="fiche__image"
+        [src]="image"
+        alt=""
+        (error)="imageIndisponible($event)"
       />
+    }
+    <dl class="fiche__meta">
       <div>
-        <h1 class="h3 mb-0">{{ formation.titre }}</h1>
-        <p class="text-muted">{{ modules.length }} Modules au total</p>
+        <dt>Niveau</dt>
+        <dd>{{ f.niveau }}</dd>
       </div>
-      <button class="btn btn-primary ml-auto" (click)="addModule()">
-        <i class="fa fa-plus"></i> Ajouter un Module
+      <div>
+        <dt>Durée estimée</dt>
+        <dd>{{ f.dureeEstimee }} h</dd>
+      </div>
+      <div>
+        <dt>Catégorie</dt>
+        <dd>{{ f.categorie || 'Non classée' }}</dd>
+      </div>
+      <div>
+        <dt>Modules</dt>
+        <dd>{{ modules().length }}</dd>
+      </div>
+      <div>
+        <dt>Leçons</dt>
+        <dd>{{ totalCours() }}</dd>
+      </div>
+      <div>
+        <dt>Statut</dt>
+        <dd>
+          <span class="status" [class.status--good]="f.active">
+            {{ f.active ? 'Publiée' : 'Hors ligne' }}
+          </span>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Programme -->
+  <section class="chart" style="margin-top: var(--space-6)">
+    <div class="chart__head">
+      <div>
+        <h3 class="chart__title">Programme</h3>
+        <p class="chart__subtitle">
+          Organisez les modules, leurs leçons et leur quiz. L'ordre affiché ici
+          est celui que verront les apprenants.
+        </p>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" (click)="ajouterModule()">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        Ajouter un module
       </button>
     </div>
-  </div>
-  @if (formation) {
-  <div class="container-fluid py-4">
-    <div class="module-section">
-      @for (mod of modules; track mod; let i = $index) {
-      <div class="card shadow-sm mb-4">
-        <div
-          class="card-header bg-white"
-          (click)="toggleModule(i)"
-          style="cursor: pointer"
-        >
-          <div class="d-flex align-items-center">
-            <i
-              class="fa mr-3"
-              [ngClass]="
-                mod.isOpen ? 'fa-chevron-down text-primary' : 'fa-chevron-right'
-              "
-            ></i>
-            <div class="flex-grow-1">
-              <h4 class="mb-0">Module {{ mod.ordre }}: {{ mod.titre }}</h4>
-              <small class="text-muted">
-                <i class="fa fa-clock mr-1"></i> Durée estimée :
-                {{ mod.dureeEstimee }}h |
-                <i class="fa fa-book-open mr-1 ml-2"></i>
-                {{ mod.nombreCours }} leçons
-              </small>
-            </div>
-            <div class="ml-auto">
-              <button
-                class="btn btn-sm btn-outline-danger"
-                (click)="deleteModule(mod.id); $event.stopPropagation()"
-              >
-                <i class="fa fa-trash"></i>
-              </button>
-            </div>
-          </div>
-          @if (mod.description) {
-          <div class="mt-2 text-muted small">
-            {{ mod.description }}
-          </div>
-          }
-        </div>
-        @if (mod.isOpen) {
-        <div class="card-body bg-light">
-          <h5
-            class="text-info border-bottom pb-2 d-flex justify-content-between align-items-center"
-          >
-            <span
-              ><i class="fa fa-graduation-cap mr-2"></i>Contenu du module</span
-            >
-            <button
-              class="btn btn-xs btn-outline-info"
-              (click)="addCours(mod.id, i)"
-            >
-              <i class="fa fa-plus"></i> Ajouter un cours
-            </button>
-          </h5>
-          <div class="list-group mb-4">
-            @for (c of mod.cours; track c) {
-            <div
-              class="list-group-item list-group-item-action flex-column align-items-start shadow-sm mb-2 border-left-info"
-            >
-              <div
-                class="d-flex w-100 justify-content-between align-items-center"
-              >
-                <h6 class="mb-1 font-weight-bold">
-                  <span class="badge badge-info mr-2">{{ c.ordre }}</span>
-                  {{ c.titre }}
-                </h6>
-                <span class="badge badge-light border">{{
-                  c.typeContenu
-                }}</span>
-              </div>
-              <div class="mt-2 small text-secondary">
-                @if (c.contenu) {
-                <p class="mb-2">
-                  {{ c.contenu | slice : 0 : 150
-                  }}{{ c.contenu.length > 150 ? "..." : "" }}
-                </p>
-                }
-                <div class="links-section">
-                  @if (c.videoUrl) {
-                  <a
-                    [href]="c.videoUrl"
-                    target="_blank"
-                    class="btn btn-sm btn-outline-danger mr-2"
-                  >
-                    <i class="fa fa-play-circle"></i> Voir la Vidéo
-                  </a>
-                  } @if (c.documentUrl) {
-                  <a
-                    [href]="c.documentUrl"
-                    target="_blank"
-                    class="btn btn-sm btn-outline-primary"
-                  >
-                    <i class="fa fa-file-pdf"></i> Télécharger le document
-                  </a>
-                  }
-                </div>
-              </div>
-              <div class="text-right mt-2">
-                <button class="btn btn-sm btn-link text-primary">
-                  <i class="fa fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-link text-danger">
-                  <i class="fa fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-            }
-          </div>
-          <h5 class="text-warning border-bottom pb-2">
-            <i class="fa fa-star mr-2"></i>Évaluation
-          </h5>
-          @if (mod.quiz) {
-          <div class="mb-3">
-            <div class="p-3 bg-white rounded border border-warning shadow-sm">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <h6 class="mb-1">
-                    <strong>{{ mod.quiz.titre }}</strong>
-                  </h6>
-                  <p class="small text-muted mb-0">
-                    {{ mod.quiz.description }}
-                  </p>
-                  <div class="mt-2">
-                    <span class="badge badge-warning mr-2"
-                      >Score min: {{ mod.quiz.scoreMinimum }}%</span
-                    >
-                    <span class="badge badge-dark"
-                      >Tentatives: {{ mod.quiz.nombreTentatives }}</span
-                    >
-                  </div>
-                </div>
-                <div class="btn-group">
-                  <button
-                    class="btn btn-sm btn-info"
-                    (click)="addQuestionToQuiz(mod.quiz.id, i)"
-                  >
-                    <i class="fa fa-plus"></i>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-warning"
-                    (click)="manageQuiz(mod.id, i)"
-                  >
-                    <i class="fa fa-edit"></i>
-                  </button>
-                </div>
-              </div>
-              @if (mod.question) {
-              <div class="mt-3 ml-3 border-left pl-3">
-                @for (q of mod.question; track q) {
-                <div class="mb-3">
-                  <div class="small font-weight-bold">
-                    {{ q.texte }} ({{ q.points }} pts)
-                  </div>
-                  @for (opt of q.reponseOptions; track opt) {
-                  <div class="x-small ml-2">
-                    @if (opt.estCorrecte) {
-                    <i class="fa fa-check text-success mr-1"></i>
-                    } @if (!opt.estCorrecte) {
-                    <i
-                      class="fa fa-circle text-muted mr-1"
-                      style="font-size: 6px"
-                    ></i>
-                    }
-                    <span [class.text-success]="opt.estCorrecte">{{
-                      opt.texte
-                    }}</span>
-                  </div>
-                  }
-                </div>
-                }
-              </div>
-              }
-            </div>
-          </div>
-          } @if (!mod.quiz) {
-          <button
-            class="btn btn-sm btn-outline-warning btn-block"
-            (click)="manageQuiz(mod.id, i)"
-          >
-            <i class="fa fa-plus"></i> Configurer le Quiz de fin de module
-          </button>
-          }
-        </div>
-        }
+
+    @if (!modules().length) {
+      <div class="empty-state">
+        <i class="fa-solid fa-layer-group fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+        <h4 class="empty-state__title">Aucun module pour l'instant</h4>
+        <p class="empty-state__text">
+          Un module regroupe des leçons et, si vous le souhaitez, un quiz de fin.
+          Commencez par en créer un.
+        </p>
+        <button type="button" class="btn btn-primary btn-sm" (click)="ajouterModule()">
+          Créer le premier module
+        </button>
       </div>
-      }
-    </div>
-  </div>
-  }
-</div>
+    } @else {
+      <ol class="programme">
+        @for (module of modules(); track module.id; let i = $index, premier = $first, dernier = $last) {
+          <li class="module">
+            <div class="module__head">
+              <div class="module__ordre" aria-hidden="true">{{ i + 1 }}</div>
+
+              <button
+                type="button"
+                class="module__toggle"
+                (click)="basculerModule(module.id)"
+                [attr.aria-expanded]="module.deplie"
+                [attr.aria-controls]="'contenu-module-' + module.id"
+              >
+                <span class="module__titre">{{ module.titre }}</span>
+                <span class="module__resume">
+                  {{ module.nombreCours || 0 }} leçon(s) ·
+                  {{ module.dureeEstimee }} h
+                  @if (module.hasQuiz || module.quiz) {
+                    · quiz
+                  }
+                </span>
+                <i
+                  class="module__chevron fa-solid"
+                  [class.fa-chevron-down]="!module.deplie"
+                  [class.fa-chevron-up]="module.deplie"
+                  aria-hidden="true"
+                ></i>
+              </button>
+
+              <div class="module__actions">
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-icon-only"
+                  (click)="deplacerModule(i, -1)"
+                  [disabled]="premier"
+                  [attr.aria-label]="'Monter le module ' + module.titre"
+                >
+                  <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-icon-only"
+                  (click)="deplacerModule(i, 1)"
+                  [disabled]="dernier"
+                  [attr.aria-label]="'Descendre le module ' + module.titre"
+                >
+                  <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-icon-only"
+                  (click)="modifierModule(module)"
+                  [attr.aria-label]="'Modifier le module ' + module.titre"
+                >
+                  <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-icon-only"
+                  (click)="supprimerModule(module)"
+                  [attr.aria-label]="'Supprimer le module ' + module.titre"
+                >
+                  <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            @if (module.deplie) {
+              <div class="module__corps" [id]="'contenu-module-' + module.id">
+                @if (module.description) {
+                  <p class="module__description">{{ module.description }}</p>
+                }
+
+                @if (module.chargement) {
+                  <div class="skeleton" style="height: 3rem"></div>
+                } @else {
+                  <!-- Leçons -->
+                  <div class="bloc">
+                    <div class="bloc__head">
+                      <h4 class="bloc__titre">Leçons</h4>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        (click)="ajouterCours(module)"
+                      >
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        Ajouter une leçon
+                      </button>
+                    </div>
+
+                    @if (!module.cours.length) {
+                      <p class="bloc__vide">
+                        Aucune leçon. Ajoutez-en une pour donner du contenu à ce module.
+                      </p>
+                    } @else {
+                      <ol class="lecons">
+                        @for (cours of module.cours; track cours.id; let j = $index, pj = $first, dj = $last) {
+                          <li class="lecon">
+                            <i
+                              class="lecon__icone fa-solid {{ iconeFormat[cours.typeContenu] }}"
+                              aria-hidden="true"
+                            ></i>
+                            <div class="lecon__texte">
+                              <span class="lecon__titre">{{ cours.titre }}</span>
+                              <span class="lecon__format">
+                                {{ libelleFormat[cours.typeContenu] }}
+                              </span>
+                            </div>
+                            <div class="lecon__actions">
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-icon-only"
+                                (click)="deplacerCours(module, j, -1)"
+                                [disabled]="pj"
+                                [attr.aria-label]="'Monter la leçon ' + cours.titre"
+                              >
+                                <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-icon-only"
+                                (click)="deplacerCours(module, j, 1)"
+                                [disabled]="dj"
+                                [attr.aria-label]="'Descendre la leçon ' + cours.titre"
+                              >
+                                <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-icon-only"
+                                (click)="modifierCours(module, cours)"
+                                [attr.aria-label]="'Modifier la leçon ' + cours.titre"
+                              >
+                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-icon-only"
+                                (click)="supprimerCours(module, cours)"
+                                [attr.aria-label]="'Supprimer la leçon ' + cours.titre"
+                              >
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                              </button>
+                            </div>
+                          </li>
+                        }
+                      </ol>
+                    }
+                  </div>
+
+                  <!-- Quiz -->
+                  <div class="bloc">
+                    <div class="bloc__head">
+                      <h4 class="bloc__titre">Quiz de fin de module</h4>
+                      @if (module.quiz) {
+                        <div class="page-head__actions">
+                          <button
+                            type="button"
+                            class="btn btn-secondary btn-sm"
+                            (click)="ajouterQuestion(module)"
+                          >
+                            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                            Question
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm btn-icon-only"
+                            (click)="modifierQuiz(module)"
+                            aria-label="Modifier le quiz"
+                          >
+                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm btn-icon-only"
+                            (click)="supprimerQuiz(module)"
+                            aria-label="Supprimer le quiz"
+                          >
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      } @else {
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm"
+                          (click)="creerQuiz(module)"
+                        >
+                          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                          Créer un quiz
+                        </button>
+                      }
+                    </div>
+
+                    @if (module.quiz; as quiz) {
+                      <p class="bloc__resume">
+                        <strong>{{ quiz.titre }}</strong> ·
+                        {{ quiz.scoreMinimum }} % requis ·
+                        {{ quiz.duree }} min ·
+                        {{ quiz.nombreTentatives }} tentative(s)
+                      </p>
+
+                      @if (!module.questions.length) {
+                        <p class="bloc__vide">
+                          Ce quiz n'a pas encore de question.
+                        </p>
+                      } @else {
+                        <ol class="questions">
+                          @for (question of module.questions; track question.id) {
+                            <li class="question">
+                              <div class="question__texte">
+                                <span>{{ question.texte }}</span>
+                                <span class="question__meta">
+                                  {{ question.points }} point(s) ·
+                                  {{ question.reponseOptions.length || 0 }} option(s)
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                class="btn btn-ghost btn-sm btn-icon-only"
+                                (click)="supprimerQuestion(module, question)"
+                                aria-label="Supprimer la question"
+                              >
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                              </button>
+                            </li>
+                          }
+                        </ol>
+                      }
+                    } @else {
+                      <p class="bloc__vide">
+                        Aucun quiz. Ajoutez-en un pour valider les acquis du module.
+                      </p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ol>
+    }
+  </section>
 }
