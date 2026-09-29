@@ -4,9 +4,10 @@ import { BlogService } from "src/app/services/blog.service";
 import { CategorieService } from "src/app/services/categorie.service";
 
 @Component({
-  selector: "app-add-up-blog",
-  templateUrl: "./add-up-blog.component.html",
-  styleUrls: ["./add-up-blog.component.scss"],
+    selector: "app-add-up-blog",
+    templateUrl: "./add-up-blog.component.html",
+    styleUrls: ["./add-up-blog.component.scss"],
+    standalone: false
 })
 export class AddUpBlogComponent implements OnInit {
   blogRequest: any = {

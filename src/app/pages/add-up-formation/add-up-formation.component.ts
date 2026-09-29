@@ -5,9 +5,10 @@ import { FormationRequest, Niveau } from "src/app/models/Formation";
 import { FormationService } from "src/app/services/formation.service";
 
 @Component({
-  selector: "app-add-up-formation",
-  templateUrl: "./add-up-formation.component.html",
-  styleUrls: ["./add-up-formation.component.scss"],
+    selector: "app-add-up-formation",
+    templateUrl: "./add-up-formation.component.html",
+    styleUrls: ["./add-up-formation.component.scss"],
+    standalone: false
 })
 export class AddUpFormationComponent implements OnInit {
   private toastr = inject(ToastrService);

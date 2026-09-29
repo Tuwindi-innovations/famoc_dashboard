@@ -7,9 +7,10 @@ import { EventService } from "src/app/services/event.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-liste-event",
-  templateUrl: "./liste-event.component.html",
-  styleUrls: ["./liste-event.component.scss"],
+    selector: "app-liste-event",
+    templateUrl: "./liste-event.component.html",
+    styleUrls: ["./liste-event.component.scss"],
+    standalone: false
 })
 export class ListeEventComponent implements OnInit {
   private eventService = inject(EventService);

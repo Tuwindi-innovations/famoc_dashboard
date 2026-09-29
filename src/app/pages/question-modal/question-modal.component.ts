@@ -10,11 +10,10 @@ import {
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
-  selector: "app-question-modal",
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./question-modal.component.html",
-  styleUrls: ["./question-modal.component.scss"],
+    selector: "app-question-modal",
+    imports: [CommonModule, ReactiveFormsModule],
+    templateUrl: "./question-modal.component.html",
+    styleUrls: ["./question-modal.component.scss"]
 })
 export class QuestionModalComponent implements OnInit {
   activeModal = inject(NgbActiveModal);

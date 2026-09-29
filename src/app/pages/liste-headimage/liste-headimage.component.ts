@@ -5,9 +5,10 @@ import { HeadImage } from "src/app/models/HeadImage";
 import { HeadImageService } from "src/app/services/head-image.service";
 
 @Component({
-  selector: "app-liste-headimage",
-  templateUrl: "./liste-headimage.component.html",
-  styleUrls: ["./liste-headimage.component.scss"],
+    selector: "app-liste-headimage",
+    templateUrl: "./liste-headimage.component.html",
+    styleUrls: ["./liste-headimage.component.scss"],
+    standalone: false
 })
 export class ListeHeadimageComponent implements OnInit {
   private headService = inject(HeadImageService);

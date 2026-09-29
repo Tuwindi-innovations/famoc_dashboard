@@ -5,9 +5,10 @@ import { FormationService } from "src/app/services/formation.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-liste-formation",
-  templateUrl: "./liste-formation.component.html",
-  styleUrls: ["./liste-formation.component.scss"],
+    selector: "app-liste-formation",
+    templateUrl: "./liste-formation.component.html",
+    styleUrls: ["./liste-formation.component.scss"],
+    standalone: false
 })
 export class ListeFormationComponent implements OnInit {
   private toastr = inject(ToastrService);

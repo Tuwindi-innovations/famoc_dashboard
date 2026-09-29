@@ -5,9 +5,10 @@ import { CategorieService } from "src/app/services/categorie.service";
 import { EventService } from "src/app/services/event.service";
 
 @Component({
-  selector: "app-add-up-event",
-  templateUrl: "./add-up-event.component.html",
-  styleUrls: ["./add-up-event.component.scss"],
+    selector: "app-add-up-event",
+    templateUrl: "./add-up-event.component.html",
+    styleUrls: ["./add-up-event.component.scss"],
+    standalone: false
 })
 export class AddUpEventComponent implements OnInit {
   eventRequest: any = {

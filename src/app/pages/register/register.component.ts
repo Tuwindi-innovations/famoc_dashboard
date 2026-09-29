@@ -4,9 +4,10 @@ import { AuthService } from "src/app/services/auth.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
-  selector: "app-register",
-  templateUrl: "./register.component.html",
-  styleUrls: ["./register.component.scss"],
+    selector: "app-register",
+    templateUrl: "./register.component.html",
+    styleUrls: ["./register.component.scss"],
+    standalone: false
 })
 export class RegisterComponent implements OnInit {
   private authService = inject(AuthService);

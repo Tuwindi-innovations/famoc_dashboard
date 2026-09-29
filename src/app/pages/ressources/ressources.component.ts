@@ -5,9 +5,10 @@ import { RessourceService } from "src/app/services/ressource.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-ressources",
-  templateUrl: "./ressources.component.html",
-  styleUrls: ["./ressources.component.scss"],
+    selector: "app-ressources",
+    templateUrl: "./ressources.component.html",
+    styleUrls: ["./ressources.component.scss"],
+    standalone: false
 })
 export class RessourcesComponent implements OnInit {
   private ressourceService = inject(RessourceService);

@@ -5,9 +5,10 @@ import { UserResponseDTO } from "src/app/models/User";
 import { UserService } from "src/app/services/user.service";
 
 @Component({
-  selector: "app-liste-user",
-  templateUrl: "./liste-user.component.html",
-  styleUrls: ["./liste-user.component.scss"],
+    selector: "app-liste-user",
+    templateUrl: "./liste-user.component.html",
+    styleUrls: ["./liste-user.component.scss"],
+    standalone: false
 })
 export class ListeUserComponent implements OnInit {
   newUser = {

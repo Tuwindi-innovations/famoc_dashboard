@@ -24,9 +24,10 @@ interface ModuleUI extends ModuleResponse {
 }
 
 @Component({
-  selector: "app-formation-detail",
-  templateUrl: "./formation-detail.component.html",
-  styleUrls: ["./formation-detail.component.scss"],
+    selector: "app-formation-detail",
+    templateUrl: "./formation-detail.component.html",
+    styleUrls: ["./formation-detail.component.scss"],
+    standalone: false
 })
 export class FormationDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);

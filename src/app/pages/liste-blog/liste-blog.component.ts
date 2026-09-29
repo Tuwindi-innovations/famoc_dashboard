@@ -7,9 +7,10 @@ import { BlogService } from "src/app/services/blog.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-liste-blog",
-  templateUrl: "./liste-blog.component.html",
-  styleUrls: ["./liste-blog.component.scss"],
+    selector: "app-liste-blog",
+    templateUrl: "./liste-blog.component.html",
+    styleUrls: ["./liste-blog.component.scss"],
+    standalone: false
 })
 export class ListeBlogComponent implements OnInit {
   private blogService = inject(BlogService);

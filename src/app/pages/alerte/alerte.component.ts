@@ -5,9 +5,10 @@ import { AlertService } from "src/app/services/alert.service";
 import { environment } from "src/environments/environment";
 
 @Component({
-  selector: "app-alerte",
-  templateUrl: "./alerte.component.html",
-  styleUrls: ["./alerte.component.scss"],
+    selector: "app-alerte",
+    templateUrl: "./alerte.component.html",
+    styleUrls: ["./alerte.component.scss"],
+    standalone: false
 })
 export class AlerteComponent implements OnInit {
   private alerteService = inject(AlertService);

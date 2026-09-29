@@ -5,9 +5,10 @@ import { Categorie } from "src/app/models/Categorie";
 import { CategorieService } from "src/app/services/categorie.service";
 
 @Component({
-  selector: "app-liste-categorie",
-  templateUrl: "./liste-categorie.component.html",
-  styleUrls: ["./liste-categorie.component.scss"],
+    selector: "app-liste-categorie",
+    templateUrl: "./liste-categorie.component.html",
+    styleUrls: ["./liste-categorie.component.scss"],
+    standalone: false
 })
 export class ListeCategorieComponent implements OnInit {
   categories: Categorie[] = [];
