@@ -1,9 +1,9 @@
 @if (chargement()) {
-  <div class="skeleton" style="height: 8rem; border-radius: var(--radius-lg)"></div>
+  <div class="skeleton" style="height: 8rem; border-radius: var(--r-lg)"></div>
   <p role="status" class="visually-hidden">Chargement de la formation…</p>
 } @else if (erreur()) {
   <div class="empty-state">
-    <i class="fa-solid fa-circle-exclamation fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <i class="fa-solid fa-circle-exclamation fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
     <h2 class="empty-state__title">Formation introuvable</h2>
     <p class="empty-state__text">{{ erreur() }}</p>
     <a class="btn btn-secondary btn-sm" [routerLink]="['/liste-formation']">
@@ -71,7 +71,7 @@
   </div>
 
   <!-- Programme -->
-  <section class="chart" style="margin-top: var(--space-6)">
+  <section class="chart" style="margin-top: var(--e-6)">
     <div class="chart__head">
       <div>
         <h3 class="chart__title">Programme</h3>
@@ -88,7 +88,7 @@
 
     @if (!modules().length) {
       <div class="empty-state">
-        <i class="fa-solid fa-layer-group fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+        <i class="fa-solid fa-layer-group fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
         <h4 class="empty-state__title">Aucun module pour l'instant</h4>
         <p class="empty-state__text">
           Un module regroupe des leçons et, si vous le souhaitez, un quiz de fin.

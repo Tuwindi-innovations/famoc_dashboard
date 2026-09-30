@@ -14,18 +14,18 @@
 </div>
 
 @if (chargement()) {
-  <div class="skeleton" style="height: 16rem; border-radius: var(--radius-lg)"></div>
+  <div class="skeleton" style="height: 16rem; border-radius: var(--r-lg)"></div>
   <p role="status" class="visually-hidden">Chargement des messages…</p>
 } @else if (erreur()) {
   <div class="empty-state">
-    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
     <h3 class="empty-state__title">Messages indisponibles</h3>
     <p class="empty-state__text">{{ erreur() }}</p>
     <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
   </div>
 } @else if (!contacts().length) {
   <div class="empty-state">
-    <i class="fa-solid fa-envelope-open fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <i class="fa-solid fa-envelope-open fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
     <h3 class="empty-state__title">Aucun message</h3>
     <p class="empty-state__text">
       Les messages envoyés depuis le formulaire de contact du site apparaîtront ici.

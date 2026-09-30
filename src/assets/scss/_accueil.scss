@@ -1,0 +1,245 @@
+// =============================================================================
+// Accueil : la file d'attente, les panneaux de relevé
+// -----------------------------------------------------------------------------
+// La page s'ouvre sur une phrase, pas sur une rangée d'indicateurs. Le nombre
+// de signalements en attente est le seul très grand corps de l'écran : toute
+// la hardiesse de la page est dépensée là, le reste reste discipliné.
+// =============================================================================
+
+.file {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--e-6);
+  padding: var(--e-8) var(--e-8) var(--e-6);
+  margin-bottom: var(--e-6);
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-left: 4px solid var(--indigo);
+  border-radius: var(--r-lg);
+
+  // File vide : le trait d'accent passe au vert, la page ne crie plus.
+  &--vide {
+    border-left-color: var(--statut-resolu);
+  }
+
+  &__chiffre {
+    color: var(--indigo);
+    padding-top: 0.15em; // aligne l'oeil du chiffre sur la première ligne
+  }
+
+  &--vide &__chiffre {
+    color: var(--statut-resolu-texte);
+  }
+
+  // La phrase continue le chiffre : ensemble ils forment une seule ligne de
+  // lecture, au lieu d'un nombre surmonté d'une étiquette.
+  &__phrase {
+    font-size: var(--t-xl);
+    font-weight: var(--g-appuye);
+    max-width: 22ch;
+  }
+
+  &__contexte {
+    margin-top: var(--e-2);
+    color: var(--encre-douce);
+    font-size: var(--t-base);
+  }
+
+  &__repartition {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-4);
+    margin: var(--e-5) 0 var(--e-6);
+    padding: 0;
+    list-style: none;
+  }
+
+  &__part {
+    display: grid;
+    gap: var(--e-2);
+    min-width: 7rem;
+  }
+
+  // Une barre par catégorie, toutes ancrées sur la même base : les longueurs
+  // se comparent d'un coup d'oeil.
+  &__part-barre {
+    display: block;
+    height: 0.375rem;
+    min-width: 0.375rem;
+    border-radius: var(--r-pilule);
+    background: var(--viz-2);
+  }
+
+  &__part-texte {
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
+
+    b {
+      margin-left: 0.35em;
+      color: var(--encre);
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--g-appuye);
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .file {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--e-3);
+    padding: var(--e-6) var(--e-5);
+  }
+}
+
+// --- Panneaux ---------------------------------------------------------------
+.deux-colonnes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
+  gap: var(--e-4);
+  margin-bottom: var(--e-4);
+}
+
+.panneau {
+  padding: var(--e-5);
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-lg);
+
+  &__tete {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--e-3);
+    margin-bottom: var(--e-4);
+  }
+
+  &__titre {
+    font-size: var(--t-md);
+  }
+
+  &__sous-titre {
+    margin: var(--e-5) 0 var(--e-3);
+    color: var(--encre-douce);
+    font-size: var(--t-sm);
+    font-stretch: 100%;
+    font-variation-settings: 'wdth' 100;
+    font-weight: var(--g-moyen);
+  }
+
+  &__intro {
+    margin-bottom: var(--e-4);
+    color: var(--encre-douce);
+    font-size: var(--t-sm);
+  }
+
+  &__vide {
+    color: var(--encre-tenue);
+    font-size: var(--t-xs);
+  }
+}
+
+// Lien d'action discret, à droite d'un titre de panneau.
+.lien-discret {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--indigo);
+  font-family: inherit;
+  font-size: var(--t-xs);
+  font-weight: var(--g-moyen);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+}
+
+// --- Relevé de chiffres -----------------------------------------------------
+// Une liste de définitions plutôt que des tuiles : ces valeurs se lisent en
+// série, elles n'ont pas à être encadrées une par une.
+.releve {
+  margin: 0;
+
+  &__ligne {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--e-4);
+    padding: var(--e-3) 0;
+    border-bottom: 1px solid var(--trait);
+
+    &:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    dt {
+      color: var(--encre-douce);
+      font-size: var(--t-sm);
+    }
+
+    dd {
+      margin: 0;
+      color: var(--encre);
+      font-size: var(--t-lg);
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--g-appuye);
+      white-space: nowrap;
+    }
+  }
+
+  &__note {
+    margin-left: var(--e-2);
+    color: var(--encre-tenue);
+    font-size: var(--t-xs);
+    font-weight: var(--g-normal);
+  }
+}
+
+// --- Avancement, à droite de la file ----------------------------------------
+// Onze en attente ne veut rien dire seul : ce bloc dit quelle part du flux
+// total a déjà été traitée.
+.file {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+
+  &__avancement {
+    align-self: center;
+    min-width: 12rem;
+    max-width: 16rem;
+    padding-left: var(--e-6);
+    border-left: 1px solid var(--trait);
+  }
+
+  &__avancement-valeur {
+    color: var(--encre);
+    font-size: var(--t-2xl);
+    font-stretch: 116%;
+    font-variation-settings: 'wdth' 116;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--g-fort);
+    line-height: 1;
+  }
+
+  &__avancement-libelle {
+    margin: var(--e-2) 0 var(--e-3);
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .file {
+    grid-template-columns: auto minmax(0, 1fr);
+
+    &__avancement {
+      grid-column: 1 / -1;
+      max-width: none;
+      padding: var(--e-5) 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--trait);
+    }
+  }
+}

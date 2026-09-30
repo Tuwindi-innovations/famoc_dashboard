@@ -11,7 +11,7 @@
 // =============================================================================
 
 // --- Couleurs ---------------------------------------------------------------
-$blue: #2a78d6;
+$blue: #2d3a8c;
 $indigo: #4a3aa7;
 $purple: #4a3aa7;
 $pink: #e87ba4;
@@ -31,7 +31,7 @@ $gray-500: #898781;
 $gray-600: #52514e;
 $gray-700: #3d3c3a;
 $gray-800: #262624;
-$gray-900: #0b0b0b;
+$gray-900: #14162b;
 $black: #000000;
 
 $primary: $blue;
@@ -43,11 +43,11 @@ $danger: $red;
 $light: $gray-200;
 $dark: $gray-900;
 
-$body-bg: #f9f9f7;
-$body-color: #0b0b0b;
+$body-bg: #f6f6f4;
+$body-color: #14162b;
 
 // --- Typographie ------------------------------------------------------------
-$font-family-sans-serif: system-ui, -apple-system, 'Segoe UI', sans-serif;
+$font-family-sans-serif: 'Archivo Variable', system-ui, sans-serif;
 $font-size-base: 0.875rem; // 14px : densité adaptée à un back-office
 $line-height-base: 1.5;
 
@@ -59,37 +59,37 @@ $h5-font-size: 0.9375rem;
 $h6-font-size: 0.875rem;
 
 $headings-font-weight: 600;
-$headings-color: #0b0b0b;
+$headings-color: #14162b;
 $headings-line-height: 1.25;
 
 // --- Traits et rayons -------------------------------------------------------
-$border-color: rgba(11, 11, 11, 0.1);
-$border-radius: 8px;
-$border-radius-lg: 12px;
-$border-radius-sm: 4px;
+$border-color: #ddddd8;
+$border-radius: 5px;
+$border-radius-lg: 8px;
+$border-radius-sm: 3px;
 
 // --- Composants -------------------------------------------------------------
-$card-border-radius: 12px;
-$card-border-color: rgba(11, 11, 11, 0.1);
+$card-border-radius: 8px;
+$card-border-color: #ddddd8;
 $card-cap-bg: transparent;
-$card-bg: #fcfcfb;
+$card-bg: #ffffff;
 $card-spacer-x: 1.25rem;
 $card-spacer-y: 1.25rem;
 
 $input-btn-focus-width: 3px;
-$input-btn-focus-color: rgba(42, 120, 214, 0.35);
-$input-bg: #fcfcfb;
+$input-btn-focus-color: rgba(45, 58, 140, 0.3);
+$input-bg: #ffffff;
 $input-border-color: rgba(11, 11, 11, 0.16);
 $input-color: #0b0b0b;
 $input-placeholder-color: #898781;
-$input-focus-border-color: #2a78d6;
+$input-focus-border-color: #2d3a8c;
 $input-btn-padding-y: 0.5rem;
 $input-btn-padding-x: 0.75rem;
 
 $btn-font-weight: 500;
-$btn-border-radius: 8px;
-$btn-border-radius-lg: 8px;
-$btn-border-radius-sm: 6px;
+$btn-border-radius: 5px;
+$btn-border-radius-lg: 5px;
+$btn-border-radius-sm: 3px;
 
 $table-cell-padding: 0.75rem;
 $table-border-color: rgba(11, 11, 11, 0.08);

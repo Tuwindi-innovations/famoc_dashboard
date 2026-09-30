@@ -1,166 +1,169 @@
 // =============================================================================
-// Tokens du design system
+// Tokens du design system — FAMOC
 // -----------------------------------------------------------------------------
-// Source unique de vérité pour les couleurs, l'espacement, la typographie et les
-// élévations. Les composants ne référencent QUE ces variables, jamais un hex
-// littéral : le thème clair/sombre se règle donc en un seul endroit.
+// Une seule couleur de marque : l'indigo. Le reste est encre, papier et trait.
+// L'indigo renvoie au gara, la teinture indigo d'Afrique de l'Ouest — un choix
+// documenté, pas une évocation décorative.
 //
-// La palette de data-visualisation (rampe bleue ordinale, couleurs de statut)
-// est validée pour le daltonisme et le contraste sur les deux surfaces.
+// Les couleurs de statut restent strictement fonctionnelles : elles signalent
+// un état, elles ne décorent jamais.
 // =============================================================================
 
 :root {
   color-scheme: light;
 
-  // --- Surfaces ------------------------------------------------------------
-  --plane: #f9f9f7; // fond de page
-  --surface: #fcfcfb; // cartes, panneaux
-  --surface-raised: #ffffff; // menus, popovers
-  --surface-sunken: #f2f2ef; // zones en retrait, en-têtes de tableau
-  --surface-hover: rgba(11, 11, 11, 0.04);
-  --surface-active: rgba(11, 11, 11, 0.08);
+  // --- Fondations ----------------------------------------------------------
+  --papier: #f6f6f4; // fond de l'espace de travail
+  --surface: #ffffff; // panneaux, lignes de registre
+  --surface-creuse: #efefec; // en-têtes de tableau, zones en retrait
+  --surface-survol: rgba(20, 22, 43, 0.04);
+  --surface-active: rgba(20, 22, 43, 0.08);
 
-  // --- Encre ---------------------------------------------------------------
-  --ink: #0b0b0b;
-  --ink-secondary: #52514e;
-  --ink-muted: #898781;
-  --ink-inverse: #ffffff;
+  --encre: #14162b; // encre indigo : la teinte de la marque, poussée au noir
+  --encre-douce: #4a4d66;
+  --encre-tenue: #7c7f93;
+  --encre-inverse: #ffffff;
 
-  // --- Traits --------------------------------------------------------------
-  --border: rgba(11, 11, 11, 0.1);
-  --border-strong: #c3c2b7;
-  --grid-line: #e1e0d9;
+  --trait: #ddddd8;
+  --trait-appuye: #c4c4bd;
 
-  // --- Marque / accent -----------------------------------------------------
-  --accent: #2a78d6;
-  --accent-hover: #256abf;
-  --accent-active: #1c5cab;
-  --accent-wash: #cde2fb;
-  --accent-ink: #ffffff;
-  --focus-ring: #2a78d6;
+  // --- Indigo --------------------------------------------------------------
+  --indigo: #2d3a8c;
+  --indigo-survol: #384799;
+  --indigo-actif: #232e73;
+  --indigo-voile: #e6e8f5; // aplat très clair, pour les états sélectionnés
+  --indigo-encre: #ffffff;
+  --anneau-focus: #2d3a8c;
 
-  // --- Statuts (fixes, jamais thémés ; toujours accompagnés d'une icône
-  //     et d'un libellé, jamais la couleur seule) ---------------------------
-  --status-good: #0ca30c;
-  --status-warning: #fab219;
-  --status-serious: #ec835a;
-  --status-critical: #d03b3b;
-  --status-good-text: #006300; // variante lisible en texte sur fond clair
-  --status-critical-text: #a52a2a;
+  // --- Statuts (fonctionnels, toujours accompagnés d'un mot) ---------------
+  --statut-resolu: #0ca30c;
+  --statut-attente: #fab219;
+  --statut-encours: #ec835a;
+  --statut-critique: #d03b3b;
+  --statut-resolu-texte: #006300;
+  --statut-attente-texte: #8a6100;
+  --statut-encours-texte: #9c4a24;
+  --statut-critique-texte: #a52a2a;
 
-  // --- Rampe ordinale de data-viz (bleu, clair → foncé) -------------------
-  // Validée : monotonie de luminosité, écarts >= 0.06, extrémité claire à
-  // 2.06:1 sur la surface, teinte unique (écart 3°).
-  --viz-1: #86b6ef;
-  --viz-2: #2a78d6;
-  --viz-3: #104281;
-  --viz-fill: rgba(42, 120, 214, 0.14); // remplissage d'aire sous courbe
+  // --- Rampe de data-visualisation (indigo, clair → foncé) ----------------
+  // Validée : monotonie de luminosité, écarts ≥ 0.06, extrémité claire à
+  // 2.27:1 sur le papier, teinte unique (écart 5°).
+  --viz-1: #9aa3d4;
+  --viz-2: #4c5bb5;
+  --viz-3: #2d3a8c;
+  --viz-aplat: rgba(45, 58, 140, 0.12);
 
   // --- Typographie ---------------------------------------------------------
-  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --text-2xs: 0.6875rem; // 11px
-  --text-xs: 0.75rem; // 12px
-  --text-sm: 0.8125rem; // 13px
-  --text-base: 0.875rem; // 14px
-  --text-md: 1rem; // 16px
-  --text-lg: 1.125rem; // 18px
-  --text-xl: 1.375rem; // 22px
-  --text-2xl: 1.75rem; // 28px
-  --text-hero: 2.5rem; // 40px
+  // Une seule famille, deux registres. Les titres empruntent l'axe de largeur
+  // (jusqu'à 118 %) pour prendre une voix nettement distincte du texte
+  // courant, sans recourir au duo serif/sans convenu.
+  --famille: 'Archivo Variable', system-ui, sans-serif;
+  --largeur-titre: 116%;
+  --largeur-courante: 100%;
 
-  --weight-normal: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-  --weight-bold: 700;
+  --t-2xs: 0.6875rem;
+  --t-xs: 0.75rem;
+  --t-sm: 0.8125rem;
+  --t-base: 0.875rem;
+  --t-md: 1rem;
+  --t-lg: 1.25rem;
+  --t-xl: 1.625rem;
+  --t-2xl: 2.25rem;
+  --t-affiche: 3.75rem; // le seul très grand corps de la page
 
-  --leading-tight: 1.2;
-  --leading-normal: 1.5;
+  --g-normal: 400;
+  --g-moyen: 500;
+  --g-appuye: 600;
+  --g-fort: 700;
 
-  // --- Espacement (échelle de 4px) -----------------------------------------
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
+  --i-serre: 1.05;
+  --i-titre: 1.15;
+  --i-courant: 1.55;
+
+  // --- Espacement (échelle de 4 px) ----------------------------------------
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.25rem;
+  --e-6: 1.5rem;
+  --e-8: 2rem;
+  --e-10: 2.5rem;
+  --e-12: 3rem;
+  --e-16: 4rem;
 
   // --- Rayons --------------------------------------------------------------
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-pill: 999px;
+  // Volontairement discrets : un poste de travail, pas une galerie de cartes.
+  --r-sm: 3px;
+  --r-md: 5px;
+  --r-lg: 8px;
+  --r-pilule: 999px;
 
-  // --- Élévations (discrètes : le design repose sur les traits, pas l'ombre)
-  --shadow-sm: 0 1px 2px rgba(11, 11, 11, 0.06);
-  --shadow-md: 0 2px 8px rgba(11, 11, 11, 0.08);
-  --shadow-lg: 0 8px 24px rgba(11, 11, 11, 0.12);
+  // --- Élévations ----------------------------------------------------------
+  // Le design repose sur le trait, pas sur l'ombre. Seuls les calques
+  // réellement flottants en portent une.
+  --ombre-menu: 0 4px 16px rgba(20, 22, 43, 0.12);
+  --ombre-modale: 0 16px 48px rgba(20, 22, 43, 0.22);
 
   // --- Gabarit -------------------------------------------------------------
-  --sidebar-width: 15.5rem;
-  --topbar-height: 3.5rem;
-  --content-max: 90rem;
+  --rail: 14.5rem;
+  --barre: 3.25rem;
+  --contenu-max: 88rem;
 
   // --- Mouvement -----------------------------------------------------------
-  --ease: cubic-bezier(0.2, 0, 0.2, 1);
-  --duration-fast: 120ms;
-  --duration: 180ms;
+  --sortie: cubic-bezier(0.2, 0, 0.2, 1);
+  --duree-breve: 110ms;
+  --duree: 170ms;
 }
 
 // --- Thème sombre -----------------------------------------------------------
-// Déclaré sous les deux portées : la media query suit le réglage système, la
-// portée [data-theme] laisse l'utilisateur trancher dans les deux sens. Le
-// garde `:not([data-theme='light'])` permet à un choix « clair » explicite de
-// battre un système en sombre.
-@mixin dark-tokens {
+// Le papier devient une nuit indigo : la teinte de marque reste présente dans
+// le fond au lieu d'être remplacée par un gris neutre.
+@mixin tokens-sombres {
   color-scheme: dark;
 
-  --plane: #0d0d0d;
-  --surface: #1a1a19;
-  --surface-raised: #242422;
-  --surface-sunken: #141413;
-  --surface-hover: rgba(255, 255, 255, 0.06);
-  --surface-active: rgba(255, 255, 255, 0.1);
+  --papier: #0d0e18;
+  --surface: #12131f;
+  --surface-creuse: #191b2a;
+  --surface-survol: rgba(255, 255, 255, 0.05);
+  --surface-active: rgba(255, 255, 255, 0.09);
 
-  --ink: #ffffff;
-  --ink-secondary: #c3c2b7;
-  --ink-muted: #898781;
-  --ink-inverse: #0b0b0b;
+  --encre: #f2f2f6;
+  --encre-douce: #b3b5c6;
+  --encre-tenue: #7c7f93;
+  --encre-inverse: #14162b;
 
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: #383835;
-  --grid-line: #2c2c2a;
+  --trait: #272a3d;
+  --trait-appuye: #3b3f56;
 
-  --accent: #3987e5;
-  --accent-hover: #5598e7;
-  --accent-active: #6da7ec;
-  --accent-wash: #184f95;
-  --accent-ink: #0b0b0b;
-  --focus-ring: #5598e7;
+  --indigo: #7382db;
+  --indigo-survol: #8793e2;
+  --indigo-actif: #5f6fce;
+  --indigo-voile: #1e2242;
+  --indigo-encre: #0d0e18;
+  --anneau-focus: #8793e2;
 
-  --status-good-text: #0ca30c;
-  --status-critical-text: #e66767;
+  --statut-resolu-texte: #35c435;
+  --statut-attente-texte: #fab219;
+  --statut-encours-texte: #ec835a;
+  --statut-critique-texte: #e66767;
 
-  // Rampe ordinale stepped pour la surface sombre (validée séparément, ce
-  // n'est pas une simple inversion du mode clair).
-  --viz-1: #9ec5f4;
-  --viz-2: #3987e5;
-  --viz-3: #184f95;
-  --viz-fill: rgba(57, 135, 229, 0.18);
+  // Rampe re-échelonnée pour le fond sombre, validée séparément.
+  --viz-1: #a8b2e4;
+  --viz-2: #6b79d0;
+  --viz-3: #3a48a8;
+  --viz-aplat: rgba(107, 121, 208, 0.16);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --ombre-menu: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --ombre-modale: 0 16px 48px rgba(0, 0, 0, 0.65);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    @include dark-tokens;
+    @include tokens-sombres;
   }
 }
 
 :root[data-theme='dark'] {
-  @include dark-tokens;
+  @include tokens-sombres;
 }

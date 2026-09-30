@@ -46,6 +46,8 @@ export interface StatsAlertes {
   enCours: number;
   resolues: number;
   parCategorie: RepartitionItem[];
+  /** Date du plus ancien signalement non clos, au format ISO. */
+  plusAncienneEnAttente: string | null;
 }
 
 export interface StatsContenus {

@@ -168,12 +168,21 @@ export class DashboardStatsService {
     const compter = (statut: StatutAlerte) =>
       alertes.filter((a) => a.statut === statut).length;
 
+    // Le plus ancien signalement encore ouvert : c'est lui qui mesure le
+    // retard de l'équipe, bien mieux qu'un simple total.
+    const enAttente = alertes
+      .filter((a) => a.statut !== StatutAlerte.RESOLUE)
+      .map((a) => a.dateCreation)
+      .filter((d): d is string => !!d && Number.isFinite(Date.parse(d)))
+      .sort();
+
     return {
       total: alertes.length,
       envoyees: compter(StatutAlerte.ENVOYER),
       enCours: compter(StatutAlerte.ENCOURSDETRAITEMENT),
       resolues: compter(StatutAlerte.RESOLUE),
       parCategorie: repartir(alertes, (a) => a.categorie ?? 'Non catégorisée'),
+      plusAncienneEnAttente: enAttente[0] ?? null,
     };
   }
 

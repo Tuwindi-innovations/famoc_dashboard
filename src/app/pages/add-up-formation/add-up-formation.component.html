@@ -18,7 +18,7 @@
 </div>
 
 @if (chargement()) {
-  <div class="skeleton" style="height: 20rem; border-radius: var(--radius-lg)"></div>
+  <div class="skeleton" style="height: 20rem; border-radius: var(--r-lg)"></div>
 } @else {
   <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate class="formulaire">
     <div class="card">

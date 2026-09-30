@@ -1,4 +1,3 @@
-import { DecimalPipe } from '@angular/common';
 import {
   afterRenderEffect,
   Component,
@@ -9,6 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { libelleCategorie } from '../../models/Alerte';
 import { Chart, type ChartConfiguration } from 'chart.js/auto';
 import type { DashboardStats, PointTemporel, RepartitionItem } from '../../models/DashboardStats';
 import { DashboardStatsService } from '../../services/dashboard-stats.service';
@@ -26,7 +26,7 @@ const ORDRE_NIVEAU = ['DEBUTANT', 'Intermediaire', 'AVANCER'];
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DecimalPipe, RouterLink],
+  imports: [RouterLink],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
@@ -118,6 +118,35 @@ export class DashboardComponent {
     })),
   );
 
+  /** Signalements encore ouverts : le chiffre qui ouvre la page. */
+  protected readonly aTraiter = computed(() => {
+    const alertes = this.stats()?.alertes;
+    return alertes ? alertes.envoyees + alertes.enCours : 0;
+  });
+
+  /** Date lisible du plus ancien signalement ouvert. */
+  protected readonly plusAncienne = computed(() => {
+    const brut = this.stats()?.alertes.plusAncienneEnAttente;
+    if (!brut) {
+      return null;
+    }
+    const date = new Date(brut);
+    return Number.isNaN(date.getTime())
+      ? null
+      : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  });
+
+  /** Catégories des alertes ouvertes, les plus fournies d'abord. */
+  protected readonly categoriesAlerte = computed<RepartitionItem[]>(() => {
+    const brut = this.stats()?.alertes.parCategorie ?? [];
+    return brut.slice(0, 4).map((item) => ({
+      libelle: libelleCategorie(
+        item.libelle === 'Non catégorisée' ? null : item.libelle,
+      ),
+      valeur: item.valeur,
+    }));
+  });
+
   /** Part des alertes résolues, pour la jauge de traitement. */
   protected readonly tauxResolution = computed(() => {
     const alertes = this.stats()?.alertes;
@@ -149,11 +178,11 @@ export class DashboardComponent {
     const lire = (token: string) => styles.getPropertyValue(token).trim();
 
     const trait = lire('--viz-2') || '#2a78d6';
-    const remplissage = lire('--viz-fill') || 'rgba(42, 120, 214, 0.14)';
-    const encreDiscrete = lire('--ink-muted') || '#898781';
-    const ligneGrille = lire('--grid-line') || '#e1e0d9';
+    const remplissage = lire('--viz-aplat') || 'rgba(42, 120, 214, 0.14)';
+    const encreDiscrete = lire('--encre-tenue') || '#898781';
+    const ligneGrille = lire('--trait') || '#e1e0d9';
     const surface = lire('--surface') || '#fcfcfb';
-    const encre = lire('--ink') || '#0b0b0b';
+    const encre = lire('--encre') || '#0b0b0b';
 
     return {
       type: 'line',

@@ -8,6 +8,11 @@
 //   4. base / layout / ui / dataviz — notre design system, qui a le dernier mot
 // =============================================================================
 
+// Police auto-hébergée : aucun appel à un CDN, ce qui compte pour des
+// connexions lentes. Archivo est variable — une seule famille couvre les deux
+// registres typographiques grâce à ses axes de graisse et de largeur.
+@import '@fontsource-variable/archivo/index.css';
+
 @import 'tokens';
 @import 'bootstrap-config';
 
@@ -49,6 +54,7 @@
 @import 'layout';
 @import 'ui';
 @import 'dataviz';
+@import 'accueil';
 @import 'auth';
 @import 'programme';
 @import 'compat-argon';

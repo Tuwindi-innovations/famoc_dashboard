@@ -11,15 +11,15 @@
 .kpi-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: var(--e-4);
+  margin-bottom: var(--e-6);
 }
 
 .chart-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  gap: var(--e-4);
+  margin-bottom: var(--e-4);
 
   // Un graphique qui a besoin de toute la largeur (séries temporelles).
   &__wide {
@@ -31,67 +31,67 @@
 .stat {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
+  gap: var(--e-2);
+  padding: var(--e-4) var(--e-5);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-lg);
 
   &__label {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--e-2);
     margin: 0;
-    color: var(--ink-secondary);
-    font-size: var(--text-xs);
-    font-weight: var(--weight-medium);
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
+    font-weight: var(--g-moyen);
     letter-spacing: 0.01em;
   }
 
   // La valeur porte l'information : elle domine visuellement.
   &__value {
     margin: 0;
-    color: var(--ink);
-    font-size: var(--text-2xl);
-    font-weight: var(--weight-semibold);
+    color: var(--encre);
+    font-size: var(--t-2xl);
+    font-weight: var(--g-appuye);
     line-height: 1.1;
     letter-spacing: -0.02em;
   }
 
   &__unit {
     margin-left: 0.25rem;
-    color: var(--ink-secondary);
-    font-size: var(--text-md);
-    font-weight: var(--weight-normal);
+    color: var(--encre-douce);
+    font-size: var(--t-md);
+    font-weight: var(--g-normal);
   }
 
   // Précision sous la valeur (répartition, part, contexte).
   &__meta {
     margin: 0;
-    color: var(--ink-muted);
-    font-size: var(--text-xs);
+    color: var(--encre-tenue);
+    font-size: var(--t-xs);
   }
 
   // Variante de statut : la barre colorée à gauche double l'icône et le
   // libellé, elle ne porte jamais l'information seule.
   &--status {
-    border-left: 3px solid var(--border-strong);
+    border-left: 3px solid var(--trait-appuye);
   }
 
   &--good {
-    border-left-color: var(--status-good);
+    border-left-color: var(--statut-resolu);
   }
 
   &--warning {
-    border-left-color: var(--status-warning);
+    border-left-color: var(--statut-attente);
   }
 
   &--serious {
-    border-left-color: var(--status-serious);
+    border-left-color: var(--statut-encours);
   }
 
   &--critical {
-    border-left-color: var(--status-critical);
+    border-left-color: var(--statut-critique);
   }
 }
 
@@ -100,7 +100,7 @@
   font-size: 0.8125rem;
 
   &--good {
-    color: var(--status-good-text);
+    color: var(--statut-resolu-texte);
   }
 
   &--warning {
@@ -112,34 +112,34 @@
   }
 
   &--critical {
-    color: var(--status-critical-text);
+    color: var(--statut-critique-texte);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .stat__icon--warning {
-    color: var(--status-warning);
+    color: var(--statut-attente);
   }
   :root:not([data-theme='light']) .stat__icon--serious {
-    color: var(--status-serious);
+    color: var(--statut-encours);
   }
 }
 
 :root[data-theme='dark'] {
   .stat__icon--warning {
-    color: var(--status-warning);
+    color: var(--statut-attente);
   }
   .stat__icon--serious {
-    color: var(--status-serious);
+    color: var(--statut-encours);
   }
 }
 
 // --- Chiffre phare ----------------------------------------------------------
 .hero-figure {
   margin: 0;
-  color: var(--ink);
-  font-size: var(--text-hero);
-  font-weight: var(--weight-semibold);
+  color: var(--encre);
+  font-size: var(--t-affiche);
+  font-weight: var(--g-appuye);
   line-height: 1;
   letter-spacing: -0.03em;
 }
@@ -147,29 +147,29 @@
 // --- Conteneur de graphique -------------------------------------------------
 .chart {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-lg);
+  padding: var(--e-5);
 
   &__head {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    gap: var(--e-3);
+    margin-bottom: var(--e-4);
   }
 
   &__title {
     margin: 0;
-    font-size: var(--text-md);
-    font-weight: var(--weight-semibold);
+    font-size: var(--t-md);
+    font-weight: var(--g-appuye);
   }
 
   // Sous-titre : dit ce que le lecteur doit comprendre du graphique.
   &__subtitle {
-    margin: var(--space-1) 0 0;
-    color: var(--ink-secondary);
-    font-size: var(--text-xs);
+    margin: var(--e-1) 0 0;
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
   }
 
   // Hauteur fixée pour que Chart.js n'entre pas en boucle de redimensionnement.
@@ -188,7 +188,7 @@
 // canvas : texte sélectionnable, accessible, et aucune dépendance.
 .bar-list {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--e-3);
   margin: 0;
   padding: 0;
 
@@ -196,12 +196,12 @@
     display: grid;
     grid-template-columns: minmax(6rem, 10rem) minmax(0, 1fr) auto;
     align-items: center;
-    gap: var(--space-3);
+    gap: var(--e-3);
   }
 
   &__label {
-    color: var(--ink-secondary);
-    font-size: var(--text-xs);
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -211,24 +211,24 @@
   // comparent directement.
   &__track {
     height: 0.5rem;
-    background: var(--surface-sunken);
-    border-radius: var(--radius-pill);
+    background: var(--surface-creuse);
+    border-radius: var(--r-pilule);
     overflow: hidden;
   }
 
   &__fill {
     height: 100%;
     // Extrémité arrondie côté valeur, ancrée à plat sur la ligne de base.
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
     background: var(--viz-2);
     min-width: 2px; // une valeur non nulle reste visible
   }
 
   &__value {
-    color: var(--ink);
-    font-size: var(--text-xs);
+    color: var(--encre);
+    font-size: var(--t-xs);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--weight-medium);
+    font-weight: var(--g-moyen);
     text-align: right;
     min-width: 2.5rem;
   }
@@ -238,38 +238,38 @@
 // Un ratio face à une limite : la piste est la même rampe que le remplissage.
 .meter {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--e-2);
 
   &__head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--e-3);
   }
 
   &__label {
-    color: var(--ink-secondary);
-    font-size: var(--text-xs);
-    font-weight: var(--weight-medium);
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
+    font-weight: var(--g-moyen);
   }
 
   &__value {
-    color: var(--ink);
-    font-size: var(--text-sm);
+    color: var(--encre);
+    font-size: var(--t-sm);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--weight-semibold);
+    font-weight: var(--g-appuye);
   }
 
   &__track {
     height: 0.5rem;
-    background: var(--surface-sunken);
-    border-radius: var(--radius-pill);
+    background: var(--surface-creuse);
+    border-radius: var(--r-pilule);
     overflow: hidden;
   }
 
   &__fill {
     height: 100%;
-    border-radius: var(--radius-pill);
+    border-radius: var(--r-pilule);
     background: var(--viz-2);
   }
 }
@@ -279,7 +279,7 @@
 .legend {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--e-4);
   flex-wrap: wrap;
   margin: 0;
   padding: 0;
@@ -288,9 +288,9 @@
   &__item {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    color: var(--ink-secondary);
-    font-size: var(--text-xs);
+    gap: var(--e-2);
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
   }
 
   // Le repère coloré est à côté du texte ; le texte reste en encre neutre.
@@ -308,15 +308,15 @@
 .data-notice {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-5);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--status-warning);
-  border-radius: var(--radius-md);
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  margin-bottom: var(--e-5);
+  border: 1px solid var(--trait);
+  border-left: 3px solid var(--statut-attente);
+  border-radius: var(--r-md);
   background: var(--surface);
-  color: var(--ink-secondary);
-  font-size: var(--text-xs);
+  color: var(--encre-douce);
+  font-size: var(--t-xs);
 
   &__icon {
     color: #8a6100;

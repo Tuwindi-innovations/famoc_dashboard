@@ -1,5 +1,9 @@
 // =============================================================================
-// Base : document, typographie, focus, coquille applicative
+// Base : document, typographie, focus
+// -----------------------------------------------------------------------------
+// Une seule famille, Archivo, sur deux registres. Les titres empruntent l'axe
+// de largeur variable (font-stretch) ; le texte courant reste à la largeur
+// normale. Deux voix nettement distinctes, un seul fichier de police.
 // =============================================================================
 
 *,
@@ -14,42 +18,86 @@ html {
 
 body {
   margin: 0;
-  background: var(--plane);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  line-height: var(--leading-normal);
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--famille);
+  font-size: var(--t-base);
+  font-variation-settings: 'wdth' 100;
+  line-height: var(--i-courant);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+// --- Les deux voix ----------------------------------------------------------
+// `.voix-titre` est la voix large et affirmée. Elle est appliquée aux titres
+// par défaut, et disponible en classe pour les rares éléments qui doivent la
+// porter sans être des titres.
 h1,
 h2,
 h3,
 h4,
-h5,
-h6 {
-  color: var(--ink);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
-  letter-spacing: -0.01em;
+.voix-titre {
+  margin: 0;
+  color: var(--encre);
+  font-family: var(--famille);
+  font-stretch: 116%;
+  font-variation-settings: 'wdth' 116;
+  font-weight: var(--g-appuye);
+  line-height: var(--i-titre);
+  letter-spacing: -0.005em;
+}
+
+h1 {
+  font-size: var(--t-2xl);
+  font-weight: var(--g-fort);
+  line-height: var(--i-serre);
+}
+
+h2 {
+  font-size: var(--t-xl);
+}
+
+h3 {
+  font-size: var(--t-md);
+}
+
+h4 {
+  font-size: var(--t-base);
+}
+
+// Le seul très grand corps de la page : un chiffre qu'on lit de loin.
+.affiche {
+  display: block;
+  font-family: var(--famille);
+  font-stretch: 116%;
+  font-variation-settings: 'wdth' 116;
+  font-size: var(--t-affiche);
+  font-weight: var(--g-fort);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+p {
+  margin: 0;
+  max-width: 68ch; // en deçà de 80 caractères, comme le veut la lisibilité
 }
 
 a {
-  color: var(--accent);
+  color: var(--indigo);
   text-decoration: none;
 
   &:hover,
   &:focus-visible {
-    color: var(--accent-hover);
     text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 }
 
 hr {
   border: 0;
-  border-top: 1px solid var(--border);
-  margin: var(--space-6) 0;
+  border-top: 1px solid var(--trait);
+  margin: var(--e-6) 0;
 }
 
 code,
@@ -61,24 +109,20 @@ pre {
 }
 
 // --- Focus ------------------------------------------------------------------
-// Anneau visible et uniforme pour toute navigation clavier (WCAG 2.4.7).
 :focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--anneau-focus);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-sm);
 }
 
-// On ne retire jamais l'anneau sans le remplacer : les styles ci-dessus
-// s'appliquent aussi aux contrôles Bootstrap, qui posent leur propre ombre.
 .btn:focus-visible,
 .form-control:focus-visible,
 .custom-select:focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--anneau-focus);
   outline-offset: 2px;
 }
 
-// --- Utilitaire d'accessibilité --------------------------------------------
-// Contenu réservé aux lecteurs d'écran (libellés de tableaux, légendes).
+// --- Utilitaires d'accessibilité -------------------------------------------
 .visually-hidden {
   position: absolute !important;
   width: 1px;
@@ -91,28 +135,27 @@ pre {
   border: 0;
 }
 
-// Lien d'évitement vers le contenu principal.
 .skip-link {
   position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
+  top: var(--e-2);
+  left: var(--e-2);
   z-index: 2000;
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: var(--weight-medium);
+  padding: var(--e-2) var(--e-4);
+  border-radius: var(--r-md);
+  background: var(--indigo);
+  color: var(--indigo-encre);
+  font-weight: var(--g-moyen);
   transform: translateY(-200%);
-  transition: transform var(--duration) var(--ease);
+  transition: transform var(--duree) var(--sortie);
 
   &:focus {
     transform: translateY(0);
-    color: var(--accent-ink);
+    color: var(--indigo-encre);
     text-decoration: none;
   }
 }
 
-// --- Respect des préférences de mouvement ----------------------------------
+// --- Préférences de mouvement ----------------------------------------------
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -124,10 +167,10 @@ pre {
   }
 }
 
-// --- Barres de défilement discrètes ----------------------------------------
+// --- Barres de défilement ---------------------------------------------------
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-color: var(--trait-appuye) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -140,8 +183,8 @@ pre {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
+  background: var(--trait-appuye);
   border: 3px solid transparent;
-  border-radius: var(--radius-pill);
+  border-radius: var(--r-pilule);
   background-clip: content-box;
 }

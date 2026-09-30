@@ -94,7 +94,7 @@
 
           @if (!isLoading && chargementEchoue) {
           <div class="empty-state">
-            <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+            <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
             <h3 class="empty-state__title">Apprenants indisponibles</h3>
             <p class="empty-state__text">
               L'API n'expose pas encore la liste des apprenants sur cette
@@ -106,7 +106,7 @@
           </div>
           } @if (!isLoading && !chargementEchoue && apprenants.length === 0) {
           <div class="empty-state">
-            <i class="fa-solid fa-users fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+            <i class="fa-solid fa-users fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
             <h3 class="empty-state__title">Aucun apprenant inscrit</h3>
             <p class="empty-state__text">
               Les comptes créés depuis l'application apparaîtront ici.

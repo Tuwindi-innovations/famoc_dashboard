@@ -21,20 +21,20 @@
 @if (chargement()) {
   <div class="grille-cartes" aria-hidden="true">
     @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-      <div class="skeleton" style="height: 13rem; border-radius: var(--radius-lg)"></div>
+      <div class="skeleton" style="height: 13rem; border-radius: var(--r-lg)"></div>
     }
   </div>
   <p role="status" class="visually-hidden">Chargement des formations…</p>
 } @else if (erreur()) {
   <div class="empty-state">
-    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
     <h3 class="empty-state__title">Catalogue indisponible</h3>
     <p class="empty-state__text">{{ erreur() }}</p>
     <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
   </div>
 } @else if (!formations().length) {
   <div class="empty-state">
-    <i class="fa-solid fa-graduation-cap fa-2x" style="color: var(--ink-muted)" aria-hidden="true"></i>
+    <i class="fa-solid fa-graduation-cap fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
     <h3 class="empty-state__title">Aucune formation</h3>
     <p class="empty-state__text">
       Créez votre première formation, puis ajoutez-lui des modules et des leçons.

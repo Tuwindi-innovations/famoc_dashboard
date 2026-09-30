@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from "@angular/core";
 import { ConfirmService } from 'src/app/services/confirm.service';
 import { ToastrService } from "ngx-toastr";
-import { AlerteResponse } from "src/app/models/Alerte";
+import { AlerteResponse, libelleCategorie } from "src/app/models/Alerte";
 import { AlertService } from "src/app/services/alert.service";
 import { environment } from "src/environments/environment";
 
@@ -90,6 +90,9 @@ export class AlerteComponent implements OnInit {
   get alertesEnAttente() {
     return this.alertes.filter((a) => a.statut !== "RESOLUE");
   }
+
+  /** Libellé lisible d'une catégorie, ou « Sans catégorie ». */
+  libelleCategorie = libelleCategorie;
 
   /** Libellé lisible d'un statut, ou « En attente » si l'API n'en donne pas. */
   libelleStatut(statut: string | null | undefined): string {
