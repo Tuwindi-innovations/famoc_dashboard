@@ -1,5 +1,13 @@
 <div class="modal-header">
-  <h2 class="modal-title">Nouvelle Question</h2>
+  <h2 class="modal-title">{{ donnees.titre }}</h2>
+  <button
+    type="button"
+    class="icon-button"
+    (click)="activeModal.dismiss()"
+    aria-label="Fermer"
+  >
+    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+  </button>
 </div>
 
 <div class="modal-body">
@@ -35,7 +43,7 @@
     <h5 class="border-bottom pb-2 mt-4">Options de réponse</h5>
     <div formArrayName="reponseOptions">
       @for (opt of options.controls; track opt; let i = $index) {
-      <div [formGroupName]="i" class="card p-2 mb-2 bg-light">
+      <div [formGroupName]="i" class="card p-2 mb-2">
         <div class="d-flex align-items-center">
           <input
             type="text"
@@ -57,9 +65,10 @@
           <button
             type="button"
             class="btn btn-sm btn-outline-danger"
-            (click)="removeOption(i)"
+            (click)="retirerOption(i)"
+            [disabled]="options.length <= 2"
           >
-            <i class="fa fa-trash"></i>
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -68,10 +77,10 @@
 
     <button
       type="button"
-      class="btn btn-sm btn-info mt-2"
-      (click)="addOption()"
+      class="btn btn-secondary btn-sm mt-2"
+      (click)="ajouterOption()"
     >
-      <i class="fa fa-plus"></i> Ajouter une option
+      <i class="fa-solid fa-plus" aria-hidden="true"></i> Ajouter une option
     </button>
   </form>
 </div>
@@ -87,9 +96,8 @@
   <button
     type="button"
     class="btn btn-primary"
-    [disabled]="questionForm.invalid"
-    (click)="submit()"
+    (click)="soumettre()"
   >
-    Enregistrer la question
+    {{ donnees.edition ? "Enregistrer les modifications" : "Ajouter la question" }}
   </button>
 </div>

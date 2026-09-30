@@ -6,7 +6,7 @@ import { catchError, of } from 'rxjs';
 import { CoursRequestDTO, CoursResponseDTO, TypeContenu } from '../../models/Cours';
 import { FormationResponse } from '../../models/Formation';
 import { ModuleRequest, ModuleResponse } from '../../models/Module';
-import { QuestionResponseDTO } from '../../models/Question';
+import { QuestionRequestDTO, QuestionResponseDTO } from '../../models/Question';
 import { QuizRequestDTO, QuizResponseDTO } from '../../models/Quiz';
 import { ConfirmService } from '../../services/confirm.service';
 import { CoursService } from '../../services/cours.service';
@@ -22,7 +22,11 @@ import {
   type ResultatFormulaire,
   type TypeFormulaire,
 } from '../form-modal/form-modal.component';
-import { QuestionModalComponent } from '../question-modal/question-modal.component';
+import {
+  DONNEES_QUESTION,
+  QuestionModalComponent,
+  type DonneesQuestion,
+} from '../question-modal/question-modal.component';
 
 /** Module enrichi de son contenu chargé à la demande. */
 interface ModuleAffiche extends ModuleResponse {
@@ -487,30 +491,83 @@ export class FormationDetailComponent {
     });
   }
 
-  protected ajouterQuestion(module: ModuleAffiche): void {
+  protected async ajouterQuestion(module: ModuleAffiche): Promise<void> {
     const quiz = module.quiz;
     if (!quiz) {
       return;
     }
 
-    const reference = this.modal.open(QuestionModalComponent, { size: 'lg' });
-    reference.result.then(
-      (resultat) => {
-        if (!resultat) {
-          return;
-        }
-        this.questionService.createQuestion(quiz.id, resultat).subscribe({
-          next: () => {
-            this.chargerQuestions(module.id, quiz.id);
-            this.toast.success('Question ajoutée.');
-          },
-          error: () => this.toast.error("La question n'a pas pu être ajoutée."),
-        });
+    const resultat = await this.ouvrirFormulaireQuestion('Nouvelle question', null);
+    if (!resultat) {
+      return;
+    }
+
+    this.questionService.createQuestion(quiz.id, resultat).subscribe({
+      next: () => {
+        this.chargerQuestions(module.id, quiz.id);
+        this.toast.success('Question ajoutée.');
       },
-      () => {
-        /* modale fermée sans validation */
+      error: () => this.toast.error("La question n'a pas pu être ajoutée."),
+    });
+  }
+
+  /**
+   * Modifie une question et ses réponses.
+   *
+   * Les options sont renvoyées en bloc : le backend remplace la liste
+   * entière, il n'existe pas d'endpoint par réponse.
+   */
+  protected async modifierQuestion(
+    module: ModuleAffiche,
+    question: QuestionResponseDTO,
+  ): Promise<void> {
+    const quiz = module.quiz;
+    if (!quiz) {
+      return;
+    }
+
+    const resultat = await this.ouvrirFormulaireQuestion('Modifier la question', {
+      texte: question.texte,
+      type: question.type,
+      points: question.points,
+      reponseOptions: (question.reponseOptions ?? []).map((option) => ({
+        texte: option.texte,
+        estCorrecte: option.estCorrecte,
+      })),
+    });
+    if (!resultat) {
+      return;
+    }
+
+    this.questionService.updateQuestion(question.id, resultat).subscribe({
+      next: () => {
+        this.chargerQuestions(module.id, quiz.id);
+        this.toast.success('Question mise à jour.');
       },
-    );
+      error: () => this.toast.error("La question n'a pas pu être modifiée."),
+    });
+  }
+
+  private async ouvrirFormulaireQuestion(
+    titre: string,
+    valeurs: QuestionRequestDTO | null,
+  ): Promise<QuestionRequestDTO | null> {
+    const donnees: DonneesQuestion = { titre, valeurs, edition: valeurs !== null };
+
+    const reference = this.modal.open(QuestionModalComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      injector: Injector.create({
+        providers: [{ provide: DONNEES_QUESTION, useValue: donnees }],
+        parent: this.injector,
+      }),
+    });
+
+    try {
+      return (await reference.result) as QuestionRequestDTO;
+    } catch {
+      return null;
+    }
   }
 
   protected async supprimerQuestion(
