@@ -31,8 +31,8 @@
             ],
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
-              "src/styles.scss",
-              "src/assets/scss/app.scss"
+              "src/assets/scss/argon.scss",
+              "src/styles.scss"
             ],
             "scripts": [],
             "stylePreprocessorOptions": {
@@ -113,8 +113,8 @@
             "karmaConfig": "src/karma.conf.js",
             "styles": [
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
-              "src/styles.scss",
-              "src/assets/scss/app.scss"
+              "src/assets/scss/argon.scss",
+              "src/styles.scss"
             ],
             "scripts": [],
             "assets": [

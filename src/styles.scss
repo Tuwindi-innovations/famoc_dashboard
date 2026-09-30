@@ -1,6 +1,12 @@
-// Styles globaux ponctuels.
-// Le design system vit dans `assets/scss/app.scss`.
-//
-// L'empilement des modales se regle dans `_bootstrap-config.scss` via
-// $zindex-modal : le poser ici serait sans effet, ce fichier etant charge
-// AVANT Bootstrap, qui ecraserait donc la valeur.
+// Styles globaux ponctuels, par-dessus le thème Argon.
+
+// ng-bootstrap 20 vise l'échelle de z-index de Bootstrap 5 et pose
+// `z-index: 1055` en style inline sur son voile. Sans cette règle, la fenêtre
+// de modale passe derrière et intercepte les clics.
+.modal {
+  z-index: 1060;
+}
+
+.modal-backdrop {
+  z-index: 1050;
+}

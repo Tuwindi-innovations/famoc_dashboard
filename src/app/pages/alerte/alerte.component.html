@@ -1,115 +1,187 @@
-<div class="page-head">
-  <div>
-    <h1 class="page-head__title">La file</h1>
-    <p class="page-head__subtitle">
-      Les signalements remontés par les apprenants, du plus ancien au plus
-      récent. Ceux qui attendent depuis le plus longtemps viennent en tête.
-    </p>
-  </div>
-  <div class="page-head__actions">
-    <button type="button" class="btn btn-secondary btn-sm" (click)="charger()">
-      Actualiser
-    </button>
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body text-center mb-5">
+      <h1 class="text-white">
+        <i class="ni ni-bell-55 mr-3" aria-hidden="true"></i>Signalements
+      </h1>
+      <p class="text-white mb-4 mt-2">
+        @if (chargement()) {
+          Chargement de la file…
+        } @else if (indisponible()) {
+          La file n'a pas pu être chargée.
+        } @else if (aTraiter()) {
+          {{ aTraiter() }} signalement{{ aTraiter() === 1 ? '' : 's' }} en attente de
+          traitement, du plus ancien au plus récent.
+        } @else {
+          Aucun signalement en attente. La file est à jour.
+        }
+      </p>
+      <button type="button" class="btn btn-neutral btn-sm" (click)="charger()">
+        <i class="fas fa-sync-alt text-danger" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
   </div>
 </div>
 
-@if (chargement()) {
-  <div class="skeleton" style="height: 18rem; border-radius: var(--r-lg)"></div>
-  <p role="status" class="visually-hidden">Chargement des signalements…</p>
-} @else if (indisponible()) {
-  <div class="empty-state">
-    <h2 class="empty-state__title">Signalements indisponibles</h2>
-    <p class="empty-state__text">
-      L'API n'a pas répondu. Vérifiez qu'elle est démarrée, puis réessayez.
-    </p>
-    <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
-  </div>
-} @else if (!alertes().length) {
-  <div class="empty-state">
-    <h2 class="empty-state__title">La file est vide</h2>
-    <p class="empty-state__text">
-      Les signalements remontés depuis l'application apparaîtront ici, le plus
-      ancien en premier.
-    </p>
-  </div>
-} @else {
-  @for (section of sections(); track section.cle) {
-    <section class="file-section">
-      <h2 class="file-section__titre">
-        {{ section.titre }}
-        <span class="file-section__compte">{{ section.alertes.length }}</span>
-      </h2>
-
-      <ol class="signalements">
-        @for (alerte of section.alertes; track alerte.id) {
-          <li
-            class="signalement"
-            [class.signalement--traite]="section.cle === 'traitees'"
-          >
-            <div class="signalement__ligne">
-              <!-- L'âge remplace la date : c'est lui qui dit l'urgence. -->
-              <div class="signalement__age">
-                @if (anciennete(alerte.dateCreation); as jours) {
-                  <span class="signalement__age-valeur">{{ jours }}</span>
-                  <span class="signalement__age-unite">
-                    {{ jours === 1 ? 'jour' : 'jours' }}
-                  </span>
-                } @else {
-                  <span class="signalement__age-unite">date inconnue</span>
-                }
-              </div>
-
-              <button
-                type="button"
-                class="signalement__corps"
-                (click)="basculer(alerte.id)"
-                [attr.aria-expanded]="ouvert() === alerte.id"
-                [attr.aria-controls]="'signalement-' + alerte.id"
-              >
-                <span class="signalement__titre">{{ alerte.titre }}</span>
-                <span class="signalement__meta">
-                  {{ libelleCategorie(alerte.categorie) }}
-                  @if (alerte.localisation) {
-                    · {{ alerte.localisation }}
-                  }
-                  · {{ alerte.dateCreation | date: 'd MMMM y' }}
-                </span>
-              </button>
-
-              <div class="signalement__actions">
-                @if (section.cle !== 'traitees') {
-                  <button
-                    type="button"
-                    class="btn btn-secondary btn-sm"
-                    (click)="resoudre(alerte)"
-                  >
-                    Marquer traité
-                  </button>
-                }
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm btn-icon-only"
-                  (click)="supprimer(alerte)"
-                  [attr.aria-label]="'Supprimer ' + alerte.titre"
-                >
-                  <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-                </button>
-              </div>
+<div class="container-fluid mt--7">
+  @if (chargement()) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5" role="status">
+        <i class="fas fa-circle-notch fa-spin text-danger fa-2x" aria-hidden="true"></i>
+        <p class="text-muted mt-3 mb-0">Chargement des signalements…</p>
+      </div>
+    </div>
+  } @else if (indisponible()) {
+    <!-- État d'erreur honnête : l'ancienne version affichait « aucun
+         signalement » quand l'API échouait, ce qui laissait croire que la
+         file était vide. -->
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <h3 class="h4 mb-2">Signalements indisponibles</h3>
+        <p class="text-muted mb-4">
+          Le serveur n'a pas répondu. Les signalements existants ne sont pas perdus :
+          ils réapparaîtront une fois l'API rétablie.
+        </p>
+        <button type="button" class="btn btn-danger btn-sm" (click)="charger()">
+          Réessayer
+        </button>
+      </div>
+    </div>
+  } @else if (!sections().length) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <h3 class="h4 mb-2">File vide</h3>
+        <p class="text-muted mb-0">
+          Aucun signalement n'a été remonté par les apprenants.
+        </p>
+      </div>
+    </div>
+  } @else {
+    @for (section of sections(); track section.cle) {
+      <div class="card shadow mb-4">
+        <div class="card-header border-0">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">{{ section.titre }}</h3>
             </div>
+            <div class="col text-right">
+              <span class="text-muted text-sm">
+                {{ section.alertes.length }} signalement{{
+                  section.alertes.length === 1 ? '' : 's'
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
 
-            @if (ouvert() === alerte.id) {
-              <div class="signalement__detail" [id]="'signalement-' + alerte.id">
-                @if (alerte.description) {
-                  <p class="signalement__description">{{ alerte.description }}</p>
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Signalement</th>
+                <th scope="col">Catégorie</th>
+                <th scope="col">Reçu</th>
+                <th scope="col">Statut</th>
+                <th scope="col" class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (alerte of section.alertes; track alerte.id) {
+                <tr>
+                  <th scope="row">
+                    <button
+                      type="button"
+                      class="btn btn-link p-0 text-left text-default font-weight-600"
+                      (click)="basculer(alerte.id)"
+                      [attr.aria-expanded]="ouvert() === alerte.id"
+                      [attr.aria-controls]="'detail-alerte-' + alerte.id"
+                    >
+                      <i
+                        class="fas mr-2 text-muted"
+                        [class.fa-chevron-right]="ouvert() !== alerte.id"
+                        [class.fa-chevron-down]="ouvert() === alerte.id"
+                        aria-hidden="true"
+                      ></i>
+                      {{ alerte.titre || 'Sans titre' }}
+                    </button>
+                  </th>
+                  <td>{{ libelleCategorie(alerte.categorie) }}</td>
+                  <td>
+                    <span class="text-sm">
+                      {{ alerte.dateCreation | date: 'd MMM y' }}
+                    </span>
+                    @if (anciennete(alerte.dateCreation); as jours) {
+                      <span class="d-block text-muted text-xs">
+                        il y a {{ jours }} jour{{ jours === 1 ? '' : 's' }}
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge badge-dot mr-4">
+                      <i
+                        [class.bg-warning]="section.cle === 'attente'"
+                        [class.bg-info]="section.cle === 'encours'"
+                        [class.bg-success]="section.cle === 'traitees'"
+                        aria-hidden="true"
+                      ></i>
+                      <span class="status">{{ libelleStatut(alerte.statut) }}</span>
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    @if (section.cle !== 'traitees') {
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-success"
+                        (click)="resoudre(alerte)"
+                      >
+                        Marquer traité
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-icon-only text-danger"
+                      (click)="supprimer(alerte)"
+                      [attr.aria-label]="'Supprimer ' + (alerte.titre || 'ce signalement')"
+                    >
+                      <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                @if (ouvert() === alerte.id) {
+                  <tr [attr.id]="'detail-alerte-' + alerte.id">
+                    <td colspan="5" class="bg-secondary">
+                      <div class="row">
+                        @if (urlImage(alerte.imageUrl); as image) {
+                          <div class="col-md-4 mb-3 mb-md-0">
+                            <img
+                              [src]="image"
+                              class="img-fluid rounded shadow"
+                              [alt]="'Photo jointe à ' + (alerte.titre || 'ce signalement')"
+                            />
+                          </div>
+                        }
+                        <div class="col">
+                          <h4 class="mb-2">Description</h4>
+                          <p class="mb-3">
+                            {{ alerte.description || 'Aucune description fournie.' }}
+                          </p>
+                          @if (alerte.localisation) {
+                            <p class="mb-1 text-sm">
+                              <i class="ni ni-pin-3 mr-2 text-danger" aria-hidden="true"></i>
+                              {{ alerte.localisation }}
+                            </p>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
                 }
-                @if (urlImage(alerte.imageUrl); as photo) {
-                  <img class="signalement__photo" [src]="photo" alt="" />
-                }
-              </div>
-            }
-          </li>
-        }
-      </ol>
-    </section>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
   }
-}
+</div>

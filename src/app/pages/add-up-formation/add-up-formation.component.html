@@ -1,27 +1,37 @@
-<div class="page-head">
-  <div>
-    <a class="fil-ariane" [routerLink]="['/liste-formation']">
-      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-      Catalogue des formations
-    </a>
-    <h2 class="page-head__title">
-      {{ modeEdition() ? 'Modifier la formation' : 'Nouvelle formation' }}
-    </h2>
-    <p class="page-head__subtitle">
-      {{
-        modeEdition()
-          ? 'Mettez à jour la présentation du parcours. Le programme se gère depuis la page de détail.'
-          : 'Décrivez le parcours. Vous ajouterez ensuite les modules et les leçons.'
-      }}
-    </p>
+<div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body text-center mb-5">
+      <h1 class="text-white">
+        {{ modeEdition() ? 'Modifier la formation' : 'Nouvelle formation' }}
+      </h1>
+      <p class="text-white mb-4 mt-2">
+        {{
+          modeEdition()
+            ? 'Mettez à jour la présentation du parcours. Le programme se gère depuis la page de détail.'
+            : 'Décrivez le parcours. Vous ajouterez ensuite les modules et les leçons.'
+        }}
+      </p>
+      <a class="btn btn-neutral btn-sm" [routerLink]="['/liste-formation']">
+        <i class="fas fa-arrow-left text-info" aria-hidden="true"></i>
+        Retour au catalogue
+      </a>
+    </div>
   </div>
 </div>
 
+<div class="container-fluid mt--7">
+  <div class="row justify-content-center">
+    <div class="col-xl-8">
 @if (chargement()) {
-  <div class="skeleton" style="height: 20rem; border-radius: var(--r-lg)"></div>
+  <div class="card shadow">
+    <div class="card-body text-center py-5" role="status">
+      <i class="fas fa-circle-notch fa-spin text-info fa-2x" aria-hidden="true"></i>
+      <p class="text-muted mt-3 mb-0">Chargement de la formation…</p>
+    </div>
+  </div>
 } @else {
-  <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate class="formulaire">
-    <div class="card">
+  <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+    <div class="card shadow">
       <div class="card-body">
         <div class="form-group">
           <label for="titre">Titre de la formation</label>
@@ -34,9 +44,9 @@
             [attr.aria-invalid]="estInvalide('titre')"
           />
           @if (estInvalide('titre')) {
-            <span class="form-error">
+            <small class="form-error text-danger d-block mt-1">
               Le titre est obligatoire (150 caractères maximum).
-            </span>
+            </small>
           }
         </div>
 
@@ -51,9 +61,9 @@
             [attr.aria-invalid]="estInvalide('description')"
           ></textarea>
           @if (estInvalide('description')) {
-            <span class="form-error">
+            <small class="form-error text-danger d-block mt-1">
               Décrivez la formation en 10 caractères au minimum.
-            </span>
+            </small>
           }
         </div>
 
@@ -81,7 +91,7 @@
                 [attr.aria-invalid]="estInvalide('dureeEstimee')"
               />
               @if (estInvalide('dureeEstimee')) {
-                <span class="form-error">Indiquez au moins 1 heure.</span>
+                <small class="form-error text-danger d-block mt-1">Indiquez au moins 1 heure.</small>
               }
             </div>
           </div>
@@ -96,7 +106,7 @@
                 formControlName="categorie"
                 placeholder="Ex. : Métiers du web"
               />
-              <span class="form-hint">Facultatif.</span>
+              <small class="text-muted d-block mt-1">Facultatif.</small>
             </div>
           </div>
         </div>
@@ -105,9 +115,9 @@
           <label for="image">
             Image de couverture
             @if (modeEdition()) {
-              <span class="form-hint" style="display: inline">
+              <small class="text-muted font-weight-normal">
                 (conservée si vous ne choisissez rien)
-              </span>
+              </small>
             }
           </label>
           <input
@@ -118,14 +128,14 @@
             (change)="surImageChoisie($event)"
             [attr.aria-invalid]="!!erreurImage()"
           />
-          <span class="form-hint">Format paysage conseillé, 5 Mo maximum.</span>
+          <small class="text-muted d-block mt-1">Format paysage conseillé, 5 Mo maximum.</small>
           @if (erreurImage()) {
-            <span class="form-error" role="alert">{{ erreurImage() }}</span>
+            <small class="form-error text-danger d-block mt-1" role="alert">{{ erreurImage() }}</small>
           }
 
           @if (apercu(); as image) {
             <img
-              class="apercu"
+              class="img-fluid rounded shadow mt-3" style="max-height: 14rem"
               [src]="image"
               [alt]="modeEdition() ? 'Couverture actuelle' : 'Aperçu de la couverture'"
             />
@@ -133,11 +143,11 @@
         </div>
       </div>
 
-      <div class="card-footer" style="justify-content: flex-end; display: flex; gap: 0.5rem">
+      <div class="card-footer text-right">
         <a class="btn btn-secondary" [routerLink]="['/liste-formation']">Annuler</a>
-        <button type="submit" class="btn btn-primary" [disabled]="envoiEnCours()">
+        <button type="submit" class="btn btn-info" [disabled]="envoiEnCours()">
           @if (envoiEnCours()) {
-            <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+            <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
             Enregistrement…
           } @else {
             {{ modeEdition() ? 'Enregistrer les modifications' : 'Créer la formation' }}
@@ -147,3 +157,6 @@
     </div>
   </form>
 }
+    </div>
+  </div>
+</div>

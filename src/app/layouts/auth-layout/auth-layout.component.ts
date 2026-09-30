@@ -1,34 +1,42 @@
-import { Component } from '@angular/core';
-import { NgOptimizedImage } from '@angular/common';
+import { DOCUMENT } from '@angular/common';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-auth-layout',
-  imports: [NgOptimizedImage, RouterOutlet],
+  // Argon applique le fond sombre sur `body.bg-default` ; comme le layout est
+  // monté dans le DOM Angular, on le porte ici via `host` plutôt que par un
+  // `@HostBinding`.
+  host: { class: 'bg-default d-block min-vh-100' },
+  imports: [RouterOutlet],
   template: `
-    <div class="auth">
-      <div class="auth__center">
-        <div class="auth__panel">
-          <div class="auth__brand">
-            <img
-              class="auth__logo"
-              ngSrc="assets/img/brand/famocLogo.png"
-              width="99"
-              height="70"
-              priority
-              alt="FAMOC"
-            />
-            <p class="auth__tagline">Espace d'administration</p>
-          </div>
+    <div class="main-content">
+      <router-outlet />
+    </div>
 
-          <router-outlet />
+    <footer class="py-5">
+      <div class="container">
+        <div class="row align-items-center justify-content-xl-between">
+          <div class="col-xl-6">
+            <div class="copyright text-center text-xl-left text-muted">
+              &copy; {{ annee }}
+              <span class="font-weight-bold ml-1">FAMOC</span> &middot; Tuwindi
+            </div>
+          </div>
         </div>
       </div>
-
-      <footer class="auth__footer">FAMOC &middot; Tuwindi &middot; {{ annee }}</footer>
-    </div>
+    </footer>
   `,
 })
 export class AuthLayoutComponent {
   protected readonly annee = new Date().getFullYear();
+
+  constructor() {
+    // Argon annule la marge réservée au menu latéral via `html.auth-layout`
+    // (`angular-differences/_sidebar-and-main-panel.scss`). Sans cette classe,
+    // les pages de connexion restaient décalées de la largeur du menu.
+    const racine = inject(DOCUMENT).documentElement;
+    racine.classList.add('auth-layout');
+    inject(DestroyRef).onDestroy(() => racine.classList.remove('auth-layout'));
+  }
 }

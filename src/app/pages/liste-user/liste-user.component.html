@@ -97,10 +97,13 @@
                   </span>
                 </td>
                 <td>
+                  <!-- `badge-secondary` est un gris quasi blanc dans Argon :
+                       tout rôle autre qu'ADMIN devenait illisible. -->
                   <span
                     class="badge badge-pill shadow-sm"
                     [class.badge-primary]="u.role === 'ADMIN'"
-                    [class.badge-secondary]="u.role !== 'ADMIN'"
+                    [class.badge-danger]="u.role === 'SUPERADMIN'"
+                    [class.badge-default]="u.role !== 'ADMIN' && u.role !== 'SUPERADMIN'"
                   >
                     {{ u.role }}
                   </span>

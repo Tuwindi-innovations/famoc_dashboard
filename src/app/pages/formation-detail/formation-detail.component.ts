@@ -84,6 +84,9 @@ export class FormationDetailComponent {
   protected readonly chargement = signal(true);
   protected readonly erreur = signal('');
 
+  /** Vrai quand le fichier de couverture est introuvable côté serveur. */
+  protected readonly imageCassee = signal(false);
+
   protected readonly libelleFormat = LIBELLE_FORMAT;
 
   protected libelleNiveau(niveau: string): string {
@@ -593,12 +596,17 @@ export class FormationDetailComponent {
   // --- Utilitaires -----------------------------------------------------------
 
   protected urlImage(chemin: string | undefined): string {
-    return chemin ? `${environment.apiUrl}/${chemin}` : '';
+    return this.imageCassee() ? '' : chemin ? `${environment.apiUrl}/${chemin}` : '';
   }
 
-  /** Masque l'image quand le fichier est absent côté serveur. */
-  protected imageIndisponible(evenement: Event): void {
-    (evenement.target as HTMLImageElement).style.display = 'none';
+  /**
+   * Retire la colonne d'image quand le fichier manque côté serveur.
+   *
+   * L'ancienne version masquait la balise `img` elle-même, ce qui laissait sa
+   * colonne vide à côté de la fiche.
+   */
+  protected imageIndisponible(): void {
+    this.imageCassee.set(true);
   }
 
   private trierModules(): void {

@@ -1,47 +1,86 @@
-<aside class="sidebar" [attr.data-open]="ouvert()">
-  <a class="sidebar__brand" [routerLink]="['/dashboard']">
-    <img
-      class="sidebar__logo"
-      ngSrc="assets/img/brand/famocLogo.png"
-      width="40"
-      height="28"
-      priority
-      alt="FAMOC"
-    />
-    <span class="sidebar__brand-text">Administration</span>
-  </a>
+<nav
+  class="navbar navbar-vertical fixed-left navbar-expand-md navbar-light bg-white"
+  id="sidenav-main"
+>
+  <div class="container-fluid">
+    <button
+      class="navbar-toggler"
+      type="button"
+      (click)="basculer()"
+      [attr.aria-expanded]="!replie()"
+      aria-controls="sidenav-collapse-main"
+      aria-label="Afficher la navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <nav class="sidebar__nav" aria-label="Navigation principale">
-    @for (groupe of navigation; track groupe.titre) {
-      <div class="sidebar__group">
+    <a class="navbar-brand pt-0" [routerLink]="['/dashboard']">
+      <img
+        src="./assets/img/brand/famocLogo.png"
+        class="navbar-brand-img"
+        alt="FAMOC"
+      />
+    </a>
+
+    <div
+      class="collapse navbar-collapse"
+      [ngbCollapse]="replie()"
+      id="sidenav-collapse-main"
+    >
+      <div class="navbar-collapse-header d-md-none">
+        <div class="row">
+          <div class="col-6 collapse-brand">
+            <a [routerLink]="['/dashboard']">
+              <img src="./assets/img/brand/famocLogo.png" alt="FAMOC" />
+            </a>
+          </div>
+          <div class="col-6 collapse-close">
+            <button
+              type="button"
+              class="navbar-toggler"
+              (click)="basculer()"
+              aria-label="Fermer la navigation"
+            >
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @for (groupe of navigation; track groupe.titre) {
         @if (groupe.titre) {
-          <h2 class="sidebar__group-title">{{ groupe.titre }}</h2>
+          <hr class="my-3" />
+          <h6 class="navbar-heading text-muted">{{ groupe.titre }}</h6>
         }
-        <ul class="sidebar__list">
+        <ul class="navbar-nav">
           @for (element of groupe.elements; track element.chemin) {
-            <li>
+            <li class="nav-item">
               <a
-                class="sidebar__link"
+                class="nav-link"
                 [routerLink]="[element.chemin]"
-                routerLinkActive
+                routerLinkActive="active"
                 #lien="routerLinkActive"
                 [attr.aria-current]="lien.isActive ? 'page' : null"
                 (click)="fermer()"
               >
-                <i class="sidebar__icon fa-solid {{ element.icone }}" aria-hidden="true"></i>
-                {{ element.titre }}
+                <i class="ni {{ element.icone }} text-primary"></i>
+                <span class="nav-link-text">{{ element.titre }}</span>
               </a>
             </li>
           }
         </ul>
-      </div>
-    }
-  </nav>
+      }
 
-  <div class="sidebar__footer">
-    <button type="button" class="sidebar__logout" (click)="deconnecter()">
-      <i class="sidebar__icon fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
-      Déconnexion
-    </button>
+      <hr class="my-3" />
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <button type="button" class="nav-link btn btn-link text-left w-100" (click)="deconnecter()">
+            <i class="ni ni-user-run text-danger"></i>
+            <span class="nav-link-text">Déconnexion</span>
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
-</aside>
+</nav>

@@ -65,14 +65,14 @@
             <h6 class="text-uppercase text-muted ls-1 mb-1">Article</h6>
             <div class="d-flex align-items-center">
               <a
-                class="btn btn-sm btn-ghost btn-icon-only mr-1"
+                class="btn btn-sm btn-icon-only text-muted mr-1"
                 [routerLink]="['/update-blog', blog.id]"
                 [attr.aria-label]="'Modifier ' + blog.titre"
               >
                 <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
               </a>
               <button
-                class="btn btn-sm btn-ghost btn-icon-only"
+                class="btn btn-sm btn-icon-only text-muted"
                 (click)="onDelete(blog.id)"
                 [attr.aria-label]="'Supprimer ' + blog.titre"
               >

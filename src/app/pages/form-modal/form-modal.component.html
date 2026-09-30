@@ -2,11 +2,11 @@
   <h2 class="modal-title" id="titre-modale-contenu">{{ donnees.titre }}</h2>
   <button
     type="button"
-    class="icon-button"
+    class="close"
     (click)="activeModal.dismiss()"
     aria-label="Fermer"
   >
-    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 
@@ -22,7 +22,7 @@
         [attr.aria-invalid]="estInvalide('titre')"
       />
       @if (estInvalide('titre')) {
-        <span class="form-error">Le titre est obligatoire (150 caractères maximum).</span>
+        <small class="text-danger d-block mt-1">Le titre est obligatoire (150 caractères maximum).</small>
       }
     </div>
 
@@ -35,7 +35,7 @@
           rows="3"
           formControlName="description"
         ></textarea>
-        <span class="form-hint">Ce que l'apprenant saura faire à la fin du module.</span>
+        <small class="text-muted d-block mt-1">Ce que l'apprenant saura faire à la fin du module.</small>
       </div>
 
       <div class="form-group">
@@ -49,7 +49,7 @@
           [attr.aria-invalid]="estInvalide('dureeEstimee')"
         />
         @if (estInvalide('dureeEstimee')) {
-          <span class="form-error">Indiquez une durée d'au moins 1 heure.</span>
+          <small class="text-danger d-block mt-1">Indiquez une durée d'au moins 1 heure.</small>
         }
       </div>
     }
@@ -80,14 +80,14 @@
             "
           />
           @if (fichier(); as f) {
-            <span class="form-hint">
-              <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+            <small class="text-muted d-block mt-1">
+              <i class="fas fa-paperclip" aria-hidden="true"></i>
               {{ f.name }}
-            </span>
+            </small>
           }
-          <span class="form-hint">
+          <small class="text-muted d-block mt-1">
             Ou laissez vide et renseignez plutôt une URL ci-dessous.
-          </span>
+          </small>
         </div>
 
         @if (formulaire.controls.typeContenu.value === 'VIDEO') {
@@ -161,7 +161,7 @@
               [attr.aria-invalid]="estInvalide('scoreMinimum')"
             />
             @if (estInvalide('scoreMinimum')) {
-              <span class="form-error">Valeur entre 0 et 100.</span>
+              <small class="text-danger d-block mt-1">Valeur entre 0 et 100.</small>
             }
           </div>
         </div>
@@ -177,7 +177,7 @@
               [attr.aria-invalid]="estInvalide('duree')"
             />
             @if (estInvalide('duree')) {
-              <span class="form-error">Au moins 1 minute.</span>
+              <small class="text-danger d-block mt-1">Au moins 1 minute.</small>
             }
           </div>
         </div>
@@ -193,7 +193,7 @@
               [attr.aria-invalid]="estInvalide('nombreTentatives')"
             />
             @if (estInvalide('nombreTentatives')) {
-              <span class="form-error">Au moins 1 tentative.</span>
+              <small class="text-danger d-block mt-1">Au moins 1 tentative.</small>
             }
           </div>
         </div>
@@ -211,9 +211,9 @@
           formControlName="ordre"
           [attr.aria-invalid]="estInvalide('ordre')"
         />
-        <span class="form-hint">
+        <small class="text-muted d-block mt-1">
           Position dans la liste. Modifiable ensuite par les flèches.
-        </span>
+        </small>
       </div>
     }
   </div>

@@ -12,7 +12,6 @@ import { libelleCategorie } from '../../models/Alerte';
 import { Chart, type ChartConfiguration } from 'chart.js/auto';
 import type { DashboardStats, PointTemporel, RepartitionItem } from '../../models/DashboardStats';
 import { DashboardStatsService } from '../../services/dashboard-stats.service';
-import { ThemeService } from '../../services/theme.service';
 
 /** Libellés lisibles pour les niveaux renvoyés par l'API. */
 const LIBELLES_NIVEAU: Record<string, string> = {
@@ -31,7 +30,6 @@ const ORDRE_NIVEAU = ['DEBUTANT', 'Intermediaire', 'AVANCER'];
 })
 export class DashboardComponent {
   private readonly statsService = inject(DashboardStatsService);
-  private readonly themeService = inject(ThemeService);
 
   private readonly canvasCreations =
     viewChild<ElementRef<HTMLCanvasElement>>('canvasCreations');
@@ -48,12 +46,9 @@ export class DashboardComponent {
   constructor() {
     this.charger();
 
-    // Le graphique est (re)construit après chaque rendu où les données, la vue
-    // ou le thème changent ; `afterRenderEffect` garantit que le canvas existe.
-    // Chart.js fige les couleurs à la construction : sans la dépendance au
-    // thème, la grille et les axes resteraient dans la palette précédente.
+    // Le graphique est (re)construit après chaque rendu où les données ou la
+    // vue changent ; `afterRenderEffect` garantit que le canvas existe.
     afterRenderEffect(() => {
-      this.themeService.theme();
       const donnees = this.stats()?.formations.creationsParMois;
       const canvas = this.canvasCreations()?.nativeElement;
 
@@ -174,15 +169,13 @@ export class DashboardComponent {
    * légende (le titre de la carte nomme la série).
    */
   private configurationCreations(points: readonly PointTemporel[]): ChartConfiguration {
-    const styles = getComputedStyle(document.documentElement);
-    const lire = (token: string) => styles.getPropertyValue(token).trim();
-
-    const trait = lire('--viz-2') || '#2a78d6';
-    const remplissage = lire('--viz-aplat') || 'rgba(42, 120, 214, 0.14)';
-    const encreDiscrete = lire('--encre-tenue') || '#898781';
-    const ligneGrille = lire('--trait') || '#e1e0d9';
-    const surface = lire('--surface') || '#fcfcfb';
-    const encre = lire('--encre') || '#0b0b0b';
+    // Palette Argon (`$primary`, `$gray-600`, `$gray-200`, `$default`).
+    const trait = '#5e72e4';
+    const remplissage = 'rgba(94, 114, 228, 0.14)';
+    const encreDiscrete = '#8898aa';
+    const ligneGrille = '#e9ecef';
+    const surface = '#ffffff';
+    const encre = '#172b4d';
 
     return {
       type: 'line',

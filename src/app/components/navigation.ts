@@ -9,7 +9,7 @@
 export interface ElementNav {
   readonly chemin: string;
   readonly titre: string;
-  /** Classe FontAwesome, rendue avec `aria-hidden` (purement décorative). */
+  /** Classe d'icône nucleo, le jeu fourni par le thème. */
   readonly icone: string;
 }
 
@@ -22,37 +22,37 @@ export interface GroupeNav {
 export const NAVIGATION: readonly GroupeNav[] = [
   {
     elements: [
-      { chemin: '/dashboard', titre: "Vue d'ensemble", icone: 'fa-chart-line' },
+      { chemin: '/dashboard', titre: "Vue d'ensemble", icone: 'ni-chart-bar-32' },
     ],
   },
   {
     titre: 'Pédagogie',
     elements: [
-      { chemin: '/liste-formation', titre: 'Formations', icone: 'fa-graduation-cap' },
-      { chemin: '/apprenants', titre: 'Apprenants', icone: 'fa-users' },
+      { chemin: '/liste-formation', titre: 'Formations', icone: 'ni-hat-3' },
+      { chemin: '/apprenants', titre: 'Apprenants', icone: 'ni-circle-08' },
     ],
   },
   {
     titre: 'Engagement citoyen',
     elements: [
-      { chemin: '/alerte', titre: 'Alertes', icone: 'fa-triangle-exclamation' },
-      { chemin: '/contact', titre: 'Messages reçus', icone: 'fa-envelope' },
+      { chemin: '/alerte', titre: 'Alertes', icone: 'ni-bell-55' },
+      { chemin: '/contact', titre: 'Messages reçus', icone: 'ni-email-83' },
     ],
   },
   {
     titre: 'Contenus',
     elements: [
-      { chemin: '/liste-blog', titre: 'Articles', icone: 'fa-newspaper' },
-      { chemin: '/liste-event', titre: 'Évènements', icone: 'fa-calendar-days' },
-      { chemin: '/ressource', titre: 'Ressources', icone: 'fa-folder-open' },
-      { chemin: '/liste-headimage', titre: "Images d'en-tête", icone: 'fa-image' },
+      { chemin: '/liste-blog', titre: 'Articles', icone: 'ni-single-copy-04' },
+      { chemin: '/liste-event', titre: 'Évènements', icone: 'ni-calendar-grid-58' },
+      { chemin: '/ressource', titre: 'Ressources', icone: 'ni-folder-17' },
+      { chemin: '/liste-headimage', titre: "Images d'en-tête", icone: 'ni-image' },
     ],
   },
   {
     titre: 'Administration',
     elements: [
-      { chemin: '/liste-user', titre: 'Utilisateurs', icone: 'fa-user-shield' },
-      { chemin: '/liste-categorie', titre: 'Catégories', icone: 'fa-tags' },
+      { chemin: '/liste-user', titre: 'Utilisateurs', icone: 'ni-badge' },
+      { chemin: '/liste-categorie', titre: 'Catégories', icone: 'ni-tag' },
     ],
   },
 ];

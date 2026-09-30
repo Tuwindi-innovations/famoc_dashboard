@@ -1,246 +1,353 @@
-@if (chargement()) {
-  <div class="skeleton" style="height: 13rem; border-radius: var(--r-lg)"></div>
-  <p role="status" class="visually-hidden">Chargement des chiffres…</p>
-} @else if (erreur()) {
-  <div class="empty-state">
-    <h2 class="empty-state__title">Chiffres indisponibles</h2>
-    <p class="empty-state__text">
-      Le serveur n'a pas répondu. Vérifiez que l'API est démarrée, puis réessayez.
-    </p>
-    <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
-  </div>
-} @else if (stats(); as s) {
-  <!-- La file d'attente ouvre la page : c'est ce que l'équipe vient voir. -->
-  <section class="file" [class.file--vide]="aTraiter() === 0">
-    <div class="file__chiffre">
-      <span class="affiche">{{ aTraiter() }}</span>
-    </div>
-
-    <div class="file__propos">
-      <h1 class="file__phrase">
-        @if (aTraiter() === 1) {
-          signalement attend une réponse
-        } @else if (aTraiter() === 0) {
-          signalement en attente. La file est vide.
-        } @else {
-          signalements attendent une réponse
-        }
-      </h1>
-
-      @if (plusAncienne(); as depuis) {
-        <p class="file__contexte">
-          Le plus ancien remonte au {{ depuis }}.
-        </p>
-      } @else if (aTraiter() === 0) {
-        <p class="file__contexte">
-          Les prochains signalements remontés par les apprenants apparaîtront ici.
-        </p>
-      }
-
-      @if (categoriesAlerte().length) {
-        <ul class="file__repartition">
-          @for (item of categoriesAlerte(); track item.libelle; let i = $index) {
-            <li class="file__part">
-              <span
-                class="file__part-barre"
-                [style.width.%]="largeur(item.valeur, categoriesAlerte())"
-                [style.background]="'var(--viz-' + (i % 3 + 1) + ')'"
-              ></span>
-              <span class="file__part-texte">
-                {{ item.libelle }}
-                <b>{{ item.valeur }}</b>
-              </span>
-            </li>
-          }
-        </ul>
-      }
-
-      <a class="btn btn-primary" [routerLink]="['/alerte']">Ouvrir la file</a>
-    </div>
-
-    <!-- L'avancement donne sa mesure au chiffre de gauche : sans lui, on ne
-         sait pas si onze est beaucoup ou peu. -->
-    @if (s.alertes.total) {
-      <div class="file__avancement">
-        <p class="file__avancement-valeur">{{ tauxResolution() }} %</p>
-        <p class="file__avancement-libelle">
-          des {{ s.alertes.total }} signalements reçus ont été traités
-        </p>
-        <div
-          class="meter__track"
-          role="meter"
-          aria-label="Part des signalements traités"
-          [attr.aria-valuenow]="tauxResolution()"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div class="meter__fill" [style.width.%]="tauxResolution()"></div>
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body">
+      @if (chargement()) {
+        <p class="text-white mb-0" role="status">Chargement des statistiques…</p>
+      } @else if (erreur()) {
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-body text-center">
+                <h5 class="h3 mb-1">Statistiques indisponibles</h5>
+                <p class="text-muted mb-4">
+                  Le serveur n'a répondu à aucune des sources de données.
+                </p>
+                <button type="button" class="btn btn-primary btn-sm" (click)="charger()">
+                  Réessayer
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      } @else if (stats(); as s) {
+        <div class="row">
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Formations</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ s.formations.total }}</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                      <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <span class="text-success mr-2">{{ s.formations.actives }} en ligne</span>
+                  <span class="text-nowrap text-muted">
+                    {{ s.formations.totalModules }} module{{
+                      s.formations.totalModules === 1 ? '' : 's'
+                    }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Apprenants</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ s.apprenants.total }}</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                      <i class="fas fa-users" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <span class="text-nowrap text-muted">
+                    {{ s.utilisateurs.total }} compte{{
+                      s.utilisateurs.total === 1 ? '' : 's'
+                    }}
+                    d'administration
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">À traiter</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ aTraiter() }}</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-yellow text-white rounded-circle shadow">
+                      <i class="fas fa-bell" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  @if (plusAncienne(); as depuis) {
+                    <span class="text-nowrap text-muted">Plus ancien : {{ depuis }}</span>
+                  } @else {
+                    <span class="text-nowrap text-muted">Aucun signalement en attente</span>
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Résolution</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ tauxResolution() }}%</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                      <i class="fas fa-percent" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <span class="text-nowrap text-muted">
+                    {{ s.alertes.resolues }} sur {{ s.alertes.total }} signalement{{
+                      s.alertes.total === 1 ? '' : 's'
+                    }}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (stats(); as s) {
+  <div class="container-fluid mt--7">
+    @if (s.sourcesIndisponibles.length) {
+      <!-- Une source muette fausse les totaux : on le dit plutôt que d'afficher
+           un chiffre incomplet comme s'il était exact. -->
+      <div class="alert alert-warning" role="status">
+        <span class="alert-inner--icon">
+          <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        </span>
+        <span class="alert-inner--text">
+          Chiffres partiels : {{ s.sourcesIndisponibles.join(', ') }}
+          {{ s.sourcesIndisponibles.length === 1 ? "n'a" : "n'ont" }} pas répondu.
+        </span>
       </div>
     }
-  </section>
 
-  @if (s.sourcesIndisponibles.length) {
-    <p class="data-notice" role="status">
-      <i class="data-notice__icon fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-      <span>
-        Ces sources n'ont pas répondu : {{ s.sourcesIndisponibles.join(', ') }}.
-        Les chiffres correspondants sont à zéro.
-      </span>
-    </p>
-  }
-
-  <!-- Le catalogue : un état, pas quatre tuiles de même poids. -->
-  <div class="deux-colonnes">
-    <section class="panneau">
-      <div class="panneau__tete">
-        <h2 class="panneau__titre">Le catalogue</h2>
-        <a class="lien-discret" [routerLink]="['/liste-formation']">Gérer les formations</a>
-      </div>
-
-      <dl class="releve">
-        <div class="releve__ligne">
-          <dt>Formations publiées</dt>
-          <dd>
-            {{ s.formations.actives }}
-            @if (s.formations.inactives) {
-              <span class="releve__note">+ {{ s.formations.inactives }} hors ligne</span>
+    <div class="row">
+      <div class="col-xl-8 mb-5 mb-xl-0">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="text-uppercase text-muted ls-1 mb-1">Activité</h6>
+                <h2 class="mb-0">Formations créées par mois</h2>
+              </div>
+              <div class="col text-right">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="vueTableau.set(!vueTableau())"
+                  [attr.aria-pressed]="vueTableau()"
+                >
+                  {{ vueTableau() ? 'Voir le graphique' : 'Voir le tableau' }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (vueTableau()) {
+              <div class="table-responsive">
+                <table class="table align-items-center table-flush">
+                  <caption class="sr-only">
+                    Nombre de formations créées par mois
+                  </caption>
+                  <thead class="thead-light">
+                    <tr>
+                      <th scope="col">Mois</th>
+                      <th scope="col" class="text-right">Formations créées</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (point of creations(); track point.periode) {
+                      <tr>
+                        <th scope="row">{{ point.libelle }}</th>
+                        <td class="text-right">{{ point.valeur }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="2" class="text-muted">Aucune création enregistrée.</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div style="height: 20rem">
+                <canvas #canvasCreations aria-label="Formations créées par mois" role="img"></canvas>
+              </div>
             }
-          </dd>
+          </div>
         </div>
-        <div class="releve__ligne">
-          <dt>Modules</dt>
-          <dd>{{ s.formations.totalModules }}</dd>
-        </div>
-        <div class="releve__ligne">
-          <dt>Durée moyenne</dt>
-          <dd>{{ s.formations.dureeMoyenneHeures }} h</dd>
-        </div>
-        <div class="releve__ligne">
-          <dt>Apprenants inscrits</dt>
-          <dd>{{ s.apprenants.total }}</dd>
-        </div>
-      </dl>
-
-      <h3 class="panneau__sous-titre">Répartition par niveau</h3>
-      @if (niveaux().length) {
-        <div class="bar-list">
-          @for (item of niveaux(); track item.libelle; let i = $index) {
-            <div class="bar-list__row">
-              <span class="bar-list__label">{{ item.libelle }}</span>
-              <div class="bar-list__track">
-                <div
-                  class="bar-list__fill"
-                  [style.width.%]="largeur(item.valeur, niveaux())"
-                  [style.background]="'var(--viz-' + (i + 1) + ')'"
-                ></div>
-              </div>
-              <span class="bar-list__value">{{ item.valeur }}</span>
-            </div>
-          }
-        </div>
-      } @else {
-        <p class="panneau__vide">Aucune formation à répartir.</p>
-      }
-    </section>
-
-    <section class="panneau">
-      <div class="panneau__tete">
-        <h2 class="panneau__titre">Rythme de publication</h2>
-        <button
-          type="button"
-          class="lien-discret"
-          (click)="vueTableau.set(!vueTableau())"
-          [attr.aria-pressed]="vueTableau()"
-        >
-          {{ vueTableau() ? 'Voir la courbe' : 'Voir les chiffres' }}
-        </button>
       </div>
-      <p class="panneau__intro">Formations créées sur les douze derniers mois.</p>
 
-      @if (vueTableau()) {
-        <div class="table-wrap">
-          <table class="table">
-            <caption class="visually-hidden">
-              Nombre de formations créées chaque mois sur les douze derniers mois
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Mois</th>
-                <th scope="col" class="num">Créées</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (point of creations(); track point.periode) {
-                <tr>
-                  <th scope="row" style="font-weight: 400">{{ point.libelle }}</th>
-                  <td class="num">{{ point.valeur }}</td>
-                </tr>
+      <div class="col-xl-4">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <h6 class="text-uppercase text-muted ls-1 mb-1">Catalogue</h6>
+            <h2 class="mb-0">Par niveau</h2>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              @for (item of niveaux(); track item.libelle) {
+                <li class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-sm font-weight-bold">{{ item.libelle }}</span>
+                    <span class="text-sm text-muted">{{ item.valeur }}</span>
+                  </div>
+                  <div class="progress" style="height: 4px">
+                    <div
+                      class="progress-bar bg-danger"
+                      role="progressbar"
+                      [style.width.%]="largeur(item.valeur, niveaux())"
+                      [attr.aria-valuenow]="item.valeur"
+                      aria-valuemin="0"
+                      [attr.aria-valuemax]="maximum(niveaux())"
+                      [attr.aria-label]="item.libelle"
+                    ></div>
+                  </div>
+                </li>
+              } @empty {
+                <li class="text-muted">Aucune formation classée par niveau.</li>
               }
-            </tbody>
-          </table>
+            </ul>
+          </div>
         </div>
-      } @else {
-        <div class="chart__canvas">
-          <canvas #canvasCreations aria-label="Formations créées par mois" role="img"></canvas>
-        </div>
-      }
-    </section>
-  </div>
-
-  <!-- Contenus et comptes, en retrait : ce sont des à-côtés. -->
-  <div class="deux-colonnes">
-    <section class="panneau">
-      <div class="panneau__tete">
-        <h2 class="panneau__titre">Contenus en ligne</h2>
       </div>
-      <dl class="releve">
-        <div class="releve__ligne">
-          <dt>Articles</dt>
-          <dd>
-            {{ s.contenus.blogs }}
-            <span class="releve__note">{{ s.contenus.blogsActifs }} publiés</span>
-          </dd>
-        </div>
-        <div class="releve__ligne">
-          <dt>Évènements</dt>
-          <dd>
-            {{ s.contenus.evenements }}
-            <span class="releve__note">{{ s.contenus.evenementsAVenir }} à venir</span>
-          </dd>
-        </div>
-        <div class="releve__ligne">
-          <dt>Ressources</dt>
-          <dd>{{ s.contenus.ressources }}</dd>
-        </div>
-        <div class="releve__ligne">
-          <dt>Messages reçus</dt>
-          <dd>{{ s.contenus.contacts }}</dd>
-        </div>
-      </dl>
-    </section>
+    </div>
 
-    <section class="panneau">
-      <div class="panneau__tete">
-        <h2 class="panneau__titre">Comptes</h2>
-        <a class="lien-discret" [routerLink]="['/liste-user']">Gérer les accès</a>
+    <div class="row mt-5">
+      <div class="col-xl-4 mb-5 mb-xl-0">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <h6 class="text-uppercase text-muted ls-1 mb-1">Catalogue</h6>
+            <h2 class="mb-0">Par catégorie</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Catégorie</th>
+                  <th scope="col" class="text-right">Formations</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of categories(); track item.libelle) {
+                  <tr>
+                    <th scope="row">{{ item.libelle }}</th>
+                    <td class="text-right">{{ item.valeur }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="2" class="text-muted">Aucune catégorie renseignée.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <p class="panneau__intro">
-        {{ s.utilisateurs.total }} compte(s), dont {{ s.utilisateurs.actifs }} actif(s).
-      </p>
-      @if (roles().length) {
-        <div class="bar-list">
-          @for (item of roles(); track item.libelle) {
-            <div class="bar-list__row">
-              <span class="bar-list__label">{{ item.libelle }}</span>
-              <div class="bar-list__track">
-                <div class="bar-list__fill" [style.width.%]="largeur(item.valeur, roles())"></div>
+
+      <div class="col-xl-4 mb-5 mb-xl-0">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="text-uppercase text-muted ls-1 mb-1">Signalements</h6>
+                <h2 class="mb-0">Par catégorie</h2>
               </div>
-              <span class="bar-list__value">{{ item.valeur }}</span>
+              <div class="col text-right">
+                <a class="btn btn-sm btn-primary" [routerLink]="['/alerte']">Ouvrir</a>
+              </div>
             </div>
-          }
+          </div>
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Catégorie</th>
+                  <th scope="col" class="text-right">Signalements</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of categoriesAlerte(); track item.libelle) {
+                  <tr>
+                    <th scope="row">{{ item.libelle }}</th>
+                    <td class="text-right">{{ item.valeur }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="2" class="text-muted">Aucun signalement enregistré.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
-      }
-    </section>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <h6 class="text-uppercase text-muted ls-1 mb-1">Publications</h6>
+            <h2 class="mb-0">Contenus</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <tbody>
+                <tr>
+                  <th scope="row">Articles de blog</th>
+                  <td class="text-right">
+                    {{ s.contenus.blogs }}
+                    <span class="text-muted text-sm">({{ s.contenus.blogsActifs }} publiés)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Événements</th>
+                  <td class="text-right">
+                    {{ s.contenus.evenements }}
+                    <span class="text-muted text-sm">
+                      ({{ s.contenus.evenementsAVenir }} à venir)
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Ressources</th>
+                  <td class="text-right">{{ s.contenus.ressources }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Catégories</th>
+                  <td class="text-right">{{ s.contenus.categories }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Messages de contact</th>
+                  <td class="text-right">{{ s.contenus.contacts }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 }

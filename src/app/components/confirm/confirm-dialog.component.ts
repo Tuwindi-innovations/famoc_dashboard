@@ -31,24 +31,32 @@ const ICONES: Record<TonConfirmation, string> = {
   info: 'fa-circle-info',
 };
 
+/** Pastille ronde Argon assortie au ton. */
+const FONDS: Record<TonConfirmation, string> = {
+  danger: 'bg-danger',
+  warning: 'bg-warning',
+  info: 'bg-info',
+};
+
 @Component({
   selector: 'app-confirm-dialog',
   template: `
-    <div class="confirm">
-      <div class="confirm__icon confirm__icon--{{ donnees.ton }}" aria-hidden="true">
-        <i class="fa-solid {{ icone }}"></i>
+    <div class="modal-body text-center pt-5 pb-4">
+      <div
+        class="icon icon-shape rounded-circle text-white shadow mb-4 {{ fond }}"
+        aria-hidden="true"
+      >
+        <i class="fas {{ icone }}"></i>
       </div>
 
-      <div class="confirm__body">
-        <h2 class="confirm__title" id="titre-confirmation">{{ donnees.titre }}</h2>
-        <p class="confirm__message">{{ donnees.message }}</p>
-        @if (donnees.detail) {
-          <p class="confirm__detail">{{ donnees.detail }}</p>
-        }
-      </div>
+      <h2 class="h4 mb-2" id="titre-confirmation">{{ donnees.titre }}</h2>
+      <p class="mb-2">{{ donnees.message }}</p>
+      @if (donnees.detail) {
+        <p class="text-muted text-sm mb-0">{{ donnees.detail }}</p>
+      }
     </div>
 
-    <div class="modal-footer">
+    <div class="modal-footer justify-content-center">
       <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
         {{ donnees.libelleAnnuler }}
       </button>
@@ -69,4 +77,5 @@ export class ConfirmDialogComponent {
   readonly modal = inject(NgbActiveModal);
   protected readonly donnees = inject(DONNEES_CONFIRMATION);
   protected readonly icone = ICONES[this.donnees.ton];
+  protected readonly fond = FONDS[this.donnees.ton];
 }

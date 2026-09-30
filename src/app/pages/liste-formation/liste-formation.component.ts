@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 import { FormationResponse, Niveau } from '../../models/Formation';
@@ -13,9 +14,20 @@ const LIBELLE_NIVEAU: Record<string, string> = {
   [Niveau.AVANCER]: 'Avancé',
 };
 
+/**
+ * Pastille Argon par niveau. L'ancienne version comparait le niveau à
+ * « INTERMEDIAIRE » et « AVANCE », deux valeurs que l'API n'envoie jamais :
+ * seules les formations débutantes étaient colorées.
+ */
+const BADGE_NIVEAU: Record<string, string> = {
+  [Niveau.DEBUTANT]: 'badge-success',
+  [Niveau.Intermediaire]: 'badge-warning',
+  [Niveau.AVANCER]: 'badge-danger',
+};
+
 @Component({
   selector: 'app-liste-formation',
-  imports: [RouterLink],
+  imports: [RouterLink, NgbDropdownModule],
   templateUrl: './liste-formation.component.html',
 })
 export class ListeFormationComponent {
@@ -27,6 +39,15 @@ export class ListeFormationComponent {
   protected readonly chargement = signal(true);
   protected readonly erreur = signal('');
   protected readonly recherche = signal('');
+
+  /**
+   * Formations dont le fichier de couverture manque côté serveur.
+   *
+   * L'ancienne version masquait simplement la balise `img`, ce qui laissait un
+   * rectangle blanc à la place de la vignette. On bascule plutôt sur le même
+   * visuel de repli que les formations sans image.
+   */
+  protected readonly imagesCassees = signal<ReadonlySet<number>>(new Set());
 
   /** Filtre sur le titre, la description et la catégorie. */
   protected readonly resultats = computed(() => {
@@ -85,13 +106,22 @@ export class ListeFormationComponent {
     return chemin ? `${environment.apiUrl}/${chemin}` : '';
   }
 
-  /** Masque la vignette quand le fichier est absent côté serveur. */
-  protected imageIndisponible(evenement: Event): void {
-    (evenement.target as HTMLImageElement).style.visibility = 'hidden';
+  /** Bascule sur le visuel de repli quand le fichier est absent du serveur. */
+  protected imageIndisponible(id: number): void {
+    this.imagesCassees.update((cassees) => new Set(cassees).add(id));
+  }
+
+  /** Vignette affichable, ou chaîne vide si elle manque ou n'a pas chargé. */
+  protected vignette(formation: FormationResponse): string {
+    return this.imagesCassees().has(formation.id) ? '' : this.urlImage(formation.imageUrl);
   }
 
   protected libelleNiveau(niveau: string): string {
     return LIBELLE_NIVEAU[niveau] ?? niveau;
+  }
+
+  protected badgeNiveau(niveau: string): string {
+    return BADGE_NIVEAU[niveau] ?? 'badge-secondary';
   }
 
   protected surRecherche(evenement: Event): void {

@@ -1,100 +1,133 @@
 @if (chargement()) {
-  <div class="skeleton" style="height: 8rem; border-radius: var(--r-lg)"></div>
-  <p role="status" class="visually-hidden">Chargement de la formation…</p>
+  <div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+      <div class="header-body text-center mb-5">
+        <h1 class="text-white">Programme de la formation</h1>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid mt--7">
+    <div class="card shadow">
+      <div class="card-body text-center py-5" role="status">
+        <i class="fas fa-circle-notch fa-spin text-info fa-2x" aria-hidden="true"></i>
+        <p class="text-muted mt-3 mb-0">Chargement de la formation…</p>
+      </div>
+    </div>
+  </div>
 } @else if (erreur()) {
-  <div class="empty-state">
-    <i class="fa-solid fa-circle-exclamation fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h2 class="empty-state__title">Formation introuvable</h2>
-    <p class="empty-state__text">{{ erreur() }}</p>
-    <a class="btn btn-secondary btn-sm" [routerLink]="['/liste-formation']">
-      Retour au catalogue
-    </a>
+  <div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+      <div class="header-body text-center mb-5">
+        <h1 class="text-white">Formation introuvable</h1>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid mt--7">
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <p class="text-muted mb-4">{{ erreur() }}</p>
+        <a class="btn btn-info btn-sm" [routerLink]="['/liste-formation']">
+          Retour au catalogue
+        </a>
+      </div>
+    </div>
   </div>
 } @else if (formation(); as f) {
-  <!-- En-tête de la formation -->
-  <div class="page-head">
-    <div>
-      <a class="fil-ariane" [routerLink]="['/liste-formation']">
-        <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-        Catalogue des formations
-      </a>
-      <h2 class="page-head__title">{{ f.titre }}</h2>
-      <p class="page-head__subtitle">{{ f.description }}</p>
-    </div>
-    <div class="page-head__actions">
-      <a class="btn btn-secondary btn-sm" [routerLink]="['/formations', f.id, 'modifier']">
-        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-        Modifier la formation
-      </a>
+  <div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+      <div class="header-body text-center mb-5">
+        <h1 class="text-white">{{ f.titre }}</h1>
+        <p class="text-white mb-4 mt-2">{{ f.description }}</p>
+        <a class="btn btn-neutral btn-sm" [routerLink]="['/liste-formation']">
+          <i class="fas fa-arrow-left text-info" aria-hidden="true"></i>
+          Catalogue
+        </a>
+        <a
+          class="btn btn-neutral btn-sm"
+          [routerLink]="['/formations', f.id, 'modifier']"
+        >
+          <i class="fas fa-pen text-info" aria-hidden="true"></i>
+          Modifier la formation
+        </a>
+      </div>
     </div>
   </div>
 
-  <div class="fiche">
-    @if (urlImage(f.imageUrl); as image) {
-      <img
-        class="fiche__image"
-        [src]="image"
-        alt=""
-        (error)="imageIndisponible($event)"
-      />
-    }
-    <dl class="fiche__meta">
-      <div>
-        <dt>Niveau</dt>
-        <dd>{{ libelleNiveau(f.niveau) }}</dd>
-      </div>
-      <div>
-        <dt>Durée estimée</dt>
-        <dd>{{ f.dureeEstimee }} h</dd>
-      </div>
-      <div>
-        <dt>Catégorie</dt>
-        <dd>{{ f.categorie || 'Non classée' }}</dd>
-      </div>
-      <div>
-        <dt>Modules</dt>
-        <dd>{{ modules().length }}</dd>
-      </div>
-      <div>
-        <dt>Leçons</dt>
-        <dd>{{ totalCours() }}</dd>
-      </div>
-      <div>
-        <dt>Statut</dt>
-        <dd>
-          <span class="status" [class.status--good]="f.active">
-            {{ f.active ? 'Publiée' : 'Hors ligne' }}
-          </span>
-        </dd>
-      </div>
-    </dl>
-  </div>
+  <div class="container-fluid mt--7">
+    <!-- Fiche d'identité de la formation -->
+    <div class="card shadow mb-4">
+      <div class="row no-gutters align-items-center">
+        @if (urlImage(f.imageUrl); as image) {
+          <div class="col-md-4">
+            <img
+              class="card-img"
+              style="height: 100%; object-fit: cover"
+              [src]="image"
+              alt=""
+              (error)="imageIndisponible()"
+            />
+          </div>
+        }
+        <div class="col">
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Niveau</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ libelleNiveau(f.niveau) }}</dd>
 
-  <!-- Programme -->
-  <section class="chart" style="margin-top: var(--e-6)">
-    <div class="chart__head">
-      <div>
-        <h3 class="chart__title">Programme</h3>
-        <p class="chart__subtitle">
-          Organisez les modules, leurs leçons et leur quiz. L'ordre affiché ici
-          est celui que verront les apprenants.
-        </p>
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Durée estimée</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ f.dureeEstimee }} h</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Catégorie</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ f.categorie || 'Non classée' }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Modules</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ modules().length }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Leçons</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ totalCours() }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Statut</dt>
+              <dd class="col-6 col-md-8 mb-0">
+                <span class="badge badge-pill" [class]="f.active ? 'badge-success' : 'badge-default'">
+                  {{ f.active ? 'Publiée' : 'Hors ligne' }}
+                </span>
+              </dd>
+            </dl>
+          </div>
+        </div>
       </div>
-      <button type="button" class="btn btn-primary btn-sm" (click)="ajouterModule()">
-        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-        Ajouter un module
-      </button>
     </div>
+
+    <!-- Programme -->
+    <div class="card shadow">
+      <div class="card-header border-0">
+        <div class="row align-items-center">
+          <div class="col">
+            <h3 class="mb-0">Programme</h3>
+            <p class="text-muted text-sm mb-0">
+              Organisez les modules, leurs leçons et leur quiz. L'ordre affiché
+              ici est celui que verront les apprenants.
+            </p>
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-info btn-sm" (click)="ajouterModule()">
+              <i class="fas fa-plus" aria-hidden="true"></i>
+              Ajouter un module
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
 
     @if (!modules().length) {
-      <div class="empty-state">
-        <i class="fa-solid fa-layer-group fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-        <h4 class="empty-state__title">Aucun module pour l'instant</h4>
-        <p class="empty-state__text">
+      <div class="text-center py-5">
+        <i class="fas fa-layer-group fa-2x text-muted" aria-hidden="true"></i>
+        <h4 class="mt-3 mb-2">Aucun module pour l'instant</h4>
+        <p class="text-muted mb-4">
           Un module regroupe des leçons et, si vous le souhaitez, un quiz de fin.
           Commencez par en créer un.
         </p>
-        <button type="button" class="btn btn-primary btn-sm" (click)="ajouterModule()">
+        <button type="button" class="btn btn-info btn-sm" (click)="ajouterModule()">
           Créer le premier module
         </button>
       </div>
@@ -121,7 +154,7 @@
                   }
                 </span>
                 <i
-                  class="module__chevron fa-solid"
+                  class="module__chevron fas"
                   [class.fa-chevron-down]="!module.deplie"
                   [class.fa-chevron-up]="module.deplie"
                   aria-hidden="true"
@@ -131,37 +164,37 @@
               <div class="module__actions">
                 <button
                   type="button"
-                  class="btn btn-ghost btn-sm btn-icon-only"
+                  class="btn btn-sm btn-icon-only text-muted"
                   (click)="deplacerModule(i, -1)"
                   [disabled]="premier"
                   [attr.aria-label]="'Monter le module ' + module.titre"
                 >
-                  <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+                  <i class="fas fa-arrow-up" aria-hidden="true"></i>
                 </button>
                 <button
                   type="button"
-                  class="btn btn-ghost btn-sm btn-icon-only"
+                  class="btn btn-sm btn-icon-only text-muted"
                   (click)="deplacerModule(i, 1)"
                   [disabled]="dernier"
                   [attr.aria-label]="'Descendre le module ' + module.titre"
                 >
-                  <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+                  <i class="fas fa-arrow-down" aria-hidden="true"></i>
                 </button>
                 <button
                   type="button"
-                  class="btn btn-ghost btn-sm btn-icon-only"
+                  class="btn btn-sm btn-icon-only text-muted"
                   (click)="modifierModule(module)"
                   [attr.aria-label]="'Modifier le module ' + module.titre"
                 >
-                  <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                  <i class="fas fa-pen-to-square" aria-hidden="true"></i>
                 </button>
                 <button
                   type="button"
-                  class="btn btn-ghost btn-sm btn-icon-only"
+                  class="btn btn-sm btn-icon-only text-muted"
                   (click)="supprimerModule(module)"
                   [attr.aria-label]="'Supprimer le module ' + module.titre"
                 >
-                  <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                  <i class="fas fa-trash-can" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -173,7 +206,10 @@
                 }
 
                 @if (module.chargement) {
-                  <div class="skeleton" style="height: 3rem"></div>
+                  <p class="text-muted text-sm mb-0" role="status">
+                    <i class="fas fa-circle-notch fa-spin mr-2" aria-hidden="true"></i>
+                    Chargement du module…
+                  </p>
                 } @else {
                   <!-- Leçons -->
                   <div class="bloc">
@@ -184,7 +220,7 @@
                         class="btn btn-secondary btn-sm"
                         (click)="ajouterCours(module)"
                       >
-                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                        <i class="fas fa-plus" aria-hidden="true"></i>
                         Ajouter une leçon
                       </button>
                     </div>
@@ -198,7 +234,7 @@
                         @for (cours of module.cours; track cours.id; let j = $index, pj = $first, dj = $last) {
                           <li class="lecon">
                             <i
-                              class="lecon__icone fa-solid {{ iconeFormat[cours.typeContenu] }}"
+                              class="lecon__icone fas {{ iconeFormat[cours.typeContenu] }}"
                               aria-hidden="true"
                             ></i>
                             <div class="lecon__texte">
@@ -210,37 +246,37 @@
                             <div class="lecon__actions">
                               <button
                                 type="button"
-                                class="btn btn-ghost btn-sm btn-icon-only"
+                                class="btn btn-sm btn-icon-only text-muted"
                                 (click)="deplacerCours(module, j, -1)"
                                 [disabled]="pj"
                                 [attr.aria-label]="'Monter la leçon ' + cours.titre"
                               >
-                                <i class="fa-solid fa-arrow-up" aria-hidden="true"></i>
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i>
                               </button>
                               <button
                                 type="button"
-                                class="btn btn-ghost btn-sm btn-icon-only"
+                                class="btn btn-sm btn-icon-only text-muted"
                                 (click)="deplacerCours(module, j, 1)"
                                 [disabled]="dj"
                                 [attr.aria-label]="'Descendre la leçon ' + cours.titre"
                               >
-                                <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+                                <i class="fas fa-arrow-down" aria-hidden="true"></i>
                               </button>
                               <button
                                 type="button"
-                                class="btn btn-ghost btn-sm btn-icon-only"
+                                class="btn btn-sm btn-icon-only text-muted"
                                 (click)="modifierCours(module, cours)"
                                 [attr.aria-label]="'Modifier la leçon ' + cours.titre"
                               >
-                                <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                <i class="fas fa-pen-to-square" aria-hidden="true"></i>
                               </button>
                               <button
                                 type="button"
-                                class="btn btn-ghost btn-sm btn-icon-only"
+                                class="btn btn-sm btn-icon-only text-muted"
                                 (click)="supprimerCours(module, cours)"
                                 [attr.aria-label]="'Supprimer la leçon ' + cours.titre"
                               >
-                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                <i class="fas fa-trash-can" aria-hidden="true"></i>
                               </button>
                             </div>
                           </li>
@@ -254,30 +290,30 @@
                     <div class="bloc__head">
                       <h4 class="bloc__titre">Quiz de fin de module</h4>
                       @if (module.quiz) {
-                        <div class="page-head__actions">
+                        <div class="bloc__actions">
                           <button
                             type="button"
                             class="btn btn-secondary btn-sm"
                             (click)="ajouterQuestion(module)"
                           >
-                            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                            <i class="fas fa-plus" aria-hidden="true"></i>
                             Question
                           </button>
                           <button
                             type="button"
-                            class="btn btn-ghost btn-sm btn-icon-only"
+                            class="btn btn-sm btn-icon-only text-muted"
                             (click)="modifierQuiz(module)"
                             aria-label="Modifier le quiz"
                           >
-                            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                            <i class="fas fa-pen-to-square" aria-hidden="true"></i>
                           </button>
                           <button
                             type="button"
-                            class="btn btn-ghost btn-sm btn-icon-only"
+                            class="btn btn-sm btn-icon-only text-muted"
                             (click)="supprimerQuiz(module)"
                             aria-label="Supprimer le quiz"
                           >
-                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                            <i class="fas fa-trash-can" aria-hidden="true"></i>
                           </button>
                         </div>
                       } @else {
@@ -286,7 +322,7 @@
                           class="btn btn-secondary btn-sm"
                           (click)="creerQuiz(module)"
                         >
-                          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                          <i class="fas fa-plus" aria-hidden="true"></i>
                           Créer un quiz
                         </button>
                       }
@@ -318,19 +354,19 @@
                               <div class="lecon__actions">
                                 <button
                                   type="button"
-                                  class="btn btn-ghost btn-sm btn-icon-only"
+                                  class="btn btn-sm btn-icon-only text-muted"
                                   (click)="modifierQuestion(module, question)"
                                   aria-label="Modifier la question"
                                 >
-                                  <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+                                  <i class="fas fa-pen-to-square" aria-hidden="true"></i>
                                 </button>
                                 <button
                                   type="button"
-                                  class="btn btn-ghost btn-sm btn-icon-only"
+                                  class="btn btn-sm btn-icon-only text-muted"
                                   (click)="supprimerQuestion(module, question)"
                                   aria-label="Supprimer la question"
                                 >
-                                  <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                                  <i class="fas fa-trash-can" aria-hidden="true"></i>
                                 </button>
                               </div>
                             </li>
@@ -350,5 +386,7 @@
         }
       </ol>
     }
-  </section>
+      </div>
+    </div>
+  </div>
 }

@@ -1,78 +1,155 @@
-<div class="auth__card">
-  <h1 class="auth__title">Connexion</h1>
-  <p class="auth__subtitle">Accédez à l'administration de la plateforme.</p>
-
-  @if (messageErreur()) {
-    <p class="auth-error" role="alert">
-      <i class="auth-error__icon fa-solid fa-circle-exclamation" aria-hidden="true"></i>
-      <span>{{ messageErreur() }}</span>
-    </p>
-  }
-
-  <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
-    <div class="form-group">
-      <label for="identifiant">Identifiant ou adresse e-mail</label>
-      <input
-        id="identifiant"
-        class="form-control"
-        type="text"
-        formControlName="identifiant"
-        autocomplete="username"
-        autocapitalize="none"
-        spellcheck="false"
-        [attr.aria-invalid]="estInvalide('identifiant')"
-        [attr.aria-describedby]="estInvalide('identifiant') ? 'erreur-identifiant' : null"
-      />
-      @if (estInvalide('identifiant')) {
-        <span class="form-error" id="erreur-identifiant">
-          Saisissez votre identifiant.
-        </span>
-      }
-    </div>
-
-    <div class="form-group">
-      <label for="motDePasse">Mot de passe</label>
-      <div class="password-field">
-        <input
-          id="motDePasse"
-          class="form-control"
-          [type]="motDePasseVisible() ? 'text' : 'password'"
-          formControlName="motDePasse"
-          autocomplete="current-password"
-          [attr.aria-invalid]="estInvalide('motDePasse')"
-          [attr.aria-describedby]="estInvalide('motDePasse') ? 'erreur-motdepasse' : null"
-        />
-        <button
-          type="button"
-          class="password-field__toggle"
-          (click)="motDePasseVisible.set(!motDePasseVisible())"
-          [attr.aria-label]="
-            motDePasseVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
-          "
-          [attr.aria-pressed]="motDePasseVisible()"
-        >
-          <i
-            class="fa-solid"
-            [class.fa-eye]="!motDePasseVisible()"
-            [class.fa-eye-slash]="motDePasseVisible()"
-            aria-hidden="true"
-          ></i>
-        </button>
+<div class="header bg-gradient-danger py-7 py-lg-8">
+  <div class="container">
+    <div class="header-body text-center mb-7">
+      <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-6">
+          <img
+            src="assets/img/brand/famocLogo.png"
+            alt="FAMOC"
+            class="mb-3"
+            width="99"
+            height="70"
+          />
+          <h1 class="text-white">Administration FAMOC</h1>
+        </div>
       </div>
-      @if (estInvalide('motDePasse')) {
-        <span class="form-error" id="erreur-motdepasse">
-          Le mot de passe doit comporter au moins 6 caractères.
-        </span>
-      }
     </div>
+  </div>
+  <div class="separator separator-bottom separator-skew zindex-100">
+    <svg
+      x="0"
+      y="0"
+      viewBox="0 0 2560 100"
+      preserveAspectRatio="none"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <polygon class="fill-default" points="2560 0 2560 100 0 100"></polygon>
+    </svg>
+  </div>
+</div>
 
-    <button type="submit" class="btn btn-primary auth__submit" [disabled]="enCours()">
-      @if (enCours()) {
-        <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
-        Connexion…
-      } @else {
-        Se connecter
-      }
-    </button>
-  </form>
+<div class="container mt--8 pb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="card bg-secondary shadow border-0">
+        <div class="card-body px-lg-5 py-lg-5">
+          <div class="text-center text-muted mb-4">
+            <small>Se connecter</small>
+          </div>
+
+          @if (messageErreur()) {
+            <div class="alert alert-danger" role="alert">
+              <span class="alert-inner--icon">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+              </span>
+              <span class="alert-inner--text">{{ messageErreur() }}</span>
+            </div>
+          }
+
+          <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+            <div class="form-group mb-3">
+              <!-- Argon ne montre que des « placeholder » ; l'étiquette reste
+                   présente pour les lecteurs d'écran. `sr-only` est bien
+                   l'utilitaire de Bootstrap 4 (`visually-hidden` est en 5). -->
+              <label class="sr-only" for="identifiant">
+                Identifiant ou adresse e-mail
+              </label>
+              <div class="input-group input-group-alternative">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="ni ni-email-83" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <input
+                  id="identifiant"
+                  class="form-control"
+                  type="text"
+                  formControlName="identifiant"
+                  placeholder="Identifiant ou adresse e-mail"
+                  autocomplete="username"
+                  autocapitalize="none"
+                  spellcheck="false"
+                  [attr.aria-invalid]="estInvalide('identifiant')"
+                  [attr.aria-describedby]="
+                    estInvalide('identifiant') ? 'erreur-identifiant' : null
+                  "
+                />
+              </div>
+              @if (estInvalide('identifiant')) {
+                <small class="text-danger d-block mt-2" id="erreur-identifiant">
+                  Saisissez votre identifiant.
+                </small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label class="sr-only" for="motDePasse">Mot de passe</label>
+              <div class="input-group input-group-alternative">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="ni ni-lock-circle-open" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <input
+                  id="motDePasse"
+                  class="form-control"
+                  [type]="motDePasseVisible() ? 'text' : 'password'"
+                  formControlName="motDePasse"
+                  placeholder="Mot de passe"
+                  autocomplete="current-password"
+                  [attr.aria-invalid]="estInvalide('motDePasse')"
+                  [attr.aria-describedby]="
+                    estInvalide('motDePasse') ? 'erreur-motdepasse' : null
+                  "
+                />
+                <div class="input-group-append">
+                  <button
+                    type="button"
+                    class="input-group-text bg-transparent border-0"
+                    (click)="motDePasseVisible.set(!motDePasseVisible())"
+                    [attr.aria-label]="
+                      motDePasseVisible()
+                        ? 'Masquer le mot de passe'
+                        : 'Afficher le mot de passe'
+                    "
+                    [attr.aria-pressed]="motDePasseVisible()"
+                  >
+                    <i
+                      class="fas"
+                      [class.fa-eye]="!motDePasseVisible()"
+                      [class.fa-eye-slash]="motDePasseVisible()"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </div>
+              </div>
+              @if (estInvalide('motDePasse')) {
+                <small class="text-danger d-block mt-2" id="erreur-motdepasse">
+                  Le mot de passe doit comporter au moins 6 caractères.
+                </small>
+              }
+            </div>
+
+            <div class="text-center">
+              <button
+                type="submit"
+                class="btn btn-primary my-4"
+                [disabled]="enCours()"
+              >
+                @if (enCours()) {
+                  <i class="fas fa-circle-notch fa-spin mr-2" aria-hidden="true"></i>
+                  Connexion…
+                } @else {
+                  Se connecter
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

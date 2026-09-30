@@ -1,93 +1,130 @@
-<div class="page-head">
-  <div>
-    <h2 class="page-head__title">Messages reçus</h2>
-    <p class="page-head__subtitle">
-      Demandes envoyées depuis le formulaire de contact du site public.
-    </p>
-  </div>
-  <div class="page-head__actions">
-    <button type="button" class="btn btn-secondary btn-sm" (click)="charger()">
-      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-      Actualiser
-    </button>
+<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body text-center mb-5">
+      <h1 class="text-white">
+        <i class="ni ni-email-83 mr-3" aria-hidden="true"></i>Messages reçus
+      </h1>
+      <p class="text-white mb-4 mt-2">
+        Les messages envoyés depuis le formulaire de contact du site public.
+      </p>
+      <button type="button" class="btn btn-neutral btn-sm" (click)="charger()">
+        <i class="fas fa-sync-alt text-danger" aria-hidden="true"></i> Actualiser
+      </button>
+    </div>
   </div>
 </div>
 
-@if (chargement()) {
-  <div class="skeleton" style="height: 16rem; border-radius: var(--r-lg)"></div>
-  <p role="status" class="visually-hidden">Chargement des messages…</p>
-} @else if (erreur()) {
-  <div class="empty-state">
-    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h3 class="empty-state__title">Messages indisponibles</h3>
-    <p class="empty-state__text">{{ erreur() }}</p>
-    <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
-  </div>
-} @else if (!contacts().length) {
-  <div class="empty-state">
-    <i class="fa-solid fa-envelope-open fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h3 class="empty-state__title">Aucun message</h3>
-    <p class="empty-state__text">
-      Les messages envoyés depuis le formulaire de contact du site apparaîtront ici.
-    </p>
-  </div>
-} @else {
-  <section class="chart">
-    <div class="chart__head">
-      <div>
-        <h3 class="chart__title">Boîte de réception</h3>
-        <p class="chart__subtitle">
-          {{ contacts().length }} message(s). Cliquez sur une ligne pour lire le
-          texte complet.
+<div class="container-fluid mt--7">
+  @if (chargement()) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5" role="status">
+        <i class="fas fa-circle-notch fa-spin text-danger fa-2x" aria-hidden="true"></i>
+        <p class="text-muted mt-3 mb-0">Chargement des messages…</p>
+      </div>
+    </div>
+  } @else if (erreur()) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <h3 class="h4 mb-2">Messages indisponibles</h3>
+        <p class="text-muted mb-4">{{ erreur() }}</p>
+        <button type="button" class="btn btn-danger btn-sm" (click)="charger()">
+          Réessayer
+        </button>
+      </div>
+    </div>
+  } @else if (!contacts().length) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <h3 class="h4 mb-2">Aucun message</h3>
+        <p class="text-muted mb-0">
+          Les messages envoyés depuis le site public apparaîtront ici.
         </p>
       </div>
     </div>
-
-    <ul class="messages">
-      @for (contact of contacts(); track contact.id) {
-        <li class="message">
-          <div class="message__ligne">
-            <span class="avatar avatar-sm rounded-circle" aria-hidden="true">
-              {{ initiales(contact) }}
-            </span>
-
-            <button
-              type="button"
-              class="message__resume"
-              (click)="basculerMessage(contact.id)"
-              [attr.aria-expanded]="messageOuvert() === contact.id"
-              [attr.aria-controls]="'message-' + contact.id"
-            >
-              <span class="message__expediteur">
-                {{ contact.firstName }} {{ contact.lastName }}
-              </span>
-              <a
-                class="message__email"
-                [href]="'mailto:' + contact.email"
-                (click)="$event.stopPropagation()"
-              >
-                {{ contact.email }}
-              </a>
-              <span class="message__extrait">{{ contact.message }}</span>
-            </button>
-
-            <button
-              type="button"
-              class="btn btn-ghost btn-sm btn-icon-only"
-              (click)="supprimer(contact)"
-              [attr.aria-label]="'Supprimer le message de ' + contact.firstName"
-            >
-              <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-            </button>
+  } @else {
+    <div class="card shadow">
+      <div class="card-header border-0">
+        <div class="row align-items-center">
+          <div class="col">
+            <h3 class="mb-0">Boîte de réception</h3>
           </div>
+          <div class="col text-right">
+            <span class="text-muted text-sm">
+              {{ contacts().length }} message{{ contacts().length === 1 ? '' : 's' }}
+            </span>
+          </div>
+        </div>
+      </div>
 
-          @if (messageOuvert() === contact.id) {
-            <p class="message__corps" [id]="'message-' + contact.id">
-              {{ contact.message }}
-            </p>
-          }
-        </li>
-      }
-    </ul>
-  </section>
-}
+      <div class="table-responsive">
+        <table class="table align-items-center table-flush">
+          <thead class="thead-light">
+            <tr>
+              <th scope="col">Expéditeur</th>
+              <th scope="col">Adresse e-mail</th>
+              <th scope="col">Message</th>
+              <th scope="col" class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (contact of contacts(); track contact.id) {
+              <tr>
+                <th scope="row">
+                  <div class="media align-items-center">
+                    <span
+                      class="avatar avatar-sm rounded-circle bg-danger text-white font-weight-bold"
+                      aria-hidden="true"
+                    >
+                      {{ initiales(contact) }}
+                    </span>
+                    <div class="media-body ml-3">
+                      <span class="mb-0 text-sm font-weight-600">
+                        {{ contact.firstName }} {{ contact.lastName }}
+                      </span>
+                    </div>
+                  </div>
+                </th>
+                <td>
+                  <a [href]="'mailto:' + contact.email">{{ contact.email }}</a>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-link p-0 text-left text-default"
+                    (click)="basculerMessage(contact.id)"
+                    [attr.aria-expanded]="messageOuvert() === contact.id"
+                    [attr.aria-controls]="'message-' + contact.id"
+                  >
+                    {{ messageOuvert() === contact.id ? 'Replier' : 'Lire le message' }}
+                  </button>
+                </td>
+                <td class="text-right">
+                  <!-- L'ancienne version appelait `deleteContact()`, une méthode
+                       qui n'existait pas : le bouton ne faisait rien. -->
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-icon-only text-danger"
+                    (click)="supprimer(contact)"
+                    [attr.aria-label]="
+                      'Supprimer le message de ' + contact.firstName + ' ' + contact.lastName
+                    "
+                  >
+                    <i class="fas fa-trash" aria-hidden="true"></i>
+                  </button>
+                </td>
+              </tr>
+
+              @if (messageOuvert() === contact.id) {
+                <tr [attr.id]="'message-' + contact.id">
+                  <td colspan="4" class="bg-secondary">
+                    <p class="mb-0" style="white-space: pre-wrap">{{ contact.message }}</p>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
