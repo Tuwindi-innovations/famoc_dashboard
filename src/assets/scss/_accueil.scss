@@ -243,3 +243,168 @@
     }
   }
 }
+
+// =============================================================================
+// La file de signalements
+// -----------------------------------------------------------------------------
+// Un flux, pas une grille de cartes. L'état se lit à la section dans laquelle
+// se trouve la ligne — pas à une pastille répétée sur chacune. L'âge en jours
+// remplace la date en tête de ligne : c'est lui qui dit l'urgence.
+// =============================================================================
+
+.file-section {
+  margin-bottom: var(--e-8);
+
+  &__titre {
+    display: flex;
+    align-items: baseline;
+    gap: var(--e-3);
+    margin-bottom: var(--e-3);
+    padding-bottom: var(--e-2);
+    border-bottom: 1px solid var(--trait);
+    font-size: var(--t-md);
+  }
+
+  &__compte {
+    color: var(--encre-tenue);
+    font-size: var(--t-sm);
+    font-stretch: 100%;
+    font-variation-settings: 'wdth' 100;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--g-normal);
+  }
+}
+
+.signalements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.signalement {
+  border-bottom: 1px solid var(--trait);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &__ligne {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--e-4);
+    padding: var(--e-3) var(--e-2);
+  }
+
+  &:hover &__ligne {
+    background: var(--surface-survol);
+  }
+
+  // --- Âge ------------------------------------------------------------------
+  &__age {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.1;
+    color: var(--indigo);
+  }
+
+  &__age-valeur {
+    font-size: var(--t-lg);
+    font-stretch: 116%;
+    font-variation-settings: 'wdth' 116;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--g-fort);
+  }
+
+  &__age-unite {
+    color: var(--encre-tenue);
+    font-size: var(--t-2xs);
+  }
+
+  // --- Corps ----------------------------------------------------------------
+  &__corps {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__titre {
+    color: var(--encre);
+    font-size: var(--t-base);
+    font-weight: var(--g-moyen);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    color: var(--encre-tenue);
+    font-size: var(--t-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--e-1);
+    flex: none;
+  }
+
+  // --- Détail déplié --------------------------------------------------------
+  &__detail {
+    padding: 0 var(--e-2) var(--e-5) 6.5rem;
+  }
+
+  &__description {
+    color: var(--encre-douce);
+    font-size: var(--t-sm);
+    white-space: pre-wrap;
+  }
+
+  &__photo {
+    display: block;
+    margin-top: var(--e-3);
+    max-width: 22rem;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--trait);
+    border-radius: var(--r-md);
+  }
+
+  // Une ligne traitée n'a plus à retenir l'attention : elle recule.
+  &--traite {
+    .signalement__age,
+    .signalement__titre {
+      color: var(--encre-tenue);
+    }
+
+    .signalement__age-valeur {
+      font-weight: var(--g-moyen);
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .signalement__ligne {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    row-gap: var(--e-2);
+  }
+
+  .signalement__actions {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+
+  .signalement__detail {
+    padding-left: var(--e-2);
+  }
+}

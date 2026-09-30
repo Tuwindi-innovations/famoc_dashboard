@@ -540,3 +540,151 @@
     gap: 0.125rem;
   }
 }
+
+// =============================================================================
+// Le catalogue
+// -----------------------------------------------------------------------------
+// Des lignes, pas une grille de cartes : une formation se lit avec sa
+// structure (niveau, modules, durée), et ces valeurs se comparent mieux
+// alignées les unes sous les autres qu'enfermées dans des vignettes.
+// =============================================================================
+
+.catalogue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.parcours {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--e-4);
+  padding: var(--e-4);
+  border-bottom: 1px solid var(--trait);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover {
+    background: var(--surface-survol);
+  }
+
+  &__vignette {
+    width: 4rem;
+    height: 3rem;
+    object-fit: cover;
+    border-radius: var(--r-sm);
+    background: var(--surface-creuse);
+
+    // Pas d'image : un aplat discret tient la colonne sans attirer l'oeil.
+    &--absente {
+      display: block;
+      border: 1px dashed var(--trait);
+      background: transparent;
+    }
+  }
+
+  &__corps {
+    min-width: 0;
+  }
+
+  &__titre {
+    font-size: var(--t-base);
+    font-weight: var(--g-appuye);
+
+    a {
+      color: var(--encre);
+
+      &:hover {
+        color: var(--indigo);
+        text-decoration: none;
+      }
+    }
+  }
+
+  &__resume {
+    margin-top: 0.15rem;
+    color: var(--encre-douce);
+    font-size: var(--t-xs);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: none;
+  }
+
+  // La ligne de structure : niveau, modules, durée, séparés par un trait
+  // plutôt que par un point médian.
+  &__structure {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    margin-top: var(--e-2);
+    color: var(--encre-tenue);
+    font-size: var(--t-2xs);
+    max-width: none;
+  }
+
+  &__palier {
+    color: var(--indigo);
+    font-weight: var(--g-moyen);
+  }
+
+  &__trait {
+    width: 0.75rem;
+    height: 1px;
+    background: var(--trait-appuye);
+    flex: none;
+  }
+
+  &__etat {
+    display: grid;
+    gap: var(--e-1);
+    justify-items: end;
+    flex: none;
+  }
+
+  // Un programme vide est une action à mener, pas un simple état.
+  &__manque {
+    color: var(--statut-attente-texte);
+    font-size: var(--t-2xs);
+    font-weight: var(--g-moyen);
+    white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--e-1);
+    flex: none;
+  }
+
+  // Une formation hors ligne recule sans disparaître.
+  &--hors-ligne {
+    .parcours__titre a,
+    .parcours__vignette {
+      opacity: 0.6;
+    }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .parcours {
+    grid-template-columns: 3rem minmax(0, 1fr);
+    row-gap: var(--e-3);
+
+    &__etat {
+      grid-column: 2;
+      justify-items: start;
+    }
+
+    &__actions {
+      grid-column: 2;
+    }
+  }
+}

@@ -1,125 +1,155 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject, OnInit } from "@angular/core";
-import { ConfirmService } from 'src/app/services/confirm.service';
-import { ToastrService } from "ngx-toastr";
-import { AlerteResponse, libelleCategorie } from "src/app/models/Alerte";
-import { AlertService } from "src/app/services/alert.service";
-import { environment } from "src/environments/environment";
+import { Component, computed, inject, signal } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
+import {
+  AlerteResponse,
+  libelleCategorie,
+  LIBELLE_STATUT,
+  StatutAlerte,
+} from '../../models/Alerte';
+import { AlertService } from '../../services/alert.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { environment } from '../../../environments/environment';
 
-/** Libellés lisibles des statuts renvoyés par l'API. */
-const LIBELLE_STATUT: Record<string, string> = {
-  ENVOYER: 'En attente',
-  ENCOURSDETRAITEMENT: 'En cours',
-  RESOLUE: 'Résolue',
-};
+/** Les trois sections de la file, dans l'ordre où on les traite. */
+interface Section {
+  readonly cle: 'attente' | 'encours' | 'traitees';
+  readonly titre: string;
+  readonly alertes: AlerteResponse[];
+}
 
 @Component({
-    imports: [DatePipe],
-    selector: "app-alerte",
-    templateUrl: "./alerte.component.html",
-    styleUrls: ["./alerte.component.scss"]})
-export class AlerteComponent implements OnInit {
-  private alerteService = inject(AlertService);
-  private confirmation = inject(ConfirmService);
-  private toastr = inject(ToastrService);
+  selector: 'app-alerte',
+  imports: [DatePipe],
+  templateUrl: './alerte.component.html',
+})
+export class AlerteComponent {
+  private readonly alerteService = inject(AlertService);
+  private readonly confirmation = inject(ConfirmService);
+  private readonly toast = inject(ToastrService);
 
-  alertes: AlerteResponse[] = [];
+  protected readonly alertes = signal<AlerteResponse[]>([]);
+  protected readonly chargement = signal(true);
+  protected readonly indisponible = signal(false);
 
-  isLoading = true;
-  /** Vrai quand l'API n'a pas répondu : à ne pas confondre avec « 0 alerte ». */
-  chargementEchoue = false;
+  /** Signalement déplié dans la file, ou `null`. */
+  protected readonly ouvert = signal<number | null>(null);
 
-  ngOnInit(): void {
-    this.loadAlertes();
+  protected readonly libelleCategorie = libelleCategorie;
+
+  constructor() {
+    this.charger();
   }
 
-  loadAlertes() {
-    this.isLoading = true;
-    this.chargementEchoue = false;
+  protected charger(): void {
+    this.chargement.set(true);
+    this.indisponible.set(false);
+
     this.alerteService.getAllAlertes().subscribe({
-      next: (res) => {
-        this.alertes = res;
-        this.isLoading = false;
+      next: (alertes) => {
+        this.alertes.set(alertes);
+        this.chargement.set(false);
       },
       error: () => {
-        this.chargementEchoue = true;
-        this.isLoading = false;
+        this.indisponible.set(true);
+        this.chargement.set(false);
       },
     });
-  }
-
-  onResoudre(alerte: AlerteResponse) {
-    const userId = alerte.apprenantId;
-
-    if (!userId) {
-      this.toastr.warning("Impossible de résoudre : ID utilisateur manquant");
-      return;
-    }
-
-    this.alerteService.resoudreUserAlerte(alerte.id, userId).subscribe({
-      next: (res) => {
-        // Mise à jour locale du statut sans recharger toute la liste
-        const index = this.alertes.findIndex((a) => a.id === alerte.id);
-        if (index !== -1) {
-          this.alertes[index] = res;
-        }
-        this.toastr.success("Alerte résolue et notification envoyée !");
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error("Erreur lors de la résolution de l'alerte");
-      },
-    });
-  }
-
-  async onDelete(id: number): Promise<void> {
-    const confirme = await this.confirmation.demander({
-      titre: 'Supprimer définitivement ?',
-      message: 'Vous êtes sur le point de supprimer cette alerte.',
-      libelleConfirmer: 'Supprimer',
-    });
-    if (!confirme) {
-      return;
-    }
-      this.alerteService.deleteAlerte(id).subscribe(() => {
-        this.alertes = this.alertes.filter((a) => a.id !== id);
-        this.toastr.success("Alerte supprimée");
-      });
-  }
-
-  get alertesEnAttente() {
-    return this.alertes.filter((a) => a.statut !== "RESOLUE");
-  }
-
-  /** Libellé lisible d'une catégorie, ou « Sans catégorie ». */
-  libelleCategorie = libelleCategorie;
-
-  /** Libellé lisible d'un statut, ou « En attente » si l'API n'en donne pas. */
-  libelleStatut(statut: string | null | undefined): string {
-    return LIBELLE_STATUT[statut ?? ''] ?? 'En attente';
   }
 
   /**
-   * URL de la photo jointe, ou chaîne vide si l'alerte n'en a pas.
+   * La file, découpée par état et triée du plus ancien au plus récent.
    *
-   * On ne renvoie plus d'image de remplacement : le fichier référencé
-   * n'existe pas dans le projet, et le gestionnaire global masque de toute
-   * façon les vignettes en échec.
+   * L'état d'un signalement se lit à sa place dans la page, pas à une
+   * pastille supplémentaire sur chaque ligne. Le plus ancien vient en tête :
+   * c'est celui qui attend depuis le plus longtemps.
    */
-  getAlerteImage(imageUrl: string | null | undefined): string {
-    if (!imageUrl || imageUrl.trim() === "") {
-      return "";
+  protected readonly sections = computed<Section[]>(() => {
+    const parAge = [...this.alertes()].sort(
+      (a, b) => Date.parse(a.dateCreation ?? '') - Date.parse(b.dateCreation ?? ''),
+    );
+
+    const filtrer = (statuts: readonly string[]) =>
+      parAge.filter((a) => statuts.includes(a.statut ?? StatutAlerte.ENVOYER));
+
+    const sections: Section[] = [
+      { cle: 'attente', titre: 'En attente', alertes: filtrer([StatutAlerte.ENVOYER]) },
+      {
+        cle: 'encours',
+        titre: 'En cours de traitement',
+        alertes: filtrer([StatutAlerte.ENCOURSDETRAITEMENT]),
+      },
+      { cle: 'traitees', titre: 'Traitées', alertes: filtrer([StatutAlerte.RESOLUE]) },
+    ];
+
+    return sections.filter((section) => section.alertes.length > 0);
+  });
+
+  protected readonly aTraiter = computed(
+    () =>
+      this.alertes().filter((a) => a.statut !== StatutAlerte.RESOLUE).length,
+  );
+
+  protected basculer(id: number): void {
+    this.ouvert.update((courant) => (courant === id ? null : id));
+  }
+
+  protected libelleStatut(statut: string | null | undefined): string {
+    return LIBELLE_STATUT[statut ?? ''] ?? 'En attente';
+  }
+
+  /** Nombre de jours écoulés depuis le signalement. */
+  protected anciennete(dateCreation: string | null | undefined): number | null {
+    if (!dateCreation) {
+      return null;
+    }
+    const depuis = Date.parse(dateCreation);
+    if (!Number.isFinite(depuis)) {
+      return null;
+    }
+    return Math.max(0, Math.floor((Date.now() - depuis) / 86_400_000));
+  }
+
+  protected urlImage(imageUrl: string | null | undefined): string {
+    if (!imageUrl || !imageUrl.trim()) {
+      return '';
+    }
+    const base = environment.apiUrl.endsWith('/') ? environment.apiUrl : `${environment.apiUrl}/`;
+    return base + imageUrl.replace(/^\//, '');
+  }
+
+  protected resoudre(alerte: AlerteResponse): void {
+    if (!alerte.apprenantId) {
+      this.toast.warning("Ce signalement n'est rattaché à aucun apprenant.");
+      return;
     }
 
-    //éviter les doubles slashes ou les slashes manquants
-    const baseUrl = environment.apiUrl.endsWith("/")
-      ? environment.apiUrl
-      : `${environment.apiUrl}/`;
+    this.alerteService.resoudreUserAlerte(alerte.id, alerte.apprenantId).subscribe({
+      next: (misAJour) => {
+        this.alertes.update((liste) =>
+          liste.map((a) => (a.id === alerte.id ? misAJour : a)),
+        );
+        this.toast.success('Signalement marqué comme traité.');
+      },
+      error: () => this.toast.error("Le signalement n'a pas pu être clôturé."),
+    });
+  }
 
-    const cleanImagePath = imageUrl.startsWith("/")
-      ? imageUrl.substring(1)
-      : imageUrl;
+  protected async supprimer(alerte: AlerteResponse): Promise<void> {
+    const confirme = await this.confirmation.supprimer(
+      alerte.titre || 'Ce signalement',
+      "Le signalement et sa photo seront retirés de la plateforme. L'apprenant qui l'a remonté n'en sera pas informé.",
+    );
+    if (!confirme) {
+      return;
+    }
 
-    return `${baseUrl}${cleanImagePath}`;
+    this.alerteService.deleteAlerte(alerte.id).subscribe({
+      next: () => {
+        this.alertes.update((liste) => liste.filter((a) => a.id !== alerte.id));
+        this.toast.success('Signalement supprimé.');
+      },
+      error: () => this.toast.error("Le signalement n'a pas pu être supprimé."),
+    });
   }
 }

@@ -1,43 +1,35 @@
 <div class="page-head">
   <div>
-    <h2 class="page-head__title">Formations</h2>
+    <h1 class="page-head__title">Le catalogue</h1>
     <p class="page-head__subtitle">
-      Le catalogue proposé aux apprenants. Ouvrez une formation pour gérer ses
-      modules, ses leçons et son quiz.
+      Chaque formation se déroule en modules, et chaque module en leçons.
+      Ouvrez-en une pour en construire le programme.
     </p>
   </div>
   <div class="page-head__actions">
     <button type="button" class="btn btn-secondary btn-sm" (click)="charger()">
-      <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
       Actualiser
     </button>
     <a class="btn btn-primary btn-sm" [routerLink]="['/add-formation']">
-      <i class="fa-solid fa-plus" aria-hidden="true"></i>
       Nouvelle formation
     </a>
   </div>
 </div>
 
 @if (chargement()) {
-  <div class="grille-cartes" aria-hidden="true">
-    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-      <div class="skeleton" style="height: 13rem; border-radius: var(--r-lg)"></div>
-    }
-  </div>
-  <p role="status" class="visually-hidden">Chargement des formations…</p>
+  <div class="skeleton" style="height: 22rem; border-radius: var(--r-lg)"></div>
+  <p role="status" class="visually-hidden">Chargement du catalogue…</p>
 } @else if (erreur()) {
   <div class="empty-state">
-    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h3 class="empty-state__title">Catalogue indisponible</h3>
+    <h2 class="empty-state__title">Catalogue indisponible</h2>
     <p class="empty-state__text">{{ erreur() }}</p>
     <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
   </div>
 } @else if (!formations().length) {
   <div class="empty-state">
-    <i class="fa-solid fa-graduation-cap fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h3 class="empty-state__title">Aucune formation</h3>
+    <h2 class="empty-state__title">Aucune formation</h2>
     <p class="empty-state__text">
-      Créez votre première formation, puis ajoutez-lui des modules et des leçons.
+      Créez une première formation, puis ajoutez-lui des modules et des leçons.
     </p>
     <a class="btn btn-primary btn-sm" [routerLink]="['/add-formation']">
       Créer une formation
@@ -54,13 +46,13 @@
         id="recherche-formation"
         class="form-control"
         type="search"
-        placeholder="Rechercher par titre, description ou catégorie…"
+        placeholder="Rechercher un titre, une description, une catégorie…"
         [value]="recherche()"
         (input)="surRecherche($event)"
       />
     </div>
     <p class="barre-filtres__compte" role="status">
-      {{ resultats().length }} formation(s)
+      {{ resultats().length }} formation{{ resultats().length === 1 ? '' : 's' }}
       @if (recherche()) {
         sur {{ formations().length }}
       }
@@ -69,57 +61,66 @@
 
   @if (!resultats().length) {
     <div class="empty-state">
-      <h3 class="empty-state__title">Aucun résultat</h3>
+      <h2 class="empty-state__title">Aucun résultat</h2>
       <p class="empty-state__text">
-        Aucune formation ne correspond à « {{ recherche() }} ».
+        Rien ne correspond à « {{ recherche() }} ». Essayez un autre terme.
       </p>
     </div>
   } @else {
-    <div class="grille-cartes">
+    <ul class="catalogue">
       @for (formation of resultats(); track formation.id) {
-        <article class="carte-formation">
-          <div class="carte-formation__visuel">
-            @if (urlImage(formation.imageUrl); as image) {
-              <img [src]="image" alt="" (error)="imageIndisponible($event)" />
-            }
-            <span
-              class="status carte-formation__statut"
-              [class.status--good]="formation.active"
-            >
-              {{ formation.active ? 'Publiée' : 'Hors ligne' }}
-            </span>
-          </div>
+        <li class="parcours" [class.parcours--hors-ligne]="!formation.active">
+          @if (urlImage(formation.imageUrl); as image) {
+            <img
+              class="parcours__vignette"
+              [src]="image"
+              alt=""
+              (error)="imageIndisponible($event)"
+            />
+          } @else {
+            <span class="parcours__vignette parcours__vignette--absente" aria-hidden="true"></span>
+          }
 
-          <div class="carte-formation__corps">
-            <h3 class="carte-formation__titre">
+          <div class="parcours__corps">
+            <h2 class="parcours__titre">
               <a [routerLink]="['/formations', 'detail', formation.id]">
                 {{ formation.titre }}
               </a>
-            </h3>
-            <p class="carte-formation__description">{{ formation.description }}</p>
+            </h2>
+            <p class="parcours__resume">{{ formation.description }}</p>
 
-            <ul class="carte-formation__meta">
-              <li>
-                <i class="fa-solid fa-signal" aria-hidden="true"></i>
-                {{ libelleNiveau(formation.niveau) }}
-              </li>
-              <li>
-                <i class="fa-solid fa-clock" aria-hidden="true"></i>
-                {{ formation.dureeEstimee }} h
-              </li>
-              <li>
-                <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
-                {{ formation.nombreModules }} module(s)
-              </li>
-            </ul>
+            <!-- La structure du parcours, dite en une ligne : c'est ce qui
+                 distingue une formation d'un simple contenu. -->
+            <p class="parcours__structure">
+              <span class="parcours__palier">{{ libelleNiveau(formation.niveau) }}</span>
+              <span class="parcours__trait" aria-hidden="true"></span>
+              <span>
+                {{ formation.nombreModules }} module{{ formation.nombreModules === 1 ? '' : 's' }}
+              </span>
+              <span class="parcours__trait" aria-hidden="true"></span>
+              <span>{{ formation.dureeEstimee }} h</span>
+              @if (formation.categorie) {
+                <span class="parcours__trait" aria-hidden="true"></span>
+                <span>{{ formation.categorie }}</span>
+              }
+            </p>
           </div>
 
-          <div class="carte-formation__actions">
+          <div class="parcours__etat">
+            @if (!formation.active) {
+              <span class="status">Hors ligne</span>
+            }
+            @if (!formation.nombreModules) {
+              <span class="parcours__manque">Programme vide</span>
+            }
+          </div>
+
+          <div class="parcours__actions">
             <a
               class="btn btn-secondary btn-sm"
               [routerLink]="['/formations', 'detail', formation.id]"
             >
-              Gérer le programme
+              Programme
             </a>
             <a
               class="btn btn-ghost btn-sm btn-icon-only"
@@ -137,8 +138,8 @@
               <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
             </button>
           </div>
-        </article>
+        </li>
       }
-    </div>
+    </ul>
   }
 }

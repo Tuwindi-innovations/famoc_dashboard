@@ -1,5 +1,7 @@
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   provideRouter,
@@ -11,8 +13,14 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { authInterceptor } from './services/auth.interceptor';
 
+// Les dates et les nombres s'affichaient en anglais : la locale doit être
+// enregistrée explicitement, le pipe `date` ne la déduit pas du navigateur.
+registerLocaleData(localeFr, 'fr');
+
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: LOCALE_ID, useValue: 'fr' },
+
     // À partir d'Angular 21, `bootstrapApplication` active le mode zoneless
     // PAR DÉFAUT. Or plusieurs pages pilotent encore leur affichage par des
     // propriétés de classe modifiées dans un `subscribe` : sans zone.js, ces

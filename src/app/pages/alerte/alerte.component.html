@@ -1,129 +1,115 @@
-<div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
-  <div class="container-fluid">
-    <div class="header-body">
-      <div class="row align-items-center">
-        <div class="col-lg-12">
-          <h1 class="display-4 text-white">
-            <i class="fa-solid fa-triangle-exclamation me-3"></i>Gestion des
-            Alertes
-          </h1>
-          <p class="text-white opacity-8">
-            Gérez les alertes signalées par les utilisateurs et suivez leur
-            statut en temps réel.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="container-fluid mt--7">
-  <div class="row mb-4">
-    <div class="col">
-      <div class="card shadow border-0 p-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <h3 class="mb-0 text-primary fw-bold">Liste des signalements</h3>
-          <span class="badge bg-soft-primary text-primary px-3 py-2">
-            <i class="fa-solid fa-list-check me-1"></i> {{ alertes.length }} Alertes
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  @if (isLoading) {
-  <div class="card shadow border-0 py-5 text-center">
-    <div class="spinner-border text-primary" role="status"></div>
-    <p class="mt-2 text-muted">Récupération des données...</p>
-  </div>
-  } @if (!isLoading) {
-  <div class="row">
-    @for (alerte of alertes; track alerte) {
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card h-100 shadow border-0 transition-hover">
-        <div class="position-relative">
-          <img
-            [src]="getAlerteImage(alerte.imageUrl)"
-            class="card-img-top object-fit-cover"
-            style="height: 200px"
-            alt="Image Alerte"
-          />
-          <div class="position-absolute top-0 end-0 m-3">
-            <span
-              class="badge shadow-sm"
-              [class.status--good]="alerte.statut === 'RESOLUE'"
-              [class.status--warning]="alerte.statut !== 'RESOLUE'"
-            >
-              <i
-                class="fa-solid"
-                [class.fa-circle-check]="alerte.statut === 'RESOLUE'"
-                [class.fa-hourglass-half]="alerte.statut !== 'RESOLUE'"
-                aria-hidden="true"
-              ></i>
-              {{ libelleStatut(alerte.statut) }}
-            </span>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <h5 class="card-title fw-bold mb-0 text-dark">
-              {{ alerte.titre }}
-            </h5>
-            @if (alerte.categorie) {
-              <span class="badge bg-light text-muted">{{ libelleCategorie(alerte.categorie) }}</span>
-            }
-          </div>
-          <p class="card-text text-muted small mb-4" style="min-height: 50px">
-            {{ alerte.description }}
-          </p>
-          <div class="d-flex align-items-center text-muted mb-2 small">
-            <i class="fa-solid fa-location-dot me-2 text-danger"></i>
-            {{ alerte.localisation }}
-          </div>
-          <div class="d-flex align-items-center text-muted small">
-            <i class="fa-solid fa-calendar-days me-2"></i>
-            {{ alerte.dateCreation | date : "dd MMM yyyy à HH:mm" }}
-          </div>
-        </div>
-        <div class="card-footer bg-secondary-light border-0 d-flex gap-2 pb-3">
-          @if (alerte.statut !== 'RESOLUE') {
-          <button
-            (click)="onResoudre(alerte)"
-            class="btn btn-success btn-sm flex-grow-1 shadow-none"
-          >
-            <i class="fa-solid fa-circle-check me-1"></i> Résoudre
-          </button>
-          }
-          <button
-            (click)="onDelete(alerte.id)"
-            class="btn btn-outline-danger btn-sm shadow-none"
-          >
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-    }
-  </div>
-  } @if (!isLoading && chargementEchoue) {
-  <div class="empty-state">
-    <i class="fa-solid fa-plug-circle-xmark fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h3 class="empty-state__title">Alertes indisponibles</h3>
-    <p class="empty-state__text">
-      L'API n'expose pas encore les alertes citoyennes sur cette instance.
-      Le compteur ci-dessus ne reflète donc pas la réalité.
+<div class="page-head">
+  <div>
+    <h1 class="page-head__title">La file</h1>
+    <p class="page-head__subtitle">
+      Les signalements remontés par les apprenants, du plus ancien au plus
+      récent. Ceux qui attendent depuis le plus longtemps viennent en tête.
     </p>
-    <button type="button" class="btn btn-secondary btn-sm" (click)="loadAlertes()">
-      Réessayer
+  </div>
+  <div class="page-head__actions">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="charger()">
+      Actualiser
     </button>
   </div>
-  } @if (!isLoading && !chargementEchoue && alertes.length === 0) {
+</div>
+
+@if (chargement()) {
+  <div class="skeleton" style="height: 18rem; border-radius: var(--r-lg)"></div>
+  <p role="status" class="visually-hidden">Chargement des signalements…</p>
+} @else if (indisponible()) {
   <div class="empty-state">
-    <i class="fa-solid fa-clipboard-check fa-2x" style="color: var(--encre-tenue)" aria-hidden="true"></i>
-    <h3 class="empty-state__title">Aucune alerte active</h3>
+    <h2 class="empty-state__title">Signalements indisponibles</h2>
     <p class="empty-state__text">
-      Les signalements remontés par les apprenants apparaîtront ici.
+      L'API n'a pas répondu. Vérifiez qu'elle est démarrée, puis réessayez.
+    </p>
+    <button type="button" class="btn btn-primary btn-sm" (click)="charger()">Réessayer</button>
+  </div>
+} @else if (!alertes().length) {
+  <div class="empty-state">
+    <h2 class="empty-state__title">La file est vide</h2>
+    <p class="empty-state__text">
+      Les signalements remontés depuis l'application apparaîtront ici, le plus
+      ancien en premier.
     </p>
   </div>
+} @else {
+  @for (section of sections(); track section.cle) {
+    <section class="file-section">
+      <h2 class="file-section__titre">
+        {{ section.titre }}
+        <span class="file-section__compte">{{ section.alertes.length }}</span>
+      </h2>
+
+      <ol class="signalements">
+        @for (alerte of section.alertes; track alerte.id) {
+          <li
+            class="signalement"
+            [class.signalement--traite]="section.cle === 'traitees'"
+          >
+            <div class="signalement__ligne">
+              <!-- L'âge remplace la date : c'est lui qui dit l'urgence. -->
+              <div class="signalement__age">
+                @if (anciennete(alerte.dateCreation); as jours) {
+                  <span class="signalement__age-valeur">{{ jours }}</span>
+                  <span class="signalement__age-unite">
+                    {{ jours === 1 ? 'jour' : 'jours' }}
+                  </span>
+                } @else {
+                  <span class="signalement__age-unite">date inconnue</span>
+                }
+              </div>
+
+              <button
+                type="button"
+                class="signalement__corps"
+                (click)="basculer(alerte.id)"
+                [attr.aria-expanded]="ouvert() === alerte.id"
+                [attr.aria-controls]="'signalement-' + alerte.id"
+              >
+                <span class="signalement__titre">{{ alerte.titre }}</span>
+                <span class="signalement__meta">
+                  {{ libelleCategorie(alerte.categorie) }}
+                  @if (alerte.localisation) {
+                    · {{ alerte.localisation }}
+                  }
+                  · {{ alerte.dateCreation | date: 'd MMMM y' }}
+                </span>
+              </button>
+
+              <div class="signalement__actions">
+                @if (section.cle !== 'traitees') {
+                  <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    (click)="resoudre(alerte)"
+                  >
+                    Marquer traité
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-icon-only"
+                  (click)="supprimer(alerte)"
+                  [attr.aria-label]="'Supprimer ' + alerte.titre"
+                >
+                  <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            @if (ouvert() === alerte.id) {
+              <div class="signalement__detail" [id]="'signalement-' + alerte.id">
+                @if (alerte.description) {
+                  <p class="signalement__description">{{ alerte.description }}</p>
+                }
+                @if (urlImage(alerte.imageUrl); as photo) {
+                  <img class="signalement__photo" [src]="photo" alt="" />
+                }
+              </div>
+            }
+          </li>
+        }
+      </ol>
+    </section>
   }
-</div>
+}
