@@ -1,123 +1,187 @@
 <div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
   <div class="container-fluid">
-    <div class="header-body">
-      <div class="row align-items-center">
-        <div class="col-lg-12">
-          <h1 class="display-4 text-white">
-            <i class="bi bi-exclamation-triangle-fill me-3"></i>Gestion des
-            Alertes
-          </h1>
-          <p class="text-white opacity-8">
-            Gérez les alertes signalées par les utilisateurs et suivez leur
-            statut en temps réel.
-          </p>
-        </div>
-      </div>
+    <div class="header-body text-center mb-5">
+      <h1 class="text-white">
+        <i class="ni ni-bell-55 mr-3" aria-hidden="true"></i>Signalements
+      </h1>
+      <p class="text-white mb-4 mt-2">
+        @if (chargement()) {
+          Chargement de la file…
+        } @else if (indisponible()) {
+          La file n'a pas pu être chargée.
+        } @else if (aTraiter()) {
+          {{ aTraiter() }} signalement{{ aTraiter() === 1 ? '' : 's' }} en attente de
+          traitement, du plus ancien au plus récent.
+        } @else {
+          Aucun signalement en attente. La file est à jour.
+        }
+      </p>
+      <button type="button" class="btn btn-neutral btn-sm" (click)="charger()">
+        <i class="fas fa-sync-alt text-danger" aria-hidden="true"></i> Actualiser
+      </button>
     </div>
   </div>
 </div>
 
 <div class="container-fluid mt--7">
-  <div class="row mb-4">
-    <div class="col">
-      <div class="card shadow border-0 p-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <h3 class="mb-0 text-primary fw-bold">Liste des signalements</h3>
-          <span class="badge bg-soft-primary text-primary px-3 py-2">
-            <i class="bi bi-list-stars me-1"></i> {{ alertes.length }} Alertes
-          </span>
-        </div>
+  @if (chargement()) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5" role="status">
+        <i class="fas fa-circle-notch fa-spin text-danger fa-2x" aria-hidden="true"></i>
+        <p class="text-muted mt-3 mb-0">Chargement des signalements…</p>
       </div>
     </div>
-  </div>
-
-  <div *ngIf="isLoading" class="card shadow border-0 py-5 text-center">
-    <div class="spinner-border text-primary" role="status"></div>
-    <p class="mt-2 text-muted">Récupération des données...</p>
-  </div>
-
-  <div class="row" *ngIf="!isLoading">
-    <div class="col-xl-4 col-md-6 mb-4" *ngFor="let alerte of alertes">
-      <div class="card h-100 shadow border-0 transition-hover">
-        <div class="position-relative">
-          <img
-            [src]="getAlerteImage(alerte.imageUrl)"
-            class="card-img-top object-fit-cover"
-            style="height: 200px"
-            alt="Image Alerte"
-          />
-          <div class="position-absolute top-0 end-0 m-3">
-            <span
-              class="badge shadow-sm"
-              [ngClass]="
-                alerte.statut === 'RESOLUE'
-                  ? 'bg-success'
-                  : 'bg-warning text-dark'
-              "
-            >
-              <i
-                class="bi"
-                [ngClass]="
-                  alerte.statut === 'RESOLUE'
-                    ? 'bi-check-all'
-                    : 'bi-hourglass-split'
-                "
-              ></i>
-              {{ alerte.statut || "EN ATTENTE" }}
-            </span>
-          </div>
-        </div>
-
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <h5 class="card-title fw-bold mb-0 text-dark">
-              {{ alerte.titre }}
-            </h5>
-            <span class="badge bg-light text-muted">{{
-              alerte.categorie
-            }}</span>
-          </div>
-
-          <p class="card-text text-muted small mb-4" style="min-height: 50px">
-            {{ alerte.description }}
-          </p>
-
-          <div class="d-flex align-items-center text-muted mb-2 small">
-            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
-            {{ alerte.localisation }}
-          </div>
-
-          <div class="d-flex align-items-center text-muted small">
-            <i class="bi bi-calendar3 me-2"></i>
-            {{ alerte.dateCreation | date : "dd MMM yyyy à HH:mm" }}
-          </div>
-        </div>
-
-        <div class="card-footer bg-secondary-light border-0 d-flex gap-2 pb-3">
-          <button
-            *ngIf="alerte.statut !== 'RESOLUE'"
-            (click)="onResoudre(alerte)"
-            class="btn btn-success btn-sm flex-grow-1 shadow-none"
-          >
-            <i class="bi bi-check-circle me-1"></i> Résoudre
-          </button>
-
-          <button
-            (click)="onDelete(alerte.id)"
-            class="btn btn-outline-danger btn-sm shadow-none"
-          >
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
+  } @else if (indisponible()) {
+    <!-- État d'erreur honnête : l'ancienne version affichait « aucun
+         signalement » quand l'API échouait, ce qui laissait croire que la
+         file était vide. -->
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <h3 class="h4 mb-2">Signalements indisponibles</h3>
+        <p class="text-muted mb-4">
+          Le serveur n'a pas répondu. Les signalements existants ne sont pas perdus :
+          ils réapparaîtront une fois l'API rétablie.
+        </p>
+        <button type="button" class="btn btn-danger btn-sm" (click)="charger()">
+          Réessayer
+        </button>
       </div>
     </div>
-  </div>
+  } @else if (!sections().length) {
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <h3 class="h4 mb-2">File vide</h3>
+        <p class="text-muted mb-0">
+          Aucun signalement n'a été remonté par les apprenants.
+        </p>
+      </div>
+    </div>
+  } @else {
+    @for (section of sections(); track section.cle) {
+      <div class="card shadow mb-4">
+        <div class="card-header border-0">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">{{ section.titre }}</h3>
+            </div>
+            <div class="col text-right">
+              <span class="text-muted text-sm">
+                {{ section.alertes.length }} signalement{{
+                  section.alertes.length === 1 ? '' : 's'
+                }}
+              </span>
+            </div>
+          </div>
+        </div>
 
-  <div
-    *ngIf="!isLoading && alertes.length === 0"
-    class="card shadow border-0 py-5 text-center"
-  >
-    <i class="bi bi-clipboard-check text-muted display-1"></i>
-    <p class="text-muted mt-3">Tout est en ordre. Aucune alerte active.</p>
-  </div>
+        <div class="table-responsive">
+          <table class="table align-items-center table-flush">
+            <thead class="thead-light">
+              <tr>
+                <th scope="col">Signalement</th>
+                <th scope="col">Catégorie</th>
+                <th scope="col">Reçu</th>
+                <th scope="col">Statut</th>
+                <th scope="col" class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (alerte of section.alertes; track alerte.id) {
+                <tr>
+                  <th scope="row">
+                    <button
+                      type="button"
+                      class="btn btn-link p-0 text-left text-default font-weight-600"
+                      (click)="basculer(alerte.id)"
+                      [attr.aria-expanded]="ouvert() === alerte.id"
+                      [attr.aria-controls]="'detail-alerte-' + alerte.id"
+                    >
+                      <i
+                        class="fas mr-2 text-muted"
+                        [class.fa-chevron-right]="ouvert() !== alerte.id"
+                        [class.fa-chevron-down]="ouvert() === alerte.id"
+                        aria-hidden="true"
+                      ></i>
+                      {{ alerte.titre || 'Sans titre' }}
+                    </button>
+                  </th>
+                  <td>{{ libelleCategorie(alerte.categorie) }}</td>
+                  <td>
+                    <span class="text-sm">
+                      {{ alerte.dateCreation | date: 'd MMM y' }}
+                    </span>
+                    @if (anciennete(alerte.dateCreation); as jours) {
+                      <span class="d-block text-muted text-xs">
+                        il y a {{ jours }} jour{{ jours === 1 ? '' : 's' }}
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge badge-dot mr-4">
+                      <i
+                        [class.bg-warning]="section.cle === 'attente'"
+                        [class.bg-info]="section.cle === 'encours'"
+                        [class.bg-success]="section.cle === 'traitees'"
+                        aria-hidden="true"
+                      ></i>
+                      <span class="status">{{ libelleStatut(alerte.statut) }}</span>
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    @if (section.cle !== 'traitees') {
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-success"
+                        (click)="resoudre(alerte)"
+                      >
+                        Marquer traité
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-icon-only text-danger"
+                      (click)="supprimer(alerte)"
+                      [attr.aria-label]="'Supprimer ' + (alerte.titre || 'ce signalement')"
+                    >
+                      <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                </tr>
+
+                @if (ouvert() === alerte.id) {
+                  <tr [attr.id]="'detail-alerte-' + alerte.id">
+                    <td colspan="5" class="bg-secondary">
+                      <div class="row">
+                        @if (urlImage(alerte.imageUrl); as image) {
+                          <div class="col-md-4 mb-3 mb-md-0">
+                            <img
+                              [src]="image"
+                              class="img-fluid rounded shadow"
+                              [alt]="'Photo jointe à ' + (alerte.titre || 'ce signalement')"
+                            />
+                          </div>
+                        }
+                        <div class="col">
+                          <h4 class="mb-2">Description</h4>
+                          <p class="mb-3">
+                            {{ alerte.description || 'Aucune description fournie.' }}
+                          </p>
+                          @if (alerte.localisation) {
+                            <p class="mb-1 text-sm">
+                              <i class="ni ni-pin-3 mr-2 text-danger" aria-hidden="true"></i>
+                              {{ alerte.localisation }}
+                            </p>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
 </div>

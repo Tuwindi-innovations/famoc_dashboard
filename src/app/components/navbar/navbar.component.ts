@@ -1,55 +1,58 @@
-import { Component, OnInit, ElementRef } from "@angular/core";
-import { ROUTES } from "../sidebar/sidebar.component";
-import {
-  Location,
-  LocationStrategy,
-  PathLocationStrategy,
-} from "@angular/common";
-import { Router } from "@angular/router";
+import { Component, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { filter, map, startWith } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { titrePourUrl } from '../navigation';
 
 @Component({
-  selector: "app-navbar",
-  templateUrl: "./navbar.component.html",
-  styleUrls: ["./navbar.component.scss"],
+  selector: 'app-navbar',
+  imports: [NgbDropdownModule],
+  templateUrl: './navbar.component.html',
 })
-export class NavbarComponent implements OnInit {
-  public focus: any;
-  public listTitles: any[] = [];
-  public location: Location;
-  user: any = null;
+export class NavbarComponent {
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
-  constructor(
-    location: Location,
-    private element: ElementRef,
-    private router: Router
-  ) {
-    this.location = location;
-  }
+  /** Titre dérivé de l'URL courante, via le plan de navigation. */
+  protected readonly titre = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => titrePourUrl(e.urlAfterRedirects)),
+      startWith(titrePourUrl(this.router.url)),
+    ),
+    { initialValue: titrePourUrl(this.router.url) },
+  );
 
-  ngOnInit() {
-    this.listTitles = ROUTES.filter((listTitle) => listTitle);
-    // 🔹 Récupération du user depuis la session
-    const userData = sessionStorage.getItem("user");
-    if (userData) {
-      this.user = JSON.parse(userData);
+  /**
+   * Nom du compte connecté.
+   *
+   * L'ancienne version lisait `sessionStorage['user']`, une clé que rien
+   * n'écrivait : le menu restait donc toujours vide. Le jeton ne portant ni
+   * nom ni e-mail, on interroge `GET /user/{id}`.
+   */
+  protected readonly nomAffiche = signal(this.auth.getDisplayName() || 'Administrateur');
+
+  protected readonly initiales = computed(() => {
+    const mots = this.nomAffiche().trim().split(/[\s@._-]+/).filter(Boolean);
+    if (!mots.length) {
+      return '?';
     }
-  }
-  getTitle() {
-    var titlee = this.location.prepareExternalUrl(this.location.path());
-    if (titlee.charAt(0) === "#") {
-      titlee = titlee.slice(1);
-    }
+    return (mots[0][0] + (mots.length > 1 ? mots[1][0] : '')).toUpperCase();
+  });
 
-    for (var item = 0; item < this.listTitles.length; item++) {
-      if (this.listTitles[item].path === titlee) {
-        return this.listTitles[item].title;
+  constructor() {
+    this.auth.getCurrentUser().subscribe((utilisateur) => {
+      if (!utilisateur) {
+        return;
       }
-    }
-    return "Dashboard";
+      const nom = [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(' ').trim();
+      this.nomAffiche.set(nom || utilisateur.email || 'Administrateur');
+    });
   }
 
-  logout() {
-    sessionStorage.clear();
-    this.router.navigate(["/login"]);
+  protected deconnecter(): void {
+    this.auth.logout();
   }
 }

@@ -1,369 +1,353 @@
 <div class="header bg-gradient-danger pb-8 pt-5 pt-md-8">
   <div class="container-fluid">
     <div class="header-body">
-      <!-- Card stats -->
-      <div class="row">
-        <div class="col-xl-3 col-lg-6">
-          <div class="card card-stats mb-4 mb-xl-0">
-            <div class="card-body">
-              <div class="row">
-                <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Traffic</h5>
-                  <span class="h2 font-weight-bold mb-0">350,897</span>
-                </div>
-                <div class="col-auto">
-                  <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
-                    <i class="fas fa-chart-bar"></i>
-                  </div>
-                </div>
+      @if (chargement()) {
+        <p class="text-white mb-0" role="status">Chargement des statistiques…</p>
+      } @else if (erreur()) {
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-body text-center">
+                <h5 class="h3 mb-1">Statistiques indisponibles</h5>
+                <p class="text-muted mb-4">
+                  Le serveur n'a répondu à aucune des sources de données.
+                </p>
+                <button type="button" class="btn btn-primary btn-sm" (click)="charger()">
+                  Réessayer
+                </button>
               </div>
-              <p class="mt-3 mb-0 text-muted text-sm">
-                <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 3.48%</span>
-                <span class="text-nowrap">Since last month</span>
-              </p>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-lg-6">
-          <div class="card card-stats mb-4 mb-xl-0">
-            <div class="card-body">
-              <div class="row">
-                <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">New users</h5>
-                  <span class="h2 font-weight-bold mb-0">2,356</span>
-                </div>
-                <div class="col-auto">
-                  <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
-                    <i class="fas fa-chart-pie"></i>
+      } @else if (stats(); as s) {
+        <div class="row">
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Formations</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ s.formations.total }}</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                      <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    </div>
                   </div>
                 </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <span class="text-success mr-2">{{ s.formations.actives }} en ligne</span>
+                  <span class="text-nowrap text-muted">
+                    {{ s.formations.totalModules }} module{{
+                      s.formations.totalModules === 1 ? '' : 's'
+                    }}
+                  </span>
+                </p>
               </div>
-              <p class="mt-3 mb-0 text-muted text-sm">
-                <span class="text-danger mr-2"><i class="fas fa-arrow-down"></i> 3.48%</span>
-                <span class="text-nowrap">Since last week</span>
-              </p>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Apprenants</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ s.apprenants.total }}</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                      <i class="fas fa-users" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <span class="text-nowrap text-muted">
+                    {{ s.utilisateurs.total }} compte{{
+                      s.utilisateurs.total === 1 ? '' : 's'
+                    }}
+                    d'administration
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">À traiter</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ aTraiter() }}</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-yellow text-white rounded-circle shadow">
+                      <i class="fas fa-bell" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  @if (plusAncienne(); as depuis) {
+                    <span class="text-nowrap text-muted">Plus ancien : {{ depuis }}</span>
+                  } @else {
+                    <span class="text-nowrap text-muted">Aucun signalement en attente</span>
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Résolution</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ tauxResolution() }}%</span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                      <i class="fas fa-percent" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+                <p class="mt-3 mb-0 text-sm">
+                  <span class="text-nowrap text-muted">
+                    {{ s.alertes.resolues }} sur {{ s.alertes.total }} signalement{{
+                      s.alertes.total === 1 ? '' : 's'
+                    }}
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-lg-6">
-          <div class="card card-stats mb-4 mb-xl-0">
-            <div class="card-body">
-              <div class="row">
-                <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Sales</h5>
-                  <span class="h2 font-weight-bold mb-0">924</span>
-                </div>
-                <div class="col-auto">
-                  <div class="icon icon-shape bg-yellow text-white rounded-circle shadow">
-                    <i class="fas fa-users"></i>
-                  </div>
-                </div>
-              </div>
-              <p class="mt-3 mb-0 text-muted text-sm">
-                <span class="text-warning mr-2"><i class="fas fa-arrow-down"></i> 1.10%</span>
-                <span class="text-nowrap">Since yesterday</span>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-lg-6">
-          <div class="card card-stats mb-4 mb-xl-0">
-            <div class="card-body">
-              <div class="row">
-                <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Performance</h5>
-                  <span class="h2 font-weight-bold mb-0">49,65%</span>
-                </div>
-                <div class="col-auto">
-                  <div class="icon icon-shape bg-info text-white rounded-circle shadow">
-                    <i class="fas fa-percent"></i>
-                  </div>
-                </div>
-              </div>
-              <p class="mt-3 mb-0 text-muted text-sm">
-                <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 12%</span>
-                <span class="text-nowrap">Since last month</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      }
     </div>
   </div>
 </div>
-<div class="container-fluid mt--7">
-  <div class="row">
-    <div class="col-xl-8 mb-5 mb-xl-0">
-      <div class="card bg-gradient-default shadow">
-        <div class="card-header bg-transparent">
-          <div class="row align-items-center">
-            <div class="col">
-              <h6 class="text-uppercase text-light ls-1 mb-1">Overview</h6>
-              <h2 class="text-white mb-0">Sales value</h2>
-            </div>
-            <div class="col">
-              <ul class="nav nav-pills justify-content-end">
-                <li class="nav-item mr-2 mr-md-0" data-toggle="chart" data-target="#chart-sales"  (click)="data=datasets[0];updateOptions()">
-                  <a href="javascript:void(0)" class="nav-link py-2 px-3" [ngClass]="{'active':clicked===true}" data-toggle="tab" (click)="clicked=true;clicked1=false">
-                    <span class="d-none d-md-block">Month</span>
-                    <span class="d-md-none">M</span>
-                  </a>
-                </li>
-                <li class="nav-item" data-toggle="chart" data-target="#chart-sales"  (click)="data=datasets[1];updateOptions()">
-                  <a href="javascript:void(0)" class="nav-link py-2 px-3" [ngClass]="{'active':clicked1===true}" data-toggle="tab" (click)="clicked=false;clicked1=true">
-                    <span class="d-none d-md-block">Week</span>
-                    <span class="d-md-none">W</span>
-                  </a>
-                </li>
-              </ul>
+
+@if (stats(); as s) {
+  <div class="container-fluid mt--7">
+    @if (s.sourcesIndisponibles.length) {
+      <!-- Une source muette fausse les totaux : on le dit plutôt que d'afficher
+           un chiffre incomplet comme s'il était exact. -->
+      <div class="alert alert-warning" role="status">
+        <span class="alert-inner--icon">
+          <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        </span>
+        <span class="alert-inner--text">
+          Chiffres partiels : {{ s.sourcesIndisponibles.join(', ') }}
+          {{ s.sourcesIndisponibles.length === 1 ? "n'a" : "n'ont" }} pas répondu.
+        </span>
+      </div>
+    }
+
+    <div class="row">
+      <div class="col-xl-8 mb-5 mb-xl-0">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="text-uppercase text-muted ls-1 mb-1">Activité</h6>
+                <h2 class="mb-0">Formations créées par mois</h2>
+              </div>
+              <div class="col text-right">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="vueTableau.set(!vueTableau())"
+                  [attr.aria-pressed]="vueTableau()"
+                >
+                  {{ vueTableau() ? 'Voir le graphique' : 'Voir le tableau' }}
+                </button>
+              </div>
             </div>
           </div>
+          <div class="card-body">
+            @if (vueTableau()) {
+              <div class="table-responsive">
+                <table class="table align-items-center table-flush">
+                  <caption class="sr-only">
+                    Nombre de formations créées par mois
+                  </caption>
+                  <thead class="thead-light">
+                    <tr>
+                      <th scope="col">Mois</th>
+                      <th scope="col" class="text-right">Formations créées</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (point of creations(); track point.periode) {
+                      <tr>
+                        <th scope="row">{{ point.libelle }}</th>
+                        <td class="text-right">{{ point.valeur }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="2" class="text-muted">Aucune création enregistrée.</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div style="height: 20rem">
+                <canvas #canvasCreations aria-label="Formations créées par mois" role="img"></canvas>
+              </div>
+            }
+          </div>
         </div>
-        <div class="card-body">
-          <!-- Chart -->
-          <div class="chart">
-            <!-- Chart wrapper -->
-            <canvas id="chart-sales" class="chart-canvas"></canvas>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <h6 class="text-uppercase text-muted ls-1 mb-1">Catalogue</h6>
+            <h2 class="mb-0">Par niveau</h2>
+          </div>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              @for (item of niveaux(); track item.libelle) {
+                <li class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-sm font-weight-bold">{{ item.libelle }}</span>
+                    <span class="text-sm text-muted">{{ item.valeur }}</span>
+                  </div>
+                  <div class="progress" style="height: 4px">
+                    <div
+                      class="progress-bar bg-danger"
+                      role="progressbar"
+                      [style.width.%]="largeur(item.valeur, niveaux())"
+                      [attr.aria-valuenow]="item.valeur"
+                      aria-valuemin="0"
+                      [attr.aria-valuemax]="maximum(niveaux())"
+                      [attr.aria-label]="item.libelle"
+                    ></div>
+                  </div>
+                </li>
+              } @empty {
+                <li class="text-muted">Aucune formation classée par niveau.</li>
+              }
+            </ul>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-xl-4">
-      <div class="card shadow">
-        <div class="card-header bg-transparent">
-          <div class="row align-items-center">
-            <div class="col">
-              <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-              <h2 class="mb-0">Total orders</h2>
-            </div>
+
+    <div class="row mt-5">
+      <div class="col-xl-4 mb-5 mb-xl-0">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <h6 class="text-uppercase text-muted ls-1 mb-1">Catalogue</h6>
+            <h2 class="mb-0">Par catégorie</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Catégorie</th>
+                  <th scope="col" class="text-right">Formations</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of categories(); track item.libelle) {
+                  <tr>
+                    <th scope="row">{{ item.libelle }}</th>
+                    <td class="text-right">{{ item.valeur }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="2" class="text-muted">Aucune catégorie renseignée.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="card-body">
-          <!-- Chart -->
-          <div class="chart">
-            <canvas id="chart-orders" class="chart-canvas"></canvas>
+      </div>
+
+      <div class="col-xl-4 mb-5 mb-xl-0">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <div class="row align-items-center">
+              <div class="col">
+                <h6 class="text-uppercase text-muted ls-1 mb-1">Signalements</h6>
+                <h2 class="mb-0">Par catégorie</h2>
+              </div>
+              <div class="col text-right">
+                <a class="btn btn-sm btn-primary" [routerLink]="['/alerte']">Ouvrir</a>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Catégorie</th>
+                  <th scope="col" class="text-right">Signalements</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of categoriesAlerte(); track item.libelle) {
+                  <tr>
+                    <th scope="row">{{ item.libelle }}</th>
+                    <td class="text-right">{{ item.valeur }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="2" class="text-muted">Aucun signalement enregistré.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="card shadow">
+          <div class="card-header bg-transparent">
+            <h6 class="text-uppercase text-muted ls-1 mb-1">Publications</h6>
+            <h2 class="mb-0">Contenus</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <tbody>
+                <tr>
+                  <th scope="row">Articles de blog</th>
+                  <td class="text-right">
+                    {{ s.contenus.blogs }}
+                    <span class="text-muted text-sm">({{ s.contenus.blogsActifs }} publiés)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Événements</th>
+                  <td class="text-right">
+                    {{ s.contenus.evenements }}
+                    <span class="text-muted text-sm">
+                      ({{ s.contenus.evenementsAVenir }} à venir)
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">Ressources</th>
+                  <td class="text-right">{{ s.contenus.ressources }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Catégories</th>
+                  <td class="text-right">{{ s.contenus.categories }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Messages de contact</th>
+                  <td class="text-right">{{ s.contenus.contacts }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="row mt-5">
-    <div class="col-xl-8 mb-5 mb-xl-0">
-      <div class="card shadow">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Page visits</h3>
-            </div>
-            <div class="col text-right">
-              <a href="#!" class="btn btn-sm btn-primary">See all</a>
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <!-- Projects table -->
-          <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col">Page name</th>
-                <th scope="col">Visitors</th>
-                <th scope="col">Unique users</th>
-                <th scope="col">Bounce rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">
-                  /argon/
-                </th>
-                <td>
-                  4,569
-                </td>
-                <td>
-                  340
-                </td>
-                <td>
-                  <i class="fas fa-arrow-up text-success mr-3"></i> 46,53%
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  /argon/index.html
-                </th>
-                <td>
-                  3,985
-                </td>
-                <td>
-                  319
-                </td>
-                <td>
-                  <i class="fas fa-arrow-down text-warning mr-3"></i> 46,53%
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  /argon/charts.html
-                </th>
-                <td>
-                  3,513
-                </td>
-                <td>
-                  294
-                </td>
-                <td>
-                  <i class="fas fa-arrow-down text-warning mr-3"></i> 36,49%
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  /argon/tables.html
-                </th>
-                <td>
-                  2,050
-                </td>
-                <td>
-                  147
-                </td>
-                <td>
-                  <i class="fas fa-arrow-up text-success mr-3"></i> 50,87%
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  /argon/profile.html
-                </th>
-                <td>
-                  1,795
-                </td>
-                <td>
-                  190
-                </td>
-                <td>
-                  <i class="fas fa-arrow-down text-danger mr-3"></i> 46,53%
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-4">
-      <div class="card shadow">
-        <div class="card-header border-0">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Social traffic</h3>
-            </div>
-            <div class="col text-right">
-              <a href="#!" class="btn btn-sm btn-primary">See all</a>
-            </div>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <!-- Projects table -->
-          <table class="table align-items-center table-flush">
-            <thead class="thead-light">
-              <tr>
-                <th scope="col">Referral</th>
-                <th scope="col">Visitors</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">
-                  Facebook
-                </th>
-                <td>
-                  1,480
-                </td>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <span class="mr-2">60%</span>
-                    <div>
-                      <div class="progress">
-                        <div class="progress-bar bg-gradient-danger" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  Facebook
-                </th>
-                <td>
-                  5,480
-                </td>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <span class="mr-2">70%</span>
-                    <div>
-                      <div class="progress">
-                        <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  Google
-                </th>
-                <td>
-                  4,807
-                </td>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <span class="mr-2">80%</span>
-                    <div>
-                      <div class="progress">
-                        <div class="progress-bar bg-gradient-primary" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  Instagram
-                </th>
-                <td>
-                  3,678
-                </td>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <span class="mr-2">75%</span>
-                    <div>
-                      <div class="progress">
-                        <div class="progress-bar bg-gradient-info" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 75%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th scope="row">
-                  twitter
-                </th>
-                <td>
-                  2,645
-                </td>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <span class="mr-2">30%</span>
-                    <div>
-                      <div class="progress">
-                        <div class="progress-bar bg-gradient-warning" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%;"></div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+}

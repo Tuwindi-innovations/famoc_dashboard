@@ -1,88 +1,130 @@
-import { Component, inject, OnInit } from "@angular/core";
-import { ToastrService } from "ngx-toastr";
-import { FormationResponse } from "src/app/models/Formation";
-import { FormationService } from "src/app/services/formation.service";
-import { environment } from "src/environments/environment";
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
+import { environment } from '../../../environments/environment';
+import { FormationResponse, Niveau } from '../../models/Formation';
+import { ConfirmService } from '../../services/confirm.service';
+import { FormationService } from '../../services/formation.service';
+
+/** Libellés lisibles des niveaux renvoyés par l'API. */
+const LIBELLE_NIVEAU: Record<string, string> = {
+  [Niveau.DEBUTANT]: 'Débutant',
+  [Niveau.Intermediaire]: 'Intermédiaire',
+  [Niveau.AVANCER]: 'Avancé',
+};
+
+/**
+ * Pastille Argon par niveau. L'ancienne version comparait le niveau à
+ * « INTERMEDIAIRE » et « AVANCE », deux valeurs que l'API n'envoie jamais :
+ * seules les formations débutantes étaient colorées.
+ */
+const BADGE_NIVEAU: Record<string, string> = {
+  [Niveau.DEBUTANT]: 'badge-success',
+  [Niveau.Intermediaire]: 'badge-warning',
+  [Niveau.AVANCER]: 'badge-danger',
+};
 
 @Component({
-  selector: "app-liste-formation",
-  templateUrl: "./liste-formation.component.html",
-  styleUrls: ["./liste-formation.component.scss"],
+  selector: 'app-liste-formation',
+  imports: [RouterLink, NgbDropdownModule],
+  templateUrl: './liste-formation.component.html',
 })
-export class ListeFormationComponent implements OnInit {
-  private toastr = inject(ToastrService);
-  private formationService = inject(FormationService);
+export class ListeFormationComponent {
+  private readonly formationService = inject(FormationService);
+  private readonly confirmation = inject(ConfirmService);
+  private readonly toast = inject(ToastrService);
 
-  isLoading: boolean = true;
-  errorMessage: string = "";
-  formations: FormationResponse[] = [];
-
-  ngOnInit(): void {
-    this.loadFormations();
-  }
+  protected readonly formations = signal<FormationResponse[]>([]);
+  protected readonly chargement = signal(true);
+  protected readonly erreur = signal('');
+  protected readonly recherche = signal('');
 
   /**
-   * Charge la liste des formations depuis le backend
+   * Formations dont le fichier de couverture manque côté serveur.
+   *
+   * L'ancienne version masquait simplement la balise `img`, ce qui laissait un
+   * rectangle blanc à la place de la vignette. On bascule plutôt sur le même
+   * visuel de repli que les formations sans image.
    */
-  loadFormations(): void {
-    this.isLoading = true;
+  protected readonly imagesCassees = signal<ReadonlySet<number>>(new Set());
+
+  /** Filtre sur le titre, la description et la catégorie. */
+  protected readonly resultats = computed(() => {
+    const terme = this.recherche().trim().toLowerCase();
+    if (!terme) {
+      return this.formations();
+    }
+    return this.formations().filter((f) =>
+      [f.titre, f.description, f.categorie]
+        .filter(Boolean)
+        .some((champ) => champ.toLowerCase().includes(terme)),
+    );
+  });
+
+  constructor() {
+    this.charger();
+  }
+
+  protected charger(): void {
+    this.chargement.set(true);
+    this.erreur.set('');
+
     this.formationService.afficherFormations().subscribe({
-      next: (data) => {
-        this.formations = data;
-        this.isLoading = false;
-        console.log("Formations récupérées :", data);
+      next: (formations) => {
+        this.formations.set(formations);
+        this.chargement.set(false);
       },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = "Erreur lors de la récupération des données.";
-        this.toastr.error(this.errorMessage);
-        console.error(err);
+      error: () => {
+        this.erreur.set(
+          "Les formations n'ont pas pu être chargées. Vérifiez que l'API est démarrée.",
+        );
+        this.chargement.set(false);
       },
     });
   }
 
-  getImageFullUrl(path: string | undefined): string {
-    return path
-      ? `${environment.apiUrl}/${path}`
-      : "assets/images/default-formation.jpg";
-  }
-
-  /**
-   * Rafraîchir la liste manuellement
-   */
-  reload(): void {
-    this.loadFormations();
-  }
-
-  /**
-   * Supprime une formation après confirmation
-   */
-  deleteFormation(id: number): void {
-    if (confirm("Voulez-vous vraiment supprimer cette formation ?")) {
-      this.formationService.deleteFormation(id).subscribe({
-        next: (success) => {
-          if (success) {
-            this.toastr.success("Formation supprimée avec succès.");
-            // Mise à jour de la liste locale sans recharger la page
-            this.formations = this.formations.filter((f) => f.id !== id);
-          } else {
-            this.toastr.warning(
-              "La suppression a été traitée mais a échoué côté serveur."
-            );
-          }
-        },
-        error: (err) => {
-          this.toastr.error("Impossible de supprimer la formation.");
-          console.error(err);
-        },
-      });
+  protected async supprimer(formation: FormationResponse): Promise<void> {
+    const confirme = await this.confirmation.supprimer(
+      formation.titre,
+      'Les modules, leçons et quiz de cette formation seront supprimés, ainsi que la progression des apprenants.',
+    );
+    if (!confirme) {
+      return;
     }
+
+    this.formationService.deleteFormation(formation.id).subscribe({
+      next: () => {
+        this.formations.update((liste) => liste.filter((f) => f.id !== formation.id));
+        this.toast.success('Formation supprimée.');
+      },
+      error: () => this.toast.error("La formation n'a pas pu être supprimée."),
+    });
   }
 
-  /**
-   * Redirige ou ouvre la modale de modification
-   */
-  editFormation(formation: FormationResponse): void {
-    this.toastr.info(`Modification de : ${formation.titre}`);
+  protected urlImage(chemin: string | undefined): string {
+    return chemin ? `${environment.apiUrl}/${chemin}` : '';
+  }
+
+  /** Bascule sur le visuel de repli quand le fichier est absent du serveur. */
+  protected imageIndisponible(id: number): void {
+    this.imagesCassees.update((cassees) => new Set(cassees).add(id));
+  }
+
+  /** Vignette affichable, ou chaîne vide si elle manque ou n'a pas chargé. */
+  protected vignette(formation: FormationResponse): string {
+    return this.imagesCassees().has(formation.id) ? '' : this.urlImage(formation.imageUrl);
+  }
+
+  protected libelleNiveau(niveau: string): string {
+    return LIBELLE_NIVEAU[niveau] ?? niveau;
+  }
+
+  protected badgeNiveau(niveau: string): string {
+    return BADGE_NIVEAU[niveau] ?? 'badge-secondary';
+  }
+
+  protected surRecherche(evenement: Event): void {
+    this.recherche.set((evenement.target as HTMLInputElement).value);
   }
 }

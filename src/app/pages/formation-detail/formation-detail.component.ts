@@ -1,249 +1,672 @@
-import { Component, inject, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { CoursRequestDTO, CoursResponseDTO } from "src/app/models/Cours";
-import { FormationResponse } from "src/app/models/Formation";
-import { ModuleResponse } from "src/app/models/Module";
-import { QuizRequestDTO, QuizResponseDTO } from "src/app/models/Quiz";
-import { CoursService } from "src/app/services/cours.service";
-import { FormationService } from "src/app/services/formation.service";
-import { ModuleService } from "src/app/services/module.service";
-import { QuestionService } from "src/app/services/question.service";
-import { QuizService } from "src/app/services/quiz.service";
-import { environment } from "src/environments/environment";
-import { FormModalComponent } from "../form-modal/form-modal.component";
-import { QuestionModalComponent } from "../question-modal/question-modal.component";
-import { QuestionResponseDTO } from "src/app/models/Question";
+import { Component, computed, inject, Injector, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
+import { catchError, of } from 'rxjs';
+import { CoursRequestDTO, CoursResponseDTO, TypeContenu } from '../../models/Cours';
+import { FormationResponse } from '../../models/Formation';
+import { ModuleRequest, ModuleResponse } from '../../models/Module';
+import { QuestionRequestDTO, QuestionResponseDTO } from '../../models/Question';
+import { QuizRequestDTO, QuizResponseDTO } from '../../models/Quiz';
+import { ConfirmService } from '../../services/confirm.service';
+import { CoursService } from '../../services/cours.service';
+import { FormationService } from '../../services/formation.service';
+import { ModuleService } from '../../services/module.service';
+import { QuestionService } from '../../services/question.service';
+import { QuizService } from '../../services/quiz.service';
+import { environment } from '../../../environments/environment';
+import {
+  DONNEES_FORMULAIRE,
+  FormModalComponent,
+  type DonneesFormulaire,
+  type ResultatFormulaire,
+  type TypeFormulaire,
+} from '../form-modal/form-modal.component';
+import {
+  DONNEES_QUESTION,
+  QuestionModalComponent,
+  type DonneesQuestion,
+} from '../question-modal/question-modal.component';
 
-interface ModuleUI extends ModuleResponse {
-  isOpen: boolean;
-  cours?: CoursResponseDTO[];
-  quiz?: QuizResponseDTO | null;
-  question?: QuestionResponseDTO[];
-  isLessonsLoading?: boolean;
+/** Module enrichi de son contenu chargé à la demande. */
+interface ModuleAffiche extends ModuleResponse {
+  deplie: boolean;
+  chargement: boolean;
+  charge: boolean;
+  cours: CoursResponseDTO[];
+  quiz: QuizResponseDTO | null;
+  questions: QuestionResponseDTO[];
 }
 
+/** Libellés lisibles des niveaux renvoyés par l'API. */
+const LIBELLE_NIVEAU: Record<string, string> = {
+  DEBUTANT: 'Débutant',
+  Intermediaire: 'Intermédiaire',
+  AVANCER: 'Avancé',
+};
+
+/** Libellés lisibles des formats de leçon. */
+const LIBELLE_FORMAT: Record<TypeContenu, string> = {
+  [TypeContenu.TEXTE]: 'Article',
+  [TypeContenu.VIDEO]: 'Vidéo',
+  [TypeContenu.PDF]: 'PDF',
+  [TypeContenu.PRESENTATION]: 'Présentation',
+};
+
+const ICONE_FORMAT: Record<TypeContenu, string> = {
+  [TypeContenu.TEXTE]: 'fa-align-left',
+  [TypeContenu.VIDEO]: 'fa-play',
+  [TypeContenu.PDF]: 'fa-file-pdf',
+  [TypeContenu.PRESENTATION]: 'fa-display',
+};
+
 @Component({
-  selector: "app-formation-detail",
-  templateUrl: "./formation-detail.component.html",
-  styleUrls: ["./formation-detail.component.scss"],
+  selector: 'app-formation-detail',
+  imports: [RouterLink],
+  templateUrl: './formation-detail.component.html',
 })
-export class FormationDetailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private modalService = inject(NgbModal);
-  private formationService = inject(FormationService);
-  private courService = inject(CoursService);
-  private moduleService = inject(ModuleService);
-  private quizService = inject(QuizService);
-  private questionService = inject(QuestionService);
+export class FormationDetailComponent {
+  private readonly modal = inject(NgbModal);
+  private readonly injector = inject(Injector);
+  private readonly confirmation = inject(ConfirmService);
+  private readonly toast = inject(ToastrService);
+  private readonly formationService = inject(FormationService);
+  private readonly moduleService = inject(ModuleService);
+  private readonly coursService = inject(CoursService);
+  private readonly quizService = inject(QuizService);
+  private readonly questionService = inject(QuestionService);
 
-  modules: ModuleUI[] = [];
-  formation: FormationResponse | null = null;
-  isLoading = true;
+  /** Fourni par le routeur via `withComponentInputBinding`. */
+  readonly id = input.required<string>();
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get("id");
-    if (id) {
-      this.loadFormationData(Number(id));
-    }
+  protected readonly formation = signal<FormationResponse | null>(null);
+  protected readonly modules = signal<ModuleAffiche[]>([]);
+  protected readonly chargement = signal(true);
+  protected readonly erreur = signal('');
+
+  /** Vrai quand le fichier de couverture est introuvable côté serveur. */
+  protected readonly imageCassee = signal(false);
+
+  protected readonly libelleFormat = LIBELLE_FORMAT;
+
+  protected libelleNiveau(niveau: string): string {
+    return LIBELLE_NIVEAU[niveau] ?? niveau;
+  }
+  protected readonly iconeFormat = ICONE_FORMAT;
+
+  protected readonly totalCours = computed(() =>
+    this.modules().reduce((somme, m) => somme + (m.nombreCours ?? 0), 0),
+  );
+
+  constructor() {
+    // `id` arrive par binding d'entrée ; on charge dès qu'il est disponible.
+    queueMicrotask(() => this.charger());
   }
 
-  loadFormationData(id: number) {
-    this.isLoading = true;
-    this.formationService.getFormationById(id).subscribe({
-      next: (data) => {
-        this.formation = data;
-        this.loadModules(id);
+  protected charger(): void {
+    const identifiant = Number(this.id());
+    if (!Number.isFinite(identifiant)) {
+      this.erreur.set('Identifiant de formation invalide.');
+      this.chargement.set(false);
+      return;
+    }
+
+    this.chargement.set(true);
+    this.erreur.set('');
+
+    this.formationService.getFormationById(identifiant).subscribe({
+      next: (formation) => {
+        this.formation.set(formation);
+        this.chargerModules(identifiant);
       },
-      error: (err) => (this.isLoading = false),
+      error: () => {
+        this.erreur.set("Cette formation est introuvable ou l'API est injoignable.");
+        this.chargement.set(false);
+      },
     });
   }
 
-  loadModules(formationId: number) {
-    this.moduleService.getModulesByFormation(formationId).subscribe((mods) => {
-      this.modules = mods.map((m) => ({ ...m, isOpen: false, cours: [] }));
-      this.isLoading = false;
+  private chargerModules(formationId: number): void {
+    this.moduleService.getModulesByFormation(formationId).subscribe({
+      next: (modules) => {
+        this.modules.set(
+          [...modules]
+            .sort((a, b) => a.ordre - b.ordre)
+            .map((m) => ({
+              ...m,
+              deplie: false,
+              chargement: false,
+              charge: false,
+              cours: [],
+              quiz: null,
+              questions: [],
+            })),
+        );
+        this.chargement.set(false);
+      },
+      error: () => {
+        this.toast.error("Les modules n'ont pas pu être chargés.");
+        this.chargement.set(false);
+      },
     });
   }
 
-  toggleModule(index: number) {
-    const module = this.modules[index];
-    module.isOpen = !module.isOpen;
-    if (module.isOpen && module.cours?.length === 0) {
-      this.loadModuleContent(index);
+  // --- Dépliage / chargement paresseux ---------------------------------------
+
+  protected basculerModule(id: number): void {
+    const module = this.modules().find((m) => m.id === id);
+    if (!module) {
+      return;
+    }
+
+    this.majModule(id, { deplie: !module.deplie });
+
+    if (!module.deplie && !module.charge) {
+      this.chargerContenu(id);
     }
   }
 
-  loadModuleContent(index: number) {
-    const module = this.modules[index];
-    module.isLessonsLoading = true;
+  private chargerContenu(moduleId: number): void {
+    this.majModule(moduleId, { chargement: true });
 
-    // On charge les cours
-    this.courService.getCoursByModule(module.id).subscribe((cours) => {
-      module.cours = cours;
-      module.isLessonsLoading = false;
+    this.coursService.getCoursByModule(moduleId).subscribe({
+      next: (cours) =>
+        this.majModule(moduleId, {
+          cours: [...cours].sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0)),
+          chargement: false,
+          charge: true,
+        }),
+      error: () => this.majModule(moduleId, { chargement: false, charge: true }),
     });
 
-    // On charge aussi le quiz du module
-    this.quizService.getQuizByModule(module.id).subscribe((quiz) => {
-      module.quiz = quiz;
-      if (quiz && quiz.id) {
-        this.questionService
-          .getQuestionsByQuiz(quiz.id)
-          .subscribe((questions) => {
-            module.question = questions;
-          });
-      }
-    });
-  }
-
-  // --- Méthodes CRUD (Actions) ---
-
-  addModule() {
-    const modalRef = this.modalService.open(FormModalComponent);
-    modalRef.componentInstance.title = "Nouveau Module";
-    modalRef.componentInstance.type = "MODULE";
-
-    modalRef.result
-      .then((result) => {
-        if (result) {
-          const newModule = {
-            titre: result.titre,
-            description: result.description,
-            ordre: result.ordre,
-            dureeEstimee: result.dureeEstimee,
-          };
-
-          this.moduleService
-            .createModule(this.formation!.id, newModule)
-            .subscribe((res) => {
-              this.modules.push({
-                ...res,
-                isOpen: false,
-                cours: [],
-                quiz: null,
-              });
-            });
+    // Un module sans quiz fait répondre l'API en erreur : c'est un cas normal,
+    // pas une panne, d'où le repli sur `null`.
+    this.quizService
+      .getQuizByModule(moduleId)
+      .pipe(catchError(() => of(null)))
+      .subscribe((quiz) => {
+        this.majModule(moduleId, { quiz });
+        if (quiz?.id) {
+          this.chargerQuestions(moduleId, quiz.id);
         }
-      })
-      .catch(() => {}); // Gère la fermeture sans sauvegarde
-  }
-
-  addCours(moduleId: number, index: number) {
-    const modalRef = this.modalService.open(FormModalComponent);
-    modalRef.componentInstance.title = "Ajouter une leçon";
-    modalRef.componentInstance.type = "COURS";
-
-    modalRef.result
-      .then((result) => {
-        if (result) {
-          if (!this.modules[index].cours) {
-            this.modules[index].cours = [];
-          }
-
-          // 1. Préparer le DTO (données textuelles)
-          const newCours: CoursRequestDTO = {
-            titre: result.titre,
-            contenu: result.contenu,
-            typeContenu: result.typeContenu,
-            videoUrl: result.videoUrl,
-            documentUrl: result.documentUrl,
-            ordre: (this.modules[index].cours?.length || 0) + 1,
-          };
-
-          // 2. Récupérer le fichier depuis la modale
-          const fichierASauvegarder = result.fichier;
-
-          // 3. Appeler le service avec les deux arguments
-          this.courService
-            .createCours(moduleId, newCours, fichierASauvegarder)
-            .subscribe({
-              next: (res) => {
-                this.modules[index].cours?.push(res);
-                alert("Cours ajouté avec succès !");
-              },
-              error: (err) => {
-                console.error("Erreur lors de la création du cours", err);
-                alert("Erreur lors de l'ajout du cours au backend.");
-              },
-            });
-        }
-      })
-      .catch(() => {
-        /* Fermeture sans save */
       });
   }
 
-  addQuestionToQuiz(quizId: number, index: number) {
-    const modalRef = this.modalService.open(QuestionModalComponent, {
-      size: "lg",
-    });
+  private chargerQuestions(moduleId: number, quizId: number): void {
+    this.questionService
+      .getQuestionsByQuiz(quizId)
+      .pipe(catchError(() => of([] as QuestionResponseDTO[])))
+      .subscribe((questions) => this.majModule(moduleId, { questions }));
+  }
 
-    modalRef.result.then((result) => {
-      if (result) {
-        // result contient déjà { texte, type, points, reponseOptions: [...] }
-        this.questionService.createQuestion(quizId, result).subscribe({
-          next: () => {
-            this.loadModuleContent(index); // Rafraîchit l'UI
-            alert("Question et options ajoutées !");
+  /** Remplace un module par une copie modifiée, sans muter le signal en place. */
+  private majModule(id: number, champs: Partial<ModuleAffiche>): void {
+    this.modules.update((liste) =>
+      liste.map((m) => (m.id === id ? { ...m, ...champs } : m)),
+    );
+  }
+
+  // --- Modules ---------------------------------------------------------------
+
+  protected async ajouterModule(): Promise<void> {
+    const resultat = await this.ouvrirFormulaire('MODULE', 'Nouveau module', {
+      ordre: this.modules().length + 1,
+    });
+    if (!resultat) {
+      return;
+    }
+
+    const formation = this.formation();
+    if (!formation) {
+      return;
+    }
+
+    this.moduleService.createModule(formation.id, this.versModule(resultat)).subscribe({
+      next: (module) => {
+        this.modules.update((liste) => [
+          ...liste,
+          {
+            ...module,
+            deplie: false,
+            chargement: false,
+            charge: true,
+            cours: [],
+            quiz: null,
+            questions: [],
           },
-          error: (err) => alert("Erreur lors de l'ajout des questions."),
-        });
-      }
+        ]);
+        this.toast.success('Module ajouté.');
+      },
+      error: () => this.toast.error("Le module n'a pas pu être créé."),
     });
   }
 
-  manageQuiz(moduleId: number, index: number) {
-    const modalRef = this.modalService.open(FormModalComponent);
-    modalRef.componentInstance.title = "Configurer le Quiz du Module";
-    modalRef.componentInstance.type = "QUIZ";
+  protected async modifierModule(module: ModuleAffiche): Promise<void> {
+    const resultat = await this.ouvrirFormulaire(
+      'MODULE',
+      'Modifier le module',
+      {
+        titre: module.titre,
+        description: module.description,
+        ordre: module.ordre,
+        dureeEstimee: module.dureeEstimee,
+      },
+      true,
+    );
+    if (!resultat) {
+      return;
+    }
 
-    modalRef.result
-      .then((result) => {
-        if (result) {
-          // Préparation du DTO correspondant à ta capture Bruno
-          const newQuiz: QuizRequestDTO = {
-            titre: result.titre,
-            description: result.description || "Quiz de fin de module",
-            duree: result.duree,
-            scoreMinimum: result.scoreMinimun,
-            nombreTentatives: result.nombreTentatives,
-          };
-
-          // Appel au service avec l'ID du module
-          this.quizService.createQuiz(moduleId, newQuiz).subscribe({
-            next: (res) => {
-              this.modules[index].quiz = res; // Mise à jour immédiate de l'UI
-              alert("Le quiz a été créé avec succès !");
-            },
-            error: (err) => {
-              console.error("Erreur creation quiz", err);
-              alert(
-                "Impossible de créer le quiz. Vérifiez si un quiz n'existe pas déjà."
-              );
-            },
-          });
-        }
-      })
-      .catch(() => {});
+    this.moduleService.updateModule(module.id, this.versModule(resultat)).subscribe({
+      next: (misAJour) => {
+        this.majModule(module.id, misAJour);
+        this.trierModules();
+        this.toast.success('Module mis à jour.');
+      },
+      error: () => this.toast.error("Le module n'a pas pu être modifié."),
+    });
   }
 
-  deleteModule(id: number) {
-    if (
-      confirm(
-        "Attention: Supprimer ce module supprimera tous les cours et quiz associés. Continuer ?"
+  protected async supprimerModule(module: ModuleAffiche): Promise<void> {
+    const confirme = await this.confirmation.supprimer(
+      module.titre,
+      'Les leçons et le quiz rattachés à ce module seront supprimés avec lui. Cette action est irréversible.',
+    );
+    if (!confirme) {
+      return;
+    }
+
+    this.moduleService.deleteModule(module.id).subscribe({
+      next: () => {
+        this.modules.update((liste) => liste.filter((m) => m.id !== module.id));
+        this.toast.success('Module supprimé.');
+      },
+      error: () => this.toast.error("Le module n'a pas pu être supprimé."),
+    });
+  }
+
+  /** Déplace un module d'un cran et persiste le nouvel ordre. */
+  protected deplacerModule(index: number, direction: -1 | 1): void {
+    const liste = [...this.modules()];
+    const cible = index + direction;
+    if (cible < 0 || cible >= liste.length) {
+      return;
+    }
+
+    [liste[index], liste[cible]] = [liste[cible], liste[index]];
+    const reordonnee = liste.map((m, i) => ({ ...m, ordre: i + 1 }));
+    this.modules.set(reordonnee);
+
+    const formation = this.formation();
+    if (!formation) {
+      return;
+    }
+
+    this.moduleService
+      .reorderModules(
+        formation.id,
+        reordonnee.map((m) => m.id),
       )
-    ) {
-      this.moduleService.deleteModule(id).subscribe({
-        next: () => {
-          this.modules = this.modules.filter((m) => m.id !== id);
+      .subscribe({
+        // L'ordre affiché est déjà à jour : en cas d'échec on recharge pour
+        // revenir à l'état réel du serveur plutôt que de mentir à l'écran.
+        error: () => {
+          this.toast.error("L'ordre n'a pas pu être enregistré.");
+          this.chargerModules(formation.id);
         },
-        error: (err) => alert("Erreur lors de la suppression"),
       });
+  }
+
+  // --- Leçons ----------------------------------------------------------------
+
+  protected async ajouterCours(module: ModuleAffiche): Promise<void> {
+    const resultat = await this.ouvrirFormulaire('COURS', 'Nouvelle leçon', {
+      ordre: module.cours.length + 1,
+    });
+    if (!resultat) {
+      return;
+    }
+
+    this.coursService
+      .createCours(module.id, this.versCours(resultat), resultat.fichier ?? undefined)
+      .subscribe({
+        next: (cours) => {
+          this.majModule(module.id, {
+            cours: [...module.cours, cours],
+            nombreCours: (module.nombreCours ?? 0) + 1,
+          });
+          this.toast.success('Leçon ajoutée.');
+        },
+        error: () => this.toast.error("La leçon n'a pas pu être créée."),
+      });
+  }
+
+  protected async modifierCours(
+    module: ModuleAffiche,
+    cours: CoursResponseDTO,
+  ): Promise<void> {
+    const resultat = await this.ouvrirFormulaire(
+      'COURS',
+      'Modifier la leçon',
+      {
+        titre: cours.titre,
+        contenu: cours.contenu,
+        typeContenu: cours.typeContenu,
+        videoUrl: cours.videoUrl,
+        documentUrl: cours.documentUrl,
+        ordre: cours.ordre,
+      },
+      true,
+    );
+    if (!resultat) {
+      return;
+    }
+
+    this.coursService.updateCours(cours.id, this.versCours(resultat)).subscribe({
+      next: (misAJour) => {
+        this.majModule(module.id, {
+          cours: module.cours
+            .map((c) => (c.id === cours.id ? misAJour : c))
+            .sort((a, b) => (a.ordre ?? 0) - (b.ordre ?? 0)),
+        });
+        this.toast.success('Leçon mise à jour.');
+      },
+      error: () => this.toast.error("La leçon n'a pas pu être modifiée."),
+    });
+  }
+
+  protected async supprimerCours(
+    module: ModuleAffiche,
+    cours: CoursResponseDTO,
+  ): Promise<void> {
+    const confirme = await this.confirmation.supprimer(cours.titre);
+    if (!confirme) {
+      return;
+    }
+
+    this.coursService.deleteCours(cours.id).subscribe({
+      next: () => {
+        this.majModule(module.id, {
+          cours: module.cours.filter((c) => c.id !== cours.id),
+          nombreCours: Math.max(0, (module.nombreCours ?? 1) - 1),
+        });
+        this.toast.success('Leçon supprimée.');
+      },
+      error: () => this.toast.error("La leçon n'a pas pu être supprimée."),
+    });
+  }
+
+  protected deplacerCours(module: ModuleAffiche, index: number, direction: -1 | 1): void {
+    const liste = [...module.cours];
+    const cible = index + direction;
+    if (cible < 0 || cible >= liste.length) {
+      return;
+    }
+
+    [liste[index], liste[cible]] = [liste[cible], liste[index]];
+    const reordonnee = liste.map((c, i) => ({ ...c, ordre: i + 1 }));
+    this.majModule(module.id, { cours: reordonnee });
+
+    this.coursService
+      .reorderCours(
+        module.id,
+        reordonnee.map((c) => c.id),
+      )
+      .subscribe({
+        error: () => {
+          this.toast.error("L'ordre n'a pas pu être enregistré.");
+          this.chargerContenu(module.id);
+        },
+      });
+  }
+
+  // --- Quiz ------------------------------------------------------------------
+
+  protected async creerQuiz(module: ModuleAffiche): Promise<void> {
+    const resultat = await this.ouvrirFormulaire('QUIZ', 'Créer le quiz du module', {
+      titre: `Quiz — ${module.titre}`,
+    });
+    if (!resultat) {
+      return;
+    }
+
+    this.quizService.createQuiz(module.id, this.versQuiz(resultat)).subscribe({
+      next: (quiz) => {
+        this.majModule(module.id, { quiz, hasQuiz: true });
+        this.toast.success('Quiz créé.');
+      },
+      error: () =>
+        this.toast.error("Le quiz n'a pas pu être créé. Ce module en a peut-être déjà un."),
+    });
+  }
+
+  protected async modifierQuiz(module: ModuleAffiche): Promise<void> {
+    const quiz = module.quiz;
+    if (!quiz) {
+      return;
+    }
+
+    const resultat = await this.ouvrirFormulaire(
+      'QUIZ',
+      'Modifier le quiz',
+      {
+        titre: quiz.titre,
+        description: quiz.description,
+        duree: quiz.duree,
+        scoreMinimum: quiz.scoreMinimum,
+        nombreTentatives: quiz.nombreTentatives,
+      },
+      true,
+    );
+    if (!resultat) {
+      return;
+    }
+
+    this.quizService.updateQuiz(quiz.id, this.versQuiz(resultat)).subscribe({
+      next: (misAJour) => {
+        this.majModule(module.id, { quiz: misAJour });
+        this.toast.success('Quiz mis à jour.');
+      },
+      error: () => this.toast.error("Le quiz n'a pas pu être modifié."),
+    });
+  }
+
+  protected async supprimerQuiz(module: ModuleAffiche): Promise<void> {
+    const quiz = module.quiz;
+    if (!quiz) {
+      return;
+    }
+
+    const confirme = await this.confirmation.supprimer(
+      quiz.titre,
+      'Les questions du quiz et les tentatives des apprenants seront perdues.',
+    );
+    if (!confirme) {
+      return;
+    }
+
+    this.quizService.deleteQuiz(quiz.id).subscribe({
+      next: () => {
+        this.majModule(module.id, { quiz: null, questions: [], hasQuiz: false });
+        this.toast.success('Quiz supprimé.');
+      },
+      error: () => this.toast.error("Le quiz n'a pas pu être supprimé."),
+    });
+  }
+
+  protected async ajouterQuestion(module: ModuleAffiche): Promise<void> {
+    const quiz = module.quiz;
+    if (!quiz) {
+      return;
+    }
+
+    const resultat = await this.ouvrirFormulaireQuestion('Nouvelle question', null);
+    if (!resultat) {
+      return;
+    }
+
+    this.questionService.createQuestion(quiz.id, resultat).subscribe({
+      next: () => {
+        this.chargerQuestions(module.id, quiz.id);
+        this.toast.success('Question ajoutée.');
+      },
+      error: () => this.toast.error("La question n'a pas pu être ajoutée."),
+    });
+  }
+
+  /**
+   * Modifie une question et ses réponses.
+   *
+   * Les options sont renvoyées en bloc : le backend remplace la liste
+   * entière, il n'existe pas d'endpoint par réponse.
+   */
+  protected async modifierQuestion(
+    module: ModuleAffiche,
+    question: QuestionResponseDTO,
+  ): Promise<void> {
+    const quiz = module.quiz;
+    if (!quiz) {
+      return;
+    }
+
+    const resultat = await this.ouvrirFormulaireQuestion('Modifier la question', {
+      texte: question.texte,
+      type: question.type,
+      points: question.points,
+      reponseOptions: (question.reponseOptions ?? []).map((option) => ({
+        texte: option.texte,
+        estCorrecte: option.estCorrecte,
+      })),
+    });
+    if (!resultat) {
+      return;
+    }
+
+    this.questionService.updateQuestion(question.id, resultat).subscribe({
+      next: () => {
+        this.chargerQuestions(module.id, quiz.id);
+        this.toast.success('Question mise à jour.');
+      },
+      error: () => this.toast.error("La question n'a pas pu être modifiée."),
+    });
+  }
+
+  private async ouvrirFormulaireQuestion(
+    titre: string,
+    valeurs: QuestionRequestDTO | null,
+  ): Promise<QuestionRequestDTO | null> {
+    const donnees: DonneesQuestion = { titre, valeurs, edition: valeurs !== null };
+
+    const reference = this.modal.open(QuestionModalComponent, {
+      size: 'lg',
+      backdrop: 'static',
+      injector: Injector.create({
+        providers: [{ provide: DONNEES_QUESTION, useValue: donnees }],
+        parent: this.injector,
+      }),
+    });
+
+    try {
+      return (await reference.result) as QuestionRequestDTO;
+    } catch {
+      return null;
     }
   }
 
-  getImageFullUrl(path: string) {
-    return `${environment.apiUrl}/${path}`;
+  protected async supprimerQuestion(
+    module: ModuleAffiche,
+    question: QuestionResponseDTO,
+  ): Promise<void> {
+    const confirme = await this.confirmation.supprimer(question.texte);
+    if (!confirme) {
+      return;
+    }
+
+    this.questionService.deleteQuestion(question.id).subscribe({
+      next: () => {
+        this.majModule(module.id, {
+          questions: module.questions.filter((q) => q.id !== question.id),
+        });
+        this.toast.success('Question supprimée.');
+      },
+      error: () => this.toast.error("La question n'a pas pu être supprimée."),
+    });
+  }
+
+  // --- Utilitaires -----------------------------------------------------------
+
+  protected urlImage(chemin: string | undefined): string {
+    return this.imageCassee() ? '' : chemin ? `${environment.apiUrl}/${chemin}` : '';
+  }
+
+  /**
+   * Retire la colonne d'image quand le fichier manque côté serveur.
+   *
+   * L'ancienne version masquait la balise `img` elle-même, ce qui laissait sa
+   * colonne vide à côté de la fiche.
+   */
+  protected imageIndisponible(): void {
+    this.imageCassee.set(true);
+  }
+
+  private trierModules(): void {
+    this.modules.update((liste) => [...liste].sort((a, b) => a.ordre - b.ordre));
+  }
+
+  private async ouvrirFormulaire(
+    type: TypeFormulaire,
+    titre: string,
+    valeurs: Partial<ResultatFormulaire>,
+    edition = false,
+  ): Promise<ResultatFormulaire | null> {
+    // En création, `valeurs` ne porte qu'un ordre de départ ; en modification,
+    // l'objet complet. Dans les deux cas la modale les applique telles quelles.
+    const donnees: DonneesFormulaire = { type, titre, valeurs, edition };
+
+    const reference = this.modal.open(FormModalComponent, {
+      size: type === 'COURS' ? 'lg' : undefined,
+      backdrop: 'static',
+      ariaLabelledBy: 'titre-modale-contenu',
+      injector: Injector.create({
+        providers: [{ provide: DONNEES_FORMULAIRE, useValue: donnees }],
+        parent: this.injector,
+      }),
+    });
+
+    try {
+      return (await reference.result) as ResultatFormulaire;
+    } catch {
+      return null;
+    }
+  }
+
+  private versModule(r: ResultatFormulaire): ModuleRequest {
+    return {
+      titre: r.titre,
+      description: r.description,
+      ordre: r.ordre,
+      dureeEstimee: r.dureeEstimee,
+    };
+  }
+
+  private versCours(r: ResultatFormulaire): CoursRequestDTO {
+    return {
+      titre: r.titre,
+      contenu: r.contenu,
+      typeContenu: r.typeContenu,
+      videoUrl: r.videoUrl,
+      documentUrl: r.documentUrl,
+      ordre: r.ordre,
+    };
+  }
+
+  private versQuiz(r: ResultatFormulaire): QuizRequestDTO {
+    return {
+      titre: r.titre,
+      description: r.description,
+      duree: r.duree,
+      scoreMinimum: r.scoreMinimum,
+      nombreTentatives: r.nombreTentatives,
+    };
   }
 }

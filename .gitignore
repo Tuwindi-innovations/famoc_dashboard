@@ -39,3 +39,6 @@ testem.log
 .DS_Store
 Thumbs.db
 package-lock.json
+
+# Instructions Claude (ne jamais committer)
+claude.md

@@ -63,7 +63,7 @@
               <div class="input-group input-group-alternative mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"
-                    ><i class="ni ni-single-02"></i
+                    ><i class="fa-solid fa-user"></i
                   ></span>
                 </div>
                 <input
@@ -79,7 +79,7 @@
               <div class="input-group input-group-alternative mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"
-                    ><i class="ni ni-circle-08"></i
+                    ><i class="fa-solid fa-user-plus"></i
                   ></span>
                 </div>
                 <input
@@ -95,7 +95,7 @@
               <div class="input-group input-group-alternative mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"
-                    ><i class="ni ni-tag"></i
+                    ><i class="fa-solid fa-tag"></i
                   ></span>
                 </div>
                 <input
@@ -110,7 +110,7 @@
               <div class="input-group input-group-alternative mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"
-                    ><i class="ni ni-email-83"></i
+                    ><i class="fa-solid fa-envelope"></i
                   ></span>
                 </div>
                 <input
@@ -125,7 +125,7 @@
               <div class="input-group input-group-alternative mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text"
-                    ><i class="ni ni-mobile-button"></i
+                    ><i class="fa-solid fa-mobile-screen-button"></i
                   ></span>
                 </div>
                 <input
@@ -140,7 +140,7 @@
               <div class="input-group input-group-alternative">
                 <div class="input-group-prepend">
                   <span class="input-group-text">
-                    <i class="ni ni-badge"></i>
+                    <i class="fa-solid fa-id-badge"></i>
                   </span>
                 </div>
                 <select class="form-control" formControlName="role">
@@ -154,7 +154,7 @@
               <div class="input-group input-group-alternative">
                 <div class="input-group-prepend">
                   <span class="input-group-text"
-                    ><i class="ni ni-lock-circle-open"></i
+                    ><i class="fa-solid fa-lock-open"></i
                   ></span>
                 </div>
                 <input
@@ -170,10 +170,9 @@
                 >
                   <span class="input-group-text">
                     <i
-                      class="ni"
-                      [ngClass]="
-                        showPassword ? 'ni-zoom-split-in' : 'ni-zoom-split-out'
-                      "
+                      class="fa-solid"
+                      [class.fa-eye-slash]="showPassword"
+                      [class.fa-eye]="!showPassword"
                     ></i>
                   </span>
                 </div>

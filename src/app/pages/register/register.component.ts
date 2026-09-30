@@ -1,13 +1,13 @@
 import { Component, inject, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "src/app/services/auth.service";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
-  selector: "app-register",
-  templateUrl: "./register.component.html",
-  styleUrls: ["./register.component.scss"],
-})
+    imports: [FormsModule, ReactiveFormsModule],
+    selector: "app-register",
+    templateUrl: "./register.component.html",
+    styleUrls: ["./register.component.scss"]})
 export class RegisterComponent implements OnInit {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);

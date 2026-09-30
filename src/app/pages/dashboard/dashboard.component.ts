@@ -1,60 +1,262 @@
-import { Component, OnInit } from '@angular/core';
-import Chart from 'chart.js';
-
-// core components
 import {
-  chartOptions,
-  parseOptions,
-  chartExample1,
-  chartExample2
-} from "../../variables/charts";
+  afterRenderEffect,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { libelleCategorie } from '../../models/Alerte';
+import { Chart, type ChartConfiguration } from 'chart.js/auto';
+import type { DashboardStats, PointTemporel, RepartitionItem } from '../../models/DashboardStats';
+import { DashboardStatsService } from '../../services/dashboard-stats.service';
+
+/** Libellés lisibles pour les niveaux renvoyés par l'API. */
+const LIBELLES_NIVEAU: Record<string, string> = {
+  DEBUTANT: 'Débutant',
+  Intermediaire: 'Intermédiaire',
+  AVANCER: 'Avancé',
+};
+
+/** Ordre pédagogique des niveaux, indépendant de leur effectif. */
+const ORDRE_NIVEAU = ['DEBUTANT', 'Intermediaire', 'AVANCER'];
 
 @Component({
   selector: 'app-dashboard',
+  imports: [RouterLink],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
+  private readonly statsService = inject(DashboardStatsService);
 
-  public datasets: any;
-  public data: any;
-  public salesChart;
-  public clicked: boolean = true;
-  public clicked1: boolean = false;
+  private readonly canvasCreations =
+    viewChild<ElementRef<HTMLCanvasElement>>('canvasCreations');
 
-  ngOnInit() {
+  protected readonly stats = signal<DashboardStats | null>(null);
+  protected readonly chargement = signal(true);
+  protected readonly erreur = signal(false);
 
-    this.datasets = [
-      [0, 20, 10, 30, 15, 40, 20, 60, 60],
-      [0, 20, 5, 25, 10, 30, 15, 40, 40]
-    ];
-    this.data = this.datasets[0];
+  /** Bascule entre le graphique et son équivalent tabulaire. */
+  protected readonly vueTableau = signal(false);
 
+  private graphique?: Chart;
 
-    var chartOrders = document.getElementById('chart-orders');
+  constructor() {
+    this.charger();
 
-    parseOptions(Chart, chartOptions());
+    // Le graphique est (re)construit après chaque rendu où les données ou la
+    // vue changent ; `afterRenderEffect` garantit que le canvas existe.
+    afterRenderEffect(() => {
+      const donnees = this.stats()?.formations.creationsParMois;
+      const canvas = this.canvasCreations()?.nativeElement;
 
+      this.graphique?.destroy();
+      this.graphique = undefined;
 
-    var ordersChart = new Chart(chartOrders, {
-      type: 'bar',
-      options: chartExample2.options,
-      data: chartExample2.data
+      if (donnees && canvas) {
+        this.graphique = new Chart(canvas, this.configurationCreations(donnees));
+      }
     });
-
-    var chartSales = document.getElementById('chart-sales');
-
-    this.salesChart = new Chart(chartSales, {
-			type: 'line',
-			options: chartExample1.options,
-			data: chartExample1.data
-		});
   }
 
+  protected charger(): void {
+    this.chargement.set(true);
+    this.erreur.set(false);
 
-  public updateOptions() {
-    this.salesChart.data.datasets[0].data = this.data;
-    this.salesChart.update();
+    this.statsService.charger().subscribe({
+      next: (stats) => {
+        this.stats.set(stats);
+        this.chargement.set(false);
+      },
+      error: () => {
+        this.erreur.set(true);
+        this.chargement.set(false);
+      },
+    });
   }
 
+  // --- Données dérivées ------------------------------------------------------
+
+  /** Niveaux dans l'ordre pédagogique, avec libellés lisibles. */
+  protected readonly niveaux = computed<RepartitionItem[]>(() => {
+    const brut = this.stats()?.formations.parNiveau ?? [];
+    return [...brut]
+      .sort((a, b) => indexNiveau(a.libelle) - indexNiveau(b.libelle))
+      .map((item) => ({
+        libelle: LIBELLES_NIVEAU[item.libelle] ?? item.libelle,
+        valeur: item.valeur,
+      }));
+  });
+
+  /** Les six premières catégories ; le reste est replié dans « Autres ». */
+  protected readonly categories = computed<RepartitionItem[]>(() => {
+    const brut = this.stats()?.formations.parCategorie ?? [];
+    if (brut.length <= 6) {
+      return brut;
+    }
+    const tete = brut.slice(0, 6);
+    const reste = brut.slice(6).reduce((somme, item) => somme + item.valeur, 0);
+    return [...tete, { libelle: 'Autres', valeur: reste }];
+  });
+
+  protected readonly roles = computed<RepartitionItem[]>(
+    () => this.stats()?.utilisateurs.parRole ?? [],
+  );
+
+  /** Série temporelle avec libellés de mois formatés pour le tableau. */
+  protected readonly creations = computed(() =>
+    (this.stats()?.formations.creationsParMois ?? []).map((point) => ({
+      ...point,
+      libelle: libelleMois(point.periode),
+    })),
+  );
+
+  /** Signalements encore ouverts : le chiffre qui ouvre la page. */
+  protected readonly aTraiter = computed(() => {
+    const alertes = this.stats()?.alertes;
+    return alertes ? alertes.envoyees + alertes.enCours : 0;
+  });
+
+  /** Date lisible du plus ancien signalement ouvert. */
+  protected readonly plusAncienne = computed(() => {
+    const brut = this.stats()?.alertes.plusAncienneEnAttente;
+    if (!brut) {
+      return null;
+    }
+    const date = new Date(brut);
+    return Number.isNaN(date.getTime())
+      ? null
+      : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  });
+
+  /** Catégories des alertes ouvertes, les plus fournies d'abord. */
+  protected readonly categoriesAlerte = computed<RepartitionItem[]>(() => {
+    const brut = this.stats()?.alertes.parCategorie ?? [];
+    return brut.slice(0, 4).map((item) => ({
+      libelle: libelleCategorie(
+        item.libelle === 'Non catégorisée' ? null : item.libelle,
+      ),
+      valeur: item.valeur,
+    }));
+  });
+
+  /** Part des alertes résolues, pour la jauge de traitement. */
+  protected readonly tauxResolution = computed(() => {
+    const alertes = this.stats()?.alertes;
+    if (!alertes?.total) {
+      return 0;
+    }
+    return Math.round((alertes.resolues / alertes.total) * 100);
+  });
+
+  /** Plus grande valeur d'une répartition, pour dimensionner les barres. */
+  protected maximum(items: readonly RepartitionItem[]): number {
+    return items.reduce((max, item) => Math.max(max, item.valeur), 0);
+  }
+
+  /** Largeur de barre en pourcentage, jamais nulle pour une valeur non nulle. */
+  protected largeur(valeur: number, items: readonly RepartitionItem[]): number {
+    const max = this.maximum(items);
+    return max ? (valeur / max) * 100 : 0;
+  }
+
+  // --- Configuration du graphique -------------------------------------------
+
+  /**
+   * Série unique : donc rampe bleue, pas de palette catégorielle et pas de
+   * légende (le titre de la carte nomme la série).
+   */
+  private configurationCreations(points: readonly PointTemporel[]): ChartConfiguration {
+    // Palette Argon (`$primary`, `$gray-600`, `$gray-200`, `$default`).
+    const trait = '#5e72e4';
+    const remplissage = 'rgba(94, 114, 228, 0.14)';
+    const encreDiscrete = '#8898aa';
+    const ligneGrille = '#e9ecef';
+    const surface = '#ffffff';
+    const encre = '#172b4d';
+
+    return {
+      type: 'line',
+      data: {
+        labels: points.map((p) => libelleMois(p.periode)),
+        datasets: [
+          {
+            label: 'Formations créées',
+            data: points.map((p) => p.valeur),
+            borderColor: trait,
+            backgroundColor: remplissage,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointBackgroundColor: trait,
+            // Anneau de la couleur de surface : le point reste lisible même
+            // superposé à la courbe.
+            pointHoverBorderColor: surface,
+            pointHoverBorderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        // Réticule : la valeur de tous les points du mois survolé.
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: encre,
+            titleColor: surface,
+            bodyColor: surface,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            callbacks: {
+              label: (contexte) => {
+                const valeur = contexte.parsed.y;
+                return `${valeur} formation${valeur === 1 ? '' : 's'}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { color: ligneGrille },
+            ticks: { color: encreDiscrete, font: { size: 11 } },
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: ligneGrille },
+            border: { display: false },
+            ticks: {
+              color: encreDiscrete,
+              font: { size: 11 },
+              // Un compteur de formations est entier : pas de demi-graduation.
+              precision: 0,
+            },
+          },
+        },
+      },
+    };
+  }
+}
+
+function indexNiveau(niveau: string): number {
+  const index = ORDRE_NIVEAU.indexOf(niveau);
+  return index === -1 ? ORDRE_NIVEAU.length : index;
+}
+
+/** `2026-03` → `mars 26`. */
+function libelleMois(periode: string): string {
+  const [annee, mois] = periode.split('-').map(Number);
+  if (!annee || !mois) {
+    return periode;
+  }
+  const date = new Date(annee, mois - 1, 1);
+  const nom = date.toLocaleDateString('fr-FR', { month: 'short' });
+  return `${nom} ${String(annee).slice(2)}`;
 }

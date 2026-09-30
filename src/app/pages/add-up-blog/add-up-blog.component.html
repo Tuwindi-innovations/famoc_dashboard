@@ -43,9 +43,11 @@
                       <option value="" disabled>
                         Sélectionner une catégorie
                       </option>
-                      <option *ngFor="let cat of categories" [value]="cat.id">
+                      @for (cat of categories; track cat) {
+                      <option [value]="cat.id">
                         {{ cat.nom }}
                       </option>
+                      }
                     </select>
                   </div>
                 </div>
@@ -70,15 +72,15 @@
                   <div class="form-group">
                     <label class="form-control-label"
                       >Date de Publication</label
-                    >
-                    <input
-                      type="date"
-                      name="datePublication"
-                      [(ngModel)]="blogRequest.datePublication"
-                      class="form-control form-control-alternative"
-                    />
-                  </div>
-                </div> -->
+                      >
+                      <input
+                        type="date"
+                        name="datePublication"
+                        [(ngModel)]="blogRequest.datePublication"
+                        class="form-control form-control-alternative"
+                        />
+                    </div>
+                  </div> -->
               </div>
             </div>
 
@@ -117,7 +119,8 @@
                 </div>
 
                 <div class="row mt-3">
-                  <div class="col-md-2 col-4 mb-2" *ngFor="let url of previews">
+                  @for (url of previews; track url) {
+                  <div class="col-md-2 col-4 mb-2">
                     <div class="avatar avatar-xl rounded shadow border">
                       <img
                         [src]="url"
@@ -125,6 +128,7 @@
                       />
                     </div>
                   </div>
+                  }
                 </div>
               </div>
             </div>
@@ -142,7 +146,7 @@
                 [disabled]="isSubmitting"
                 class="btn btn-primary px-5"
               >
-                <i class="ni ni-check-bold mr-2"></i>
+                <i class="fa-solid fa-check mr-2"></i>
                 {{
                   isSubmitting
                     ? "Envoi..."

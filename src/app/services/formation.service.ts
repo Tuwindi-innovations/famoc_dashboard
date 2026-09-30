@@ -41,11 +41,26 @@ export class FormationService {
     return this.http.get<FormationResponse>(`${this.apiUrl}/${id}`);
   }
 
+  /**
+   * Met à jour une formation, avec remplacement facultatif de la couverture.
+   *
+   * Sans nouvelle image, on envoie du JSON et le backend conserve celle déjà
+   * enregistrée ; avec une image, on passe en multipart sur la même route.
+   */
   modifier(
     id: number,
-    formation: FormationRequest
+    formation: FormationRequest,
+    image?: File
   ): Observable<FormationResponse> {
-    return this.http.put<FormationResponse>(`${this.apiUrl}/${id}`, formation);
+    if (!image) {
+      return this.http.put<FormationResponse>(`${this.apiUrl}/${id}`, formation);
+    }
+
+    const formData = new FormData();
+    formData.append("formation", JSON.stringify(formation));
+    formData.append("images", image);
+
+    return this.http.put<FormationResponse>(`${this.apiUrl}/${id}`, formData);
   }
 
   deleteFormation(id: number): Observable<boolean> {

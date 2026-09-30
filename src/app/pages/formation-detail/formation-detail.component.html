@@ -1,205 +1,392 @@
-<div class="container-fluid py-4" *ngIf="formation">
-  <div class="card shadow mb-4">
-    <div class="card-body d-flex align-items-center">
-      <img
-        [src]="getImageFullUrl(formation.imageUrl)"
-        class="rounded mr-4"
-        style="width: 100px; height: 100px; object-fit: cover"
-      />
-      <div>
-        <h1 class="h3 mb-0">{{ formation.titre }}</h1>
-        <p class="text-muted">{{ modules.length }} Modules au total</p>
+@if (chargement()) {
+  <div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+      <div class="header-body text-center mb-5">
+        <h1 class="text-white">Programme de la formation</h1>
       </div>
-      <button class="btn btn-primary ml-auto" (click)="addModule()">
-        <i class="fa fa-plus"></i> Ajouter un Module
-      </button>
     </div>
   </div>
-
-  <div class="container-fluid py-4" *ngIf="formation">
-    <div class="module-section">
-      <div
-        *ngFor="let mod of modules; let i = index"
-        class="card shadow-sm mb-4"
-      >
-        <div
-          class="card-header bg-white"
-          (click)="toggleModule(i)"
-          style="cursor: pointer"
+  <div class="container-fluid mt--7">
+    <div class="card shadow">
+      <div class="card-body text-center py-5" role="status">
+        <i class="fas fa-circle-notch fa-spin text-info fa-2x" aria-hidden="true"></i>
+        <p class="text-muted mt-3 mb-0">Chargement de la formation…</p>
+      </div>
+    </div>
+  </div>
+} @else if (erreur()) {
+  <div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+      <div class="header-body text-center mb-5">
+        <h1 class="text-white">Formation introuvable</h1>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid mt--7">
+    <div class="card shadow">
+      <div class="card-body text-center py-5">
+        <p class="text-muted mb-4">{{ erreur() }}</p>
+        <a class="btn btn-info btn-sm" [routerLink]="['/liste-formation']">
+          Retour au catalogue
+        </a>
+      </div>
+    </div>
+  </div>
+} @else if (formation(); as f) {
+  <div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+      <div class="header-body text-center mb-5">
+        <h1 class="text-white">{{ f.titre }}</h1>
+        <p class="text-white mb-4 mt-2">{{ f.description }}</p>
+        <a class="btn btn-neutral btn-sm" [routerLink]="['/liste-formation']">
+          <i class="fas fa-arrow-left text-info" aria-hidden="true"></i>
+          Catalogue
+        </a>
+        <a
+          class="btn btn-neutral btn-sm"
+          [routerLink]="['/formations', f.id, 'modifier']"
         >
-          <div class="d-flex align-items-center">
-            <i
-              class="fa mr-3"
-              [ngClass]="
-                mod.isOpen ? 'fa-chevron-down text-primary' : 'fa-chevron-right'
-              "
-            ></i>
-            <div class="flex-grow-1">
-              <h4 class="mb-0">Module {{ mod.ordre }}: {{ mod.titre }}</h4>
-              <small class="text-muted">
-                <i class="fa fa-clock mr-1"></i> Durée estimée :
-                {{ mod.dureeEstimee }}h |
-                <i class="fa fa-book-open mr-1 ml-2"></i>
-                {{ mod.nombreCours }} leçons
-              </small>
-            </div>
-            <div class="ml-auto">
-              <button
-                class="btn btn-sm btn-outline-danger"
-                (click)="deleteModule(mod.id); $event.stopPropagation()"
-              >
-                <i class="fa fa-trash"></i>
-              </button>
-            </div>
-          </div>
-          <div class="mt-2 text-muted small" *ngIf="mod.description">
-            {{ mod.description }}
-          </div>
-        </div>
-
-        <div class="card-body bg-light" *ngIf="mod.isOpen">
-          <h5
-            class="text-info border-bottom pb-2 d-flex justify-content-between align-items-center"
-          >
-            <span
-              ><i class="fa fa-graduation-cap mr-2"></i>Contenu du module</span
-            >
-            <button
-              class="btn btn-xs btn-outline-info"
-              (click)="addCours(mod.id, i)"
-            >
-              <i class="fa fa-plus"></i> Ajouter un cours
-            </button>
-          </h5>
-
-          <div class="list-group mb-4">
-            <div
-              *ngFor="let c of mod.cours"
-              class="list-group-item list-group-item-action flex-column align-items-start shadow-sm mb-2 border-left-info"
-            >
-              <div
-                class="d-flex w-100 justify-content-between align-items-center"
-              >
-                <h6 class="mb-1 font-weight-bold">
-                  <span class="badge badge-info mr-2">{{ c.ordre }}</span>
-                  {{ c.titre }}
-                </h6>
-                <span class="badge badge-light border">{{
-                  c.typeContenu
-                }}</span>
-              </div>
-
-              <div class="mt-2 small text-secondary">
-                <p class="mb-2" *ngIf="c.contenu">
-                  {{ c.contenu | slice : 0 : 150
-                  }}{{ c.contenu.length > 150 ? "..." : "" }}
-                </p>
-
-                <div class="links-section">
-                  <a
-                    *ngIf="c.videoUrl"
-                    [href]="c.videoUrl"
-                    target="_blank"
-                    class="btn btn-sm btn-outline-danger mr-2"
-                  >
-                    <i class="fa fa-play-circle"></i> Voir la Vidéo
-                  </a>
-                  <a
-                    *ngIf="c.documentUrl"
-                    [href]="c.documentUrl"
-                    target="_blank"
-                    class="btn btn-sm btn-outline-primary"
-                  >
-                    <i class="fa fa-file-pdf"></i> Télécharger le document
-                  </a>
-                </div>
-              </div>
-
-              <div class="text-right mt-2">
-                <button class="btn btn-sm btn-link text-primary">
-                  <i class="fa fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-link text-danger">
-                  <i class="fa fa-trash-alt"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <h5 class="text-warning border-bottom pb-2">
-            <i class="fa fa-star mr-2"></i>Évaluation
-          </h5>
-          <div *ngIf="mod.quiz" class="mb-3">
-            <div class="p-3 bg-white rounded border border-warning shadow-sm">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <h6 class="mb-1">
-                    <strong>{{ mod.quiz.titre }}</strong>
-                  </h6>
-                  <p class="small text-muted mb-0">
-                    {{ mod.quiz.description }}
-                  </p>
-                  <div class="mt-2">
-                    <span class="badge badge-warning mr-2"
-                      >Score min: {{ mod.quiz.scoreMinimum }}%</span
-                    >
-                    <span class="badge badge-dark"
-                      >Tentatives: {{ mod.quiz.nombreTentatives }}</span
-                    >
-                  </div>
-                </div>
-                <div class="btn-group">
-                  <button
-                    class="btn btn-sm btn-info"
-                    (click)="addQuestionToQuiz(mod.quiz.id, i)"
-                  >
-                    <i class="fa fa-plus"></i>
-                  </button>
-                  <button
-                    class="btn btn-sm btn-warning"
-                    (click)="manageQuiz(mod.id, i)"
-                  >
-                    <i class="fa fa-edit"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="mt-3 ml-3 border-left pl-3" *ngIf="mod.question">
-                <div *ngFor="let q of mod.question" class="mb-3">
-                  <div class="small font-weight-bold">
-                    {{ q.texte }} ({{ q.points }} pts)
-                  </div>
-                  <div
-                    *ngFor="let opt of q.reponseOptions"
-                    class="x-small ml-2"
-                  >
-                    <i
-                      class="fa fa-check text-success mr-1"
-                      *ngIf="opt.estCorrecte"
-                    ></i>
-                    <i
-                      class="fa fa-circle text-muted mr-1"
-                      *ngIf="!opt.estCorrecte"
-                      style="font-size: 6px"
-                    ></i>
-                    <span [class.text-success]="opt.estCorrecte">{{
-                      opt.texte
-                    }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <button
-            *ngIf="!mod.quiz"
-            class="btn btn-sm btn-outline-warning btn-block"
-            (click)="manageQuiz(mod.id, i)"
-          >
-            <i class="fa fa-plus"></i> Configurer le Quiz de fin de module
-          </button>
-        </div>
+          <i class="fas fa-pen text-info" aria-hidden="true"></i>
+          Modifier la formation
+        </a>
       </div>
     </div>
   </div>
-</div>
+
+  <div class="container-fluid mt--7">
+    <!-- Fiche d'identité de la formation -->
+    <div class="card shadow mb-4">
+      <div class="row no-gutters align-items-center">
+        @if (urlImage(f.imageUrl); as image) {
+          <div class="col-md-4">
+            <img
+              class="card-img"
+              style="height: 100%; object-fit: cover"
+              [src]="image"
+              alt=""
+              (error)="imageIndisponible()"
+            />
+          </div>
+        }
+        <div class="col">
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Niveau</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ libelleNiveau(f.niveau) }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Durée estimée</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ f.dureeEstimee }} h</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Catégorie</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ f.categorie || 'Non classée' }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Modules</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ modules().length }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Leçons</dt>
+              <dd class="col-6 col-md-8 mb-2">{{ totalCours() }}</dd>
+
+              <dt class="col-6 col-md-4 text-muted text-sm font-weight-600">Statut</dt>
+              <dd class="col-6 col-md-8 mb-0">
+                <span class="badge badge-pill" [class]="f.active ? 'badge-success' : 'badge-default'">
+                  {{ f.active ? 'Publiée' : 'Hors ligne' }}
+                </span>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Programme -->
+    <div class="card shadow">
+      <div class="card-header border-0">
+        <div class="row align-items-center">
+          <div class="col">
+            <h3 class="mb-0">Programme</h3>
+            <p class="text-muted text-sm mb-0">
+              Organisez les modules, leurs leçons et leur quiz. L'ordre affiché
+              ici est celui que verront les apprenants.
+            </p>
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-info btn-sm" (click)="ajouterModule()">
+              <i class="fas fa-plus" aria-hidden="true"></i>
+              Ajouter un module
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+
+    @if (!modules().length) {
+      <div class="text-center py-5">
+        <i class="fas fa-layer-group fa-2x text-muted" aria-hidden="true"></i>
+        <h4 class="mt-3 mb-2">Aucun module pour l'instant</h4>
+        <p class="text-muted mb-4">
+          Un module regroupe des leçons et, si vous le souhaitez, un quiz de fin.
+          Commencez par en créer un.
+        </p>
+        <button type="button" class="btn btn-info btn-sm" (click)="ajouterModule()">
+          Créer le premier module
+        </button>
+      </div>
+    } @else {
+      <ol class="programme">
+        @for (module of modules(); track module.id; let i = $index, premier = $first, dernier = $last) {
+          <li class="module">
+            <div class="module__head">
+              <div class="module__ordre" aria-hidden="true">{{ i + 1 }}</div>
+
+              <button
+                type="button"
+                class="module__toggle"
+                (click)="basculerModule(module.id)"
+                [attr.aria-expanded]="module.deplie"
+                [attr.aria-controls]="'contenu-module-' + module.id"
+              >
+                <span class="module__titre">{{ module.titre }}</span>
+                <span class="module__resume">
+                  {{ module.nombreCours || 0 }} leçon(s) ·
+                  {{ module.dureeEstimee }} h
+                  @if (module.hasQuiz || module.quiz) {
+                    · quiz
+                  }
+                </span>
+                <i
+                  class="module__chevron fas"
+                  [class.fa-chevron-down]="!module.deplie"
+                  [class.fa-chevron-up]="module.deplie"
+                  aria-hidden="true"
+                ></i>
+              </button>
+
+              <div class="module__actions">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-icon-only text-muted"
+                  (click)="deplacerModule(i, -1)"
+                  [disabled]="premier"
+                  [attr.aria-label]="'Monter le module ' + module.titre"
+                >
+                  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-icon-only text-muted"
+                  (click)="deplacerModule(i, 1)"
+                  [disabled]="dernier"
+                  [attr.aria-label]="'Descendre le module ' + module.titre"
+                >
+                  <i class="fas fa-arrow-down" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-icon-only text-muted"
+                  (click)="modifierModule(module)"
+                  [attr.aria-label]="'Modifier le module ' + module.titre"
+                >
+                  <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-icon-only text-muted"
+                  (click)="supprimerModule(module)"
+                  [attr.aria-label]="'Supprimer le module ' + module.titre"
+                >
+                  <i class="fas fa-trash-can" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+
+            @if (module.deplie) {
+              <div class="module__corps" [id]="'contenu-module-' + module.id">
+                @if (module.description) {
+                  <p class="module__description">{{ module.description }}</p>
+                }
+
+                @if (module.chargement) {
+                  <p class="text-muted text-sm mb-0" role="status">
+                    <i class="fas fa-circle-notch fa-spin mr-2" aria-hidden="true"></i>
+                    Chargement du module…
+                  </p>
+                } @else {
+                  <!-- Leçons -->
+                  <div class="bloc">
+                    <div class="bloc__head">
+                      <h4 class="bloc__titre">Leçons</h4>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        (click)="ajouterCours(module)"
+                      >
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        Ajouter une leçon
+                      </button>
+                    </div>
+
+                    @if (!module.cours.length) {
+                      <p class="bloc__vide">
+                        Aucune leçon. Ajoutez-en une pour donner du contenu à ce module.
+                      </p>
+                    } @else {
+                      <ol class="lecons">
+                        @for (cours of module.cours; track cours.id; let j = $index, pj = $first, dj = $last) {
+                          <li class="lecon">
+                            <i
+                              class="lecon__icone fas {{ iconeFormat[cours.typeContenu] }}"
+                              aria-hidden="true"
+                            ></i>
+                            <div class="lecon__texte">
+                              <span class="lecon__titre">{{ cours.titre }}</span>
+                              <span class="lecon__format">
+                                {{ libelleFormat[cours.typeContenu] }}
+                              </span>
+                            </div>
+                            <div class="lecon__actions">
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-icon-only text-muted"
+                                (click)="deplacerCours(module, j, -1)"
+                                [disabled]="pj"
+                                [attr.aria-label]="'Monter la leçon ' + cours.titre"
+                              >
+                                <i class="fas fa-arrow-up" aria-hidden="true"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-icon-only text-muted"
+                                (click)="deplacerCours(module, j, 1)"
+                                [disabled]="dj"
+                                [attr.aria-label]="'Descendre la leçon ' + cours.titre"
+                              >
+                                <i class="fas fa-arrow-down" aria-hidden="true"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-icon-only text-muted"
+                                (click)="modifierCours(module, cours)"
+                                [attr.aria-label]="'Modifier la leçon ' + cours.titre"
+                              >
+                                <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-icon-only text-muted"
+                                (click)="supprimerCours(module, cours)"
+                                [attr.aria-label]="'Supprimer la leçon ' + cours.titre"
+                              >
+                                <i class="fas fa-trash-can" aria-hidden="true"></i>
+                              </button>
+                            </div>
+                          </li>
+                        }
+                      </ol>
+                    }
+                  </div>
+
+                  <!-- Quiz -->
+                  <div class="bloc">
+                    <div class="bloc__head">
+                      <h4 class="bloc__titre">Quiz de fin de module</h4>
+                      @if (module.quiz) {
+                        <div class="bloc__actions">
+                          <button
+                            type="button"
+                            class="btn btn-secondary btn-sm"
+                            (click)="ajouterQuestion(module)"
+                          >
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            Question
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-icon-only text-muted"
+                            (click)="modifierQuiz(module)"
+                            aria-label="Modifier le quiz"
+                          >
+                            <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-icon-only text-muted"
+                            (click)="supprimerQuiz(module)"
+                            aria-label="Supprimer le quiz"
+                          >
+                            <i class="fas fa-trash-can" aria-hidden="true"></i>
+                          </button>
+                        </div>
+                      } @else {
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm"
+                          (click)="creerQuiz(module)"
+                        >
+                          <i class="fas fa-plus" aria-hidden="true"></i>
+                          Créer un quiz
+                        </button>
+                      }
+                    </div>
+
+                    @if (module.quiz; as quiz) {
+                      <p class="bloc__resume">
+                        <strong>{{ quiz.titre }}</strong> ·
+                        {{ quiz.scoreMinimum }} % requis ·
+                        {{ quiz.duree }} min ·
+                        {{ quiz.nombreTentatives }} tentative(s)
+                      </p>
+
+                      @if (!module.questions.length) {
+                        <p class="bloc__vide">
+                          Ce quiz n'a pas encore de question.
+                        </p>
+                      } @else {
+                        <ol class="questions">
+                          @for (question of module.questions; track question.id) {
+                            <li class="question">
+                              <div class="question__texte">
+                                <span>{{ question.texte }}</span>
+                                <span class="question__meta">
+                                  {{ question.points }} point(s) ·
+                                  {{ question.reponseOptions.length || 0 }} option(s)
+                                </span>
+                              </div>
+                              <div class="lecon__actions">
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-icon-only text-muted"
+                                  (click)="modifierQuestion(module, question)"
+                                  aria-label="Modifier la question"
+                                >
+                                  <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+                                </button>
+                                <button
+                                  type="button"
+                                  class="btn btn-sm btn-icon-only text-muted"
+                                  (click)="supprimerQuestion(module, question)"
+                                  aria-label="Supprimer la question"
+                                >
+                                  <i class="fas fa-trash-can" aria-hidden="true"></i>
+                                </button>
+                              </div>
+                            </li>
+                          }
+                        </ol>
+                      }
+                    } @else {
+                      <p class="bloc__vide">
+                        Aucun quiz. Ajoutez-en un pour valider les acquis du module.
+                      </p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ol>
+    }
+      </div>
+    </div>
+  </div>
+}

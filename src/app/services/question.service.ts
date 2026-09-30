@@ -36,6 +36,20 @@ export class QuestionService {
   }
 
   /**
+   * Met à jour une question et remplace ses options de réponse
+   * PUT /questions/{id}
+   *
+   * Les réponses n'ont pas d'endpoint propre : elles n'existent que par leur
+   * question et sont donc envoyées entières avec elle.
+   */
+  updateQuestion(
+    id: number,
+    request: QuestionRequestDTO
+  ): Observable<QuestionResponseDTO> {
+    return this.http.put<QuestionResponseDTO>(`${this.apiUrl}/${id}`, request);
+  }
+
+  /**
    * Supprime une question par son ID
    * DELETE /questions/{id}
    */

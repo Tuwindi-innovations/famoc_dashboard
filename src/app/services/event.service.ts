@@ -90,7 +90,7 @@ export class EventService {
    */
   getEventById(idEvent: string): Observable<EventResponse> {
     return this.http.get<EventResponse>(
-      `${this.serviceUrl}/${this.baseUrl}/${this.baseUrl}/${idEvent}`
+      `${this.serviceUrl}/${this.baseUrl}/${idEvent}`
     );
   }
 
@@ -99,7 +99,7 @@ export class EventService {
    */
   getEventsByCategory(idCategorie: string): Observable<EventResponse[]> {
     return this.http.get<EventResponse[]>(
-      `${this.serviceUrl}/${this.baseUrl}/${this.baseUrl}/getEventByCategory/${idCategorie}`
+      `${this.serviceUrl}/${this.baseUrl}/getEventByCategory/${idCategorie}`
     );
   }
 

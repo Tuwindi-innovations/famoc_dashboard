@@ -1,142 +1,229 @@
-<div class="modal-header bg-gradient-primary">
-  <h4 class="modal-title text-white">{{ title }}</h4>
+<div class="modal-header">
+  <h2 class="modal-title" id="titre-modale-contenu">{{ donnees.titre }}</h2>
   <button
     type="button"
-    class="close text-white"
+    class="close"
     (click)="activeModal.dismiss()"
+    aria-label="Fermer"
   >
-    <span>&times;</span>
+    <span aria-hidden="true">&times;</span>
   </button>
 </div>
 
-<div class="modal-body">
-  <form [formGroup]="form">
-    <div class="form-group mb-3">
-      <label class="form-control-label"
-        >Titre du {{ type.toLowerCase() }}</label
-      >
-      <input type="text" class="form-control" formControlName="titre" />
+<form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="champ-titre">Titre</label>
+      <input
+        id="champ-titre"
+        class="form-control"
+        type="text"
+        formControlName="titre"
+        [attr.aria-invalid]="estInvalide('titre')"
+      />
+      @if (estInvalide('titre')) {
+        <small class="text-danger d-block mt-1">Le titre est obligatoire (150 caractères maximum).</small>
+      }
     </div>
 
-    <div *ngIf="type === 'MODULE'">
-      <div class="form-group mb-3">
-        <label class="form-control-label">Description</label>
+    @if (donnees.type === 'MODULE') {
+      <div class="form-group">
+        <label for="champ-description">Description</label>
         <textarea
+          id="champ-description"
           class="form-control"
           rows="3"
           formControlName="description"
         ></textarea>
+        <small class="text-muted d-block mt-1">Ce que l'apprenant saura faire à la fin du module.</small>
       </div>
-      <div class="form-group mb-3">
-        <label class="form-control-label">Durée Estimée (heures)</label>
+
+      <div class="form-group">
+        <label for="champ-duree-estimee">Durée estimée (heures)</label>
         <input
-          type="number"
+          id="champ-duree-estimee"
           class="form-control"
+          type="number"
+          min="1"
           formControlName="dureeEstimee"
+          [attr.aria-invalid]="estInvalide('dureeEstimee')"
         />
+        @if (estInvalide('dureeEstimee')) {
+          <small class="text-danger d-block mt-1">Indiquez une durée d'au moins 1 heure.</small>
+        }
       </div>
-    </div>
-    <div *ngIf="type === 'COURS'">
-      <div class="form-group mb-3">
-        <label class="form-control-label">Format de la leçon</label>
-        <select class="form-control" formControlName="typeContenu">
-          <option value="TEXTE">📝 Article / Texte</option>
-          <option value="VIDEO">🎥 Vidéo (Fichier MP4)</option>
-          <option value="PDF">📄 Document PDF</option>
-          <option value="PRESENTATION">📊 Présentation / Slides</option>
+    }
+
+    @if (donnees.type === 'COURS') {
+      <div class="form-group">
+        <label for="champ-format">Format de la leçon</label>
+        <select id="champ-format" class="form-control" formControlName="typeContenu">
+          <option value="TEXTE">Article / texte</option>
+          <option value="VIDEO">Vidéo</option>
+          <option value="PDF">Document PDF</option>
+          <option value="PRESENTATION">Présentation</option>
         </select>
       </div>
 
-      <div
-        class="form-group mb-3"
-        *ngIf="
-          ['VIDEO', 'PDF', 'PRESENTATION'].includes(
-            form.get('typeContenu')?.value
-          )
-        "
-      >
-        <label class="form-control-label text-info">
-          Sélectionner le fichier ({{ form.get("typeContenu")?.value }})
-        </label>
-        <div class="custom-file">
+      @if (formatAttendFichier()) {
+        <div class="form-group">
+          <label for="champ-fichier">Fichier</label>
           <input
+            id="champ-fichier"
+            class="form-control"
             type="file"
-            class="form-control border-info"
-            (change)="onFileSelected($event)"
+            (change)="surFichierChoisi($event)"
             [accept]="
-              form.get('typeContenu')?.value === 'VIDEO'
+              formulaire.controls.typeContenu.value === 'VIDEO'
                 ? 'video/*'
                 : '.pdf,.ppt,.pptx'
             "
           />
-          <small class="text-info" *ngIf="selectedFile">
-            <i class="fa fa-paperclip"></i> Prêt à l'envoi :
-            {{ selectedFile.name }}
+          @if (fichier(); as f) {
+            <small class="text-muted d-block mt-1">
+              <i class="fas fa-paperclip" aria-hidden="true"></i>
+              {{ f.name }}
+            </small>
+          }
+          <small class="text-muted d-block mt-1">
+            Ou laissez vide et renseignez plutôt une URL ci-dessous.
           </small>
         </div>
-      </div>
 
-      <div class="form-group mb-3">
-        <label class="form-control-label">Contenu / Description</label>
-        <textarea
-          class="form-control"
-          rows="3"
-          formControlName="contenu"
-          [placeholder]="
-            form.get('typeContenu')?.value === 'TEXTE'
-              ? 'Saisissez votre cours ici...'
-              : 'Description optionnelle...'
-          "
-        ></textarea>
-      </div>
-    </div>
-
-    <div *ngIf="type === 'QUIZ'">
-      <div class="form-group mb-3">
-        <label class="form-control-label">Score Minimum pour réussir (%)</label>
-        <input
-          type="number"
-          class="form-control"
-          formControlName="scoreMinimun"
-        />
-      </div>
-      <div class="row">
-        <div class="col-6">
-          <div class="form-group mb-3">
-            <label class="form-control-label">Durée (minutes)</label>
-            <input type="number" class="form-control" formControlName="duree" />
-          </div>
-        </div>
-        <div class="col-6">
-          <div class="form-group mb-3">
-            <label class="form-control-label">Nombre de tentatives</label>
+        @if (formulaire.controls.typeContenu.value === 'VIDEO') {
+          <div class="form-group">
+            <label for="champ-video-url">URL de la vidéo</label>
             <input
-              type="number"
+              id="champ-video-url"
               class="form-control"
-              formControlName="nombreTentatives"
+              type="url"
+              formControlName="videoUrl"
+              placeholder="https://…"
             />
           </div>
+        } @else {
+          <div class="form-group">
+            <label for="champ-document-url">URL du document</label>
+            <input
+              id="champ-document-url"
+              class="form-control"
+              type="url"
+              formControlName="documentUrl"
+              placeholder="https://…"
+            />
+          </div>
+        }
+
+        @if (erreurFichier()) {
+          <p class="form-error" role="alert">{{ erreurFichier() }}</p>
+        }
+      }
+
+      <div class="form-group">
+        <label for="champ-contenu">
+          {{
+            formulaire.controls.typeContenu.value === 'TEXTE'
+              ? 'Contenu de la leçon'
+              : 'Description (facultatif)'
+          }}
+        </label>
+        <textarea
+          id="champ-contenu"
+          class="form-control"
+          rows="5"
+          formControlName="contenu"
+        ></textarea>
+      </div>
+    }
+
+    @if (donnees.type === 'QUIZ') {
+      <div class="form-group">
+        <label for="champ-quiz-description">Description</label>
+        <textarea
+          id="champ-quiz-description"
+          class="form-control"
+          rows="2"
+          formControlName="description"
+        ></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="champ-score">Score minimum (%)</label>
+            <input
+              id="champ-score"
+              class="form-control"
+              type="number"
+              min="0"
+              max="100"
+              formControlName="scoreMinimum"
+              [attr.aria-invalid]="estInvalide('scoreMinimum')"
+            />
+            @if (estInvalide('scoreMinimum')) {
+              <small class="text-danger d-block mt-1">Valeur entre 0 et 100.</small>
+            }
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="champ-duree">Durée (minutes)</label>
+            <input
+              id="champ-duree"
+              class="form-control"
+              type="number"
+              min="1"
+              formControlName="duree"
+              [attr.aria-invalid]="estInvalide('duree')"
+            />
+            @if (estInvalide('duree')) {
+              <small class="text-danger d-block mt-1">Au moins 1 minute.</small>
+            }
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="form-group">
+            <label for="champ-tentatives">Tentatives</label>
+            <input
+              id="champ-tentatives"
+              class="form-control"
+              type="number"
+              min="1"
+              formControlName="nombreTentatives"
+              [attr.aria-invalid]="estInvalide('nombreTentatives')"
+            />
+            @if (estInvalide('nombreTentatives')) {
+              <small class="text-danger d-block mt-1">Au moins 1 tentative.</small>
+            }
+          </div>
         </div>
       </div>
-    </div>
+    }
 
-    <div class="form-group">
-      <label class="form-control-label">Ordre d'affichage</label>
-      <input type="number" class="form-control" formControlName="ordre" />
-    </div>
-  </form>
-</div>
+    @if (donnees.type !== 'QUIZ') {
+      <div class="form-group">
+        <label for="champ-ordre">Ordre d'affichage</label>
+        <input
+          id="champ-ordre"
+          class="form-control"
+          type="number"
+          min="1"
+          formControlName="ordre"
+          [attr.aria-invalid]="estInvalide('ordre')"
+        />
+        <small class="text-muted d-block mt-1">
+          Position dans la liste. Modifiable ensuite par les flèches.
+        </small>
+      </div>
+    }
+  </div>
 
-<div class="modal-footer">
-  <button type="button" class="btn btn-link" (click)="activeModal.dismiss()">
-    Annuler
-  </button>
-  <button
-    type="button"
-    class="btn btn-primary"
-    [disabled]="form.invalid"
-    (click)="submit()"
-  >
-    Enregistrer
-  </button>
-</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">
+      Annuler
+    </button>
+    <button type="submit" class="btn btn-primary">
+      {{ donnees.edition ? 'Enregistrer les modifications' : 'Créer' }}
+    </button>
+  </div>
+</form>

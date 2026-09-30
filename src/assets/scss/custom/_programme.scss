@@ -1,0 +1,223 @@
+//
+// Éditeur de programme
+//
+// L'arborescence module → leçon → quiz n'a pas d'équivalent dans Argon : c'est
+// le seul écran qui demande ses propres règles. Elles reprennent les variables
+// du thème (`$gray-*`, `$primary`, `$border-radius`) pour rester cohérentes
+// avec le reste du tableau de bord.
+//
+
+.skip-link {
+    &:focus {
+        position: fixed;
+        top: 0.5rem;
+        left: 0.5rem;
+        z-index: $zindex-fixed + 10;
+        padding: 0.5rem 1rem;
+        background-color: $white;
+        border-radius: $border-radius;
+        box-shadow: $box-shadow;
+    }
+}
+
+// --- Liste des modules -------------------------------------------------------
+
+.programme {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: none;
+}
+
+.module {
+    border: 1px solid $gray-300;
+    border-radius: $border-radius;
+    background-color: $white;
+
+    + .module {
+        margin-top: 1rem;
+    }
+}
+
+.module__head {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+}
+
+// Le rang du module dans le parcours : ici la numérotation porte une
+// information (l'ordre suivi par l'apprenant), elle n'est pas décorative.
+.module__ordre {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    margin-right: 1rem;
+    border-radius: 50%;
+    background-color: $gray-200;
+    color: $gray-700;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.module__toggle {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: inherit;
+
+    &:hover .module__titre {
+        color: $primary;
+    }
+}
+
+.module__titre {
+    font-weight: 600;
+    color: $default;
+    @include transition($transition-base);
+}
+
+.module__resume {
+    margin-left: 0.75rem;
+    color: $text-muted;
+    font-size: $font-size-sm;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.module__chevron {
+    margin-left: auto;
+    padding-left: 0.75rem;
+    color: $gray-500;
+    font-size: $font-size-sm;
+}
+
+.module__actions {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+.module__corps {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid $gray-200;
+}
+
+.module__description {
+    margin: 1rem 0 0;
+    color: $gray-700;
+    font-size: $font-size-sm;
+}
+
+// --- Blocs « Leçons » et « Quiz » à l'intérieur d'un module -------------------
+
+.bloc {
+    margin-top: 1.5rem;
+}
+
+.bloc__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.bloc__titre {
+    margin: 0;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $gray-600;
+}
+
+.bloc__actions {
+    white-space: nowrap;
+
+    > * + * {
+        margin-left: 0.25rem;
+    }
+}
+
+.bloc__vide {
+    margin: 0;
+    padding: 1rem;
+    border: 1px dashed $gray-300;
+    border-radius: $border-radius;
+    color: $text-muted;
+    font-size: $font-size-sm;
+}
+
+.bloc__resume {
+    margin-bottom: 0.75rem;
+    color: $gray-700;
+    font-size: $font-size-sm;
+}
+
+// --- Leçons et questions -----------------------------------------------------
+
+.lecons,
+.questions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid $gray-200;
+    border-radius: $border-radius;
+    overflow: hidden;
+}
+
+.lecon,
+.question {
+    display: flex;
+    align-items: center;
+    padding: 0.625rem 0.875rem;
+    background-color: $white;
+
+    + .lecon,
+    + .question {
+        border-top: 1px solid $gray-200;
+    }
+
+    &:hover {
+        background-color: $gray-100;
+    }
+}
+
+.lecon__icone {
+    flex: 0 0 auto;
+    width: 1.5rem;
+    color: $gray-500;
+    font-size: $font-size-sm;
+}
+
+.lecon__texte,
+.question__texte {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.lecon__titre {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $default;
+}
+
+.lecon__format,
+.question__meta {
+    color: $text-muted;
+    font-size: $font-size-xs;
+}
+
+.lecon__actions {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}

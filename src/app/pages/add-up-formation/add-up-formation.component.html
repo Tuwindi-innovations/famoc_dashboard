@@ -1,89 +1,162 @@
-<div class="header bg-gradient-info pb-8 pt-5 pt-md-8"></div>
+<div class="header bg-gradient-info pb-8 pt-5 pt-md-8">
+  <div class="container-fluid">
+    <div class="header-body text-center mb-5">
+      <h1 class="text-white">
+        {{ modeEdition() ? 'Modifier la formation' : 'Nouvelle formation' }}
+      </h1>
+      <p class="text-white mb-4 mt-2">
+        {{
+          modeEdition()
+            ? 'Mettez à jour la présentation du parcours. Le programme se gère depuis la page de détail.'
+            : 'Décrivez le parcours. Vous ajouterez ensuite les modules et les leçons.'
+        }}
+      </p>
+      <a class="btn btn-neutral btn-sm" [routerLink]="['/liste-formation']">
+        <i class="fas fa-arrow-left text-info" aria-hidden="true"></i>
+        Retour au catalogue
+      </a>
+    </div>
+  </div>
+</div>
 
 <div class="container-fluid mt--7">
   <div class="row justify-content-center">
     <div class="col-xl-8">
-      <div class="card bg-secondary shadow border-0">
-        <div class="card-header bg-white border-0">
-          <h3 class="mb-0">Ajouter une nouvelle formation</h3>
+@if (chargement()) {
+  <div class="card shadow">
+    <div class="card-body text-center py-5" role="status">
+      <i class="fas fa-circle-notch fa-spin text-info fa-2x" aria-hidden="true"></i>
+      <p class="text-muted mt-3 mb-0">Chargement de la formation…</p>
+    </div>
+  </div>
+} @else {
+  <form [formGroup]="formulaire" (ngSubmit)="soumettre()" novalidate>
+    <div class="card shadow">
+      <div class="card-body">
+        <div class="form-group">
+          <label for="titre">Titre de la formation</label>
+          <input
+            id="titre"
+            class="form-control"
+            type="text"
+            formControlName="titre"
+            placeholder="Ex. : Créer du contenu vidéo pour les réseaux sociaux"
+            [attr.aria-invalid]="estInvalide('titre')"
+          />
+          @if (estInvalide('titre')) {
+            <small class="form-error text-danger d-block mt-1">
+              Le titre est obligatoire (150 caractères maximum).
+            </small>
+          }
         </div>
-        <div class="card-body">
-          <form (ngSubmit)="onSubmit()">
-            <div class="pl-lg-4">
-              <div class="form-group">
-                <label class="form-control-label">Nom de la formation</label>
-                <input
-                  type="text"
-                  name="nom"
-                  [(ngModel)]="formation.titre"
-                  class="form-control form-control-alternative"
-                  placeholder="Ex: Maîtriser Angular de A à Z"
-                />
-              </div>
 
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label class="form-control-label">Durée estimée</label>
-                    <input
-                      type="text"
-                      name="duree"
-                      [(ngModel)]="formation.dureeEstimee"
-                      class="form-control form-control-alternative"
-                      placeholder="Ex: 20 heures, 3 mois..."
-                    />
-                  </div>
-                </div>
-                <div class="col-lg-6">
-                  <div class="form-group">
-                    <label class="form-control-label">Niveau requis</label>
-                    <select
-                      name="niveau"
-                      [(ngModel)]="formation.niveau"
-                      class="form-control form-control-alternative"
-                    >
-                      <option value="DEBUTANT">Débutant</option>
-                      <option value="Intermediaire">Intermédiaire</option>
-                      <option value="AVANCER">Avancé</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            class="form-control"
+            rows="4"
+            formControlName="description"
+            placeholder="Ce que l'apprenant saura faire à la fin du parcours."
+            [attr.aria-invalid]="estInvalide('description')"
+          ></textarea>
+          @if (estInvalide('description')) {
+            <small class="form-error text-danger d-block mt-1">
+              Décrivez la formation en 10 caractères au minimum.
+            </small>
+          }
+        </div>
 
-              <div class="form-group">
-                <label class="form-control-label"
-                  >Description du programme</label
-                >
-                <textarea
-                  rows="4"
-                  name="description"
-                  [(ngModel)]="formation.description"
-                  class="form-control form-control-alternative"
-                  placeholder="Détaillez les modules de la formation..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label class="form-control-label"
-                  >Supports / Médias (Images)</label
-                >
-                <input
-                  type="file"
-                  (change)="onFileSelect($event)"
-                  multiple
-                  class="form-control form-control-alternative"
-                />
-              </div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="niveau">Niveau</label>
+              <select id="niveau" class="form-control" formControlName="niveau">
+                @for (niveau of niveaux; track niveau.valeur) {
+                  <option [value]="niveau.valeur">{{ niveau.libelle }}</option>
+                }
+              </select>
             </div>
+          </div>
 
-            <div class="text-center mt-4">
-              <button type="submit" class="btn btn-info px-6">
-                Enregistrer la formation
-              </button>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="duree">Durée estimée (heures)</label>
+              <input
+                id="duree"
+                class="form-control"
+                type="number"
+                min="1"
+                formControlName="dureeEstimee"
+                [attr.aria-invalid]="estInvalide('dureeEstimee')"
+              />
+              @if (estInvalide('dureeEstimee')) {
+                <small class="form-error text-danger d-block mt-1">Indiquez au moins 1 heure.</small>
+              }
             </div>
-          </form>
+          </div>
+
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="categorie">Catégorie</label>
+              <input
+                id="categorie"
+                class="form-control"
+                type="text"
+                formControlName="categorie"
+                placeholder="Ex. : Métiers du web"
+              />
+              <small class="text-muted d-block mt-1">Facultatif.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="image">
+            Image de couverture
+            @if (modeEdition()) {
+              <small class="text-muted font-weight-normal">
+                (conservée si vous ne choisissez rien)
+              </small>
+            }
+          </label>
+          <input
+            id="image"
+            class="form-control"
+            type="file"
+            accept="image/*"
+            (change)="surImageChoisie($event)"
+            [attr.aria-invalid]="!!erreurImage()"
+          />
+          <small class="text-muted d-block mt-1">Format paysage conseillé, 5 Mo maximum.</small>
+          @if (erreurImage()) {
+            <small class="form-error text-danger d-block mt-1" role="alert">{{ erreurImage() }}</small>
+          }
+
+          @if (apercu(); as image) {
+            <img
+              class="img-fluid rounded shadow mt-3" style="max-height: 14rem"
+              [src]="image"
+              [alt]="modeEdition() ? 'Couverture actuelle' : 'Aperçu de la couverture'"
+            />
+          }
         </div>
       </div>
+
+      <div class="card-footer text-right">
+        <a class="btn btn-secondary" [routerLink]="['/liste-formation']">Annuler</a>
+        <button type="submit" class="btn btn-info" [disabled]="envoiEnCours()">
+          @if (envoiEnCours()) {
+            <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+            Enregistrement…
+          } @else {
+            {{ modeEdition() ? 'Enregistrer les modifications' : 'Créer la formation' }}
+          }
+        </button>
+      </div>
+    </div>
+  </form>
+}
     </div>
   </div>
 </div>

@@ -1,46 +1,41 @@
-import { inject, Injectable } from "@angular/core";
-import {
-  HttpEvent,
-  HttpInterceptor,
-  HttpHandler,
-  HttpRequest,
-  HttpErrorResponse,
-} from "@angular/common/http";
-import { Observable, catchError, switchMap, throwError } from "rxjs";
-import { AuthService } from "../services/auth.service";
+import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, switchMap, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  private authService = inject(AuthService);
-  intercept(req: HttpRequest<any>, next: HttpHandler) {
-    if (req.url.includes("/auth/refresh") || req.url.includes("/auth/login")) {
-      return next.handle(req);
-    }
+/** Les routes d'authentification ne doivent jamais porter le jeton d'accès. */
+const ROUTES_SANS_JETON = ['/auth/login', '/auth/refresh', '/auth/signup'];
 
-    const token = this.authService.getAccessToken();
-
-    if (token) {
-      req = this.addToken(req, token);
-    }
-
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          return this.authService.refreshToken().pipe(
-            switchMap((tokens) => {
-              return next.handle(this.addToken(req, tokens.accessToken));
-            })
-          );
-        }
-
-        return throwError(() => error);
-      })
-    );
-  }
-
-  private addToken(request: HttpRequest<any>, token: string) {
-    return request.clone({
-      setHeaders: { Authorization: `Bearer ${token}` },
-    });
-  }
+function avecJeton<T>(requete: HttpRequest<T>, jeton: string): HttpRequest<T> {
+  return requete.clone({ setHeaders: { Authorization: `Bearer ${jeton}` } });
 }
+
+/**
+ * Ajoute le jeton d'accès à chaque appel et rejoue une fois la requête après
+ * rafraîchissement si le serveur répond 401.
+ *
+ * Le rejeu est tenté une seule fois : si la requête rafraîchie échoue encore,
+ * l'erreur remonte. `AuthService.refreshToken()` déconnecte de son côté quand
+ * le jeton de rafraîchissement est lui aussi invalide.
+ */
+export const authInterceptor: HttpInterceptorFn = (requete, suivant) => {
+  if (ROUTES_SANS_JETON.some((route) => requete.url.includes(route))) {
+    return suivant(requete);
+  }
+
+  const auth = inject(AuthService);
+  const jeton = auth.getAccessToken();
+  const requeteSortante = jeton ? avecJeton(requete, jeton) : requete;
+
+  return suivant(requeteSortante).pipe(
+    catchError((erreur: HttpErrorResponse) => {
+      if (erreur.status !== 401) {
+        return throwError(() => erreur);
+      }
+
+      return auth
+        .refreshToken()
+        .pipe(switchMap((jetons) => suivant(avecJeton(requete, jetons.accessToken))));
+    }),
+  );
+};

@@ -1,24 +1,16 @@
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpErrorResponse,
-} from "@angular/common/http";
-import { Inject, Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, throwError, of } from "rxjs";
-import { JwtHelperService, JWT_OPTIONS } from "@auth0/angular-jwt";
-import { User } from "../models/User";
-import { environment } from "src/environments/environment";
-import { Router } from "@angular/router";
-import { catchError, tap, filter, switchMap, take } from "rxjs/operators";
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { catchError, finalize, Observable, of, share, tap, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { User, UserResponseDTO } from '../models/User';
 
-// 1. Requête de connexion (LoginRequest)
 interface LoginRequest {
   identifiant: string;
   motDePasse: string;
-  token: string;
 }
 
-// 2. Requête d'inscription (SignupRequest)
 interface SignupRequest {
   nom: string;
   prenom: string;
@@ -28,168 +20,235 @@ interface SignupRequest {
   role: string;
 }
 
-// 3. Réponse de Connexion (JwtResponse)
-interface JwtResponse {
+export interface JwtResponse {
   accessToken: string;
   refreshToken: string;
-  token: string;
 }
 
-@Injectable({
-  providedIn: "root",
-})
-export class AuthService {
-  private readonly ACCESS_TOKEN_KEY = "access_token";
-  private readonly REFRESH_TOKEN_KEY = "refresh_token";
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-  private isRefreshing = false;
-  private refreshTokenSubject = new BehaviorSubject<string | null>(null);
+/** Charge utile JWT : seuls les champs que l'on sait lire sont déclarés. */
+interface ChargeJwt {
+  name?: string;
+  fullName?: string;
+  given_name?: string;
+  family_name?: string;
+  username?: string;
+  preferred_username?: string;
+  email?: string;
+  sub?: string;
+}
 
-  private serviceUrl: string;
-  private baseUrl: string = "auth";
-  constructor(
-    private http: HttpClient,
-    @Inject(JWT_OPTIONS) private jwtOptions: any,
-    private jwtHelper: JwtHelperService,
-    private router: Router
-  ) {
-    this.serviceUrl = environment.apiUrl;
-    this.isAuthenticatedSubject.next(this.isLoggedIn());
-  }
+const CLE_ACCES = 'access_token';
+const CLE_RAFRAICHISSEMENT = 'refresh_token';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly jwt = inject(JwtHelperService);
+  private readonly baseUrl = `${environment.apiUrl}/auth`;
+
+  /**
+   * Rafraîchissement en cours, partagé entre les appelants.
+   *
+   * Sans cela, plusieurs requêtes recevant un 401 simultanément déclenchent
+   * chacune leur propre rafraîchissement : les jetons se écrasent et toutes
+   * échouent sauf une.
+   */
+  private rafraichissementEnCours?: Observable<JwtResponse>;
+
+  private readonly _connecte = signal(this.jetonValide());
+
+  /** Vrai tant qu'un jeton d'accès non expiré est disponible. */
+  readonly connecte = computed(() => this._connecte());
 
   signIn(identifiant: string, motDePasse: string): Observable<JwtResponse> {
-    const authRequest: LoginRequest = { identifiant, motDePasse, token: "" };
-    return this.http
-      .post<JwtResponse>(
-        `${this.serviceUrl}/${this.baseUrl}/login`,
-        authRequest,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-      .pipe(
-        tap((tokens) => this.saveTokens(tokens)),
-        catchError((error: HttpErrorResponse) => {
-          let errorMessage = "Une erreur est survenue";
-          if (error.status === 401) {
-            errorMessage = "Identifiant ou mot de passe incorrect";
-          }
-          return throwError(() => new Error(errorMessage));
-        })
-      );
+    const corps: LoginRequest = { identifiant, motDePasse };
+
+    return this.http.post<JwtResponse>(`${this.baseUrl}/login`, corps).pipe(
+      tap((jetons) => this.enregistrerJetons(jetons)),
+      catchError((erreur: HttpErrorResponse) =>
+        throwError(() => new Error(this.messageDeConnexion(erreur))),
+      ),
+    );
+  }
+
+  signUp(donnees: SignupRequest): Observable<User> {
+    return this.http.post<User>(`${this.baseUrl}/signup`, donnees);
   }
 
   /**
-   * 2. Inscription d'un nouvel utilisateur
-   * Endpoint: POST /api-infotech/auth/signup
+   * Échange le jeton de rafraîchissement contre un nouveau couple de jetons.
+   *
+   * Les appels concurrents partagent la même requête réseau ; un échec
+   * déconnecte, car le jeton de rafraîchissement n'est plus exploitable.
    */
-  signUp(userData: SignupRequest): Observable<User> {
-    return this.http.post<User>(
-      `${this.serviceUrl}/${this.baseUrl}/signup`,
-      userData
-    );
-  }
+  refreshToken(): Observable<JwtResponse> {
+    if (this.rafraichissementEnCours) {
+      return this.rafraichissementEnCours;
+    }
 
-  public refreshTokens(refreshToken: string): Observable<JwtResponse> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${refreshToken}`,
-    });
+    const jetonRafraichissement = this.getRefreshToken();
+    if (!jetonRafraichissement) {
+      this.logout();
+      return throwError(() => new Error('Session expirée.'));
+    }
 
-    // Le corps de la requête POST est vide ({}) car toutes les infos sont dans le header.
-    return this.http.post<JwtResponse>(
-      `${this.serviceUrl}/${this.baseUrl}/refresh`,
-      {},
-      { headers }
-    );
-  }
+    this.rafraichissementEnCours = this.http
+      .post<JwtResponse>(
+        `${this.baseUrl}/refresh`,
+        {},
+        { headers: new HttpHeaders({ Authorization: `Bearer ${jetonRafraichissement}` }) },
+      )
+      .pipe(
+        tap((jetons) => this.enregistrerJetons(jetons)),
+        catchError((erreur) => {
+          this.logout();
+          return throwError(() => erreur);
+        }),
+        finalize(() => (this.rafraichissementEnCours = undefined)),
+        // `share` évite de relancer la requête pour chaque abonné.
+        share(),
+      );
 
-  private saveTokens(tokens: JwtResponse): void {
-    const storage = localStorage && sessionStorage;
-    storage.setItem(this.ACCESS_TOKEN_KEY, tokens.accessToken);
-    storage.setItem(this.REFRESH_TOKEN_KEY, tokens.refreshToken);
-    this.isAuthenticatedSubject.next(true);
-  }
-
-  public signOut() {
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("email");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("refreshToken");
-    sessionStorage.removeItem("username");
+    return this.rafraichissementEnCours;
   }
 
   logout(): void {
-    [window.localStorage, window.sessionStorage].forEach((storage) => {
-      storage.removeItem(this.ACCESS_TOKEN_KEY);
-      storage.removeItem(this.REFRESH_TOKEN_KEY);
-    });
-    this.isAuthenticatedSubject.next(false);
-    this.router.navigate(["/login"]);
+    for (const stockage of [localStorage, sessionStorage]) {
+      try {
+        stockage.removeItem(CLE_ACCES);
+        stockage.removeItem(CLE_RAFRAICHISSEMENT);
+      } catch {
+        // Stockage inaccessible : rien à nettoyer de ce côté.
+      }
+    }
+    this._connecte.set(false);
+    this.router.navigate(['/login']);
   }
 
   getAccessToken(): string | null {
-    return (
-      localStorage.getItem(this.ACCESS_TOKEN_KEY) ||
-      sessionStorage.getItem(this.ACCESS_TOKEN_KEY)
-    );
+    return this.lire(CLE_ACCES);
   }
 
   getRefreshToken(): string | null {
-    return (
-      localStorage.getItem(this.REFRESH_TOKEN_KEY) ||
-      sessionStorage.getItem(this.REFRESH_TOKEN_KEY)
-    );
-  }
-
-  getDisplayName(): string {
-    const token = this.getAccessToken();
-    if (!token) {
-      return "";
-    }
-    try {
-      const payload: any = this.jwtHelper.decodeToken(token);
-      const name =
-        payload?.name ||
-        payload?.fullName ||
-        (payload?.given_name && payload?.family_name
-          ? `${payload.given_name} ${payload.family_name}`
-          : "") ||
-        payload?.username ||
-        payload?.preferred_username ||
-        payload?.email ||
-        payload?.sub ||
-        "";
-      return typeof name === "string" ? name : "";
-    } catch {
-      return "";
-    }
+    return this.lire(CLE_RAFRAICHISSEMENT);
   }
 
   isLoggedIn(): boolean {
-    const token = this.getAccessToken();
-    return token != null && !this.jwtHelper.isTokenExpired(token);
+    return this.jetonValide();
   }
 
-  refreshToken(): Observable<JwtResponse> {
-    const refreshToken = this.getRefreshToken();
+  /** Identifiant du compte connecté, lu dans la revendication `sub` du jeton. */
+  getUserId(): string | null {
+    const jeton = this.getAccessToken();
+    if (!jeton) {
+      return null;
+    }
+    try {
+      return this.jwt.decodeToken<ChargeJwt>(jeton)?.sub ?? null;
+    } catch {
+      return null;
+    }
+  }
 
-    if (!refreshToken) {
-      this.logout();
-      return throwError(() => new Error("No refresh token"));
+  /**
+   * Nom complet du compte connecté.
+   *
+   * Le jeton émis par cette API ne porte que `iss`, `sub`, `role`, `exp`,
+   * `token_type` et `iat` : aucun nom ni e-mail. On interroge donc
+   * `GET /user/{id}` pour obtenir un libellé lisible, faute de quoi la barre
+   * supérieure afficherait l'UUID du compte.
+   */
+  getCurrentUser(): Observable<UserResponseDTO | null> {
+    const id = this.getUserId();
+    if (!id) {
+      return of(null);
+    }
+    return this.http
+      .get<UserResponseDTO>(`${environment.apiUrl}/user/${id}`)
+      .pipe(catchError(() => of(null)));
+  }
+
+  /** Nom lisible extrait du jeton, ou chaîne vide si indisponible. */
+  getDisplayName(): string {
+    const jeton = this.getAccessToken();
+    if (!jeton) {
+      return '';
     }
 
-    return this.http
-      .post<JwtResponse>(`${this.serviceUrl}/${this.baseUrl}/refresh`, {
-        refreshToken,
-      })
-      .pipe(
-        tap((tokens) => this.saveTokens(tokens)),
-        catchError((err) => {
-          this.logout();
-          return throwError(() => err);
-        })
+    try {
+      const charge = this.jwt.decodeToken<ChargeJwt>(jeton);
+      const nomComplet =
+        charge?.given_name && charge?.family_name
+          ? `${charge.given_name} ${charge.family_name}`
+          : undefined;
+
+      // `||` et non `??` : un champ présent mais vide doit laisser la main au
+      // suivant, ce que le coalescing des nuls ne ferait pas.
+      return (
+        charge?.name ||
+        charge?.fullName ||
+        nomComplet ||
+        charge?.username ||
+        charge?.preferred_username ||
+        charge?.email ||
+        charge?.sub ||
+        ''
       );
+    } catch {
+      return '';
+    }
+  }
+
+  // --- Interne ---------------------------------------------------------------
+
+  /**
+   * Conserve les jetons dans `localStorage` pour que la session survive à la
+   * fermeture de l'onglet.
+   *
+   * La version précédente écrivait dans `localStorage && sessionStorage`, une
+   * expression qui vaut toujours `sessionStorage` : la session était perdue à
+   * chaque fermeture du navigateur.
+   */
+  private enregistrerJetons(jetons: JwtResponse): void {
+    try {
+      localStorage.setItem(CLE_ACCES, jetons.accessToken);
+      localStorage.setItem(CLE_RAFRAICHISSEMENT, jetons.refreshToken);
+    } catch {
+      // Navigation privée : on retombe sur le stockage de session.
+      sessionStorage.setItem(CLE_ACCES, jetons.accessToken);
+      sessionStorage.setItem(CLE_RAFRAICHISSEMENT, jetons.refreshToken);
+    }
+    this._connecte.set(true);
+  }
+
+  private lire(cle: string): string | null {
+    try {
+      return localStorage.getItem(cle) ?? sessionStorage.getItem(cle);
+    } catch {
+      return null;
+    }
+  }
+
+  private jetonValide(): boolean {
+    const jeton = this.getAccessToken();
+    if (!jeton) {
+      return false;
+    }
+    try {
+      return !this.jwt.isTokenExpired(jeton);
+    } catch {
+      return false;
+    }
+  }
+
+  private messageDeConnexion(erreur: HttpErrorResponse): string {
+    if (erreur.status === 401 || erreur.status === 403) {
+      return 'Identifiant ou mot de passe incorrect.';
+    }
+    if (erreur.status === 0) {
+      return "Le serveur est injoignable. Vérifiez que l'API est démarrée.";
+    }
+    return 'La connexion a échoué. Réessayez dans un instant.';
   }
 }

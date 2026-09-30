@@ -7,7 +7,7 @@
           <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
             <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
               <li>
-                <a href="#"><i class="fas fa-home"></i></a>
+                <a href="#"><i class="fa-solid fa-house"></i></a>
               </li>
               <li class="breadcrumb-item active text-white">Utilisateurs</li>
             </ol>
@@ -21,7 +21,7 @@
             class="btn btn-sm btn-primary"
             (click)="openAddModal(addUserModal)"
           >
-            <i class="fas fa-plus"></i> Nouvel Utilisateur
+            <i class="fa-solid fa-plus"></i> Nouvel Utilisateur
           </button>
         </div>
       </div>
@@ -37,14 +37,15 @@
           <h3 class="mb-0">Répertoire des comptes</h3>
         </div>
 
-        <div *ngIf="isLoading" class="text-center py-5">
+        @if (isLoading) {
+        <div class="text-center py-5">
           <div class="spinner-grow text-primary" role="status"></div>
           <p class="mt-2 text-muted font-italic">
             Synchronisation avec la base de données...
           </p>
         </div>
-
-        <div class="table-responsive" *ngIf="!isLoading">
+        } @if (!isLoading) {
+        <div class="table-responsive">
           <table class="table align-items-center table-flush table-hover">
             <thead class="thead-light">
               <tr>
@@ -56,7 +57,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of users">
+              @for (u of users; track u) {
+              <tr>
                 <td>
                   <div class="d-flex align-items-center">
                     <div
@@ -77,11 +79,11 @@
                 <td>
                   <div class="text-sm">
                     <div class="mb-1">
-                      <i class="ni ni-email-83 mr-2 text-primary"></i
+                      <i class="fa-solid fa-envelope mr-2 text-primary"></i
                       >{{ u.email }}
                     </div>
                     <div>
-                      <i class="ni ni-mobile-button mr-2 text-success"></i
+                      <i class="fa-solid fa-mobile-screen-button mr-2 text-success"></i
                       >{{ u.telephone || "Non renseigné" }}
                     </div>
                   </div>
@@ -95,12 +97,13 @@
                   </span>
                 </td>
                 <td>
+                  <!-- `badge-secondary` est un gris quasi blanc dans Argon :
+                       tout rôle autre qu'ADMIN devenait illisible. -->
                   <span
                     class="badge badge-pill shadow-sm"
-                    [ngClass]="{
-                      'badge-primary': u.role === 'ADMIN',
-                      'badge-secondary': u.role !== 'ADMIN'
-                    }"
+                    [class.badge-primary]="u.role === 'ADMIN'"
+                    [class.badge-danger]="u.role === 'SUPERADMIN'"
+                    [class.badge-default]="u.role !== 'ADMIN' && u.role !== 'SUPERADMIN'"
                   >
                     {{ u.role }}
                   </span>
@@ -111,7 +114,7 @@
                       class="btn btn-sm btn-icon-only text-light"
                       ngbDropdownToggle
                     >
-                      <i class="fas fa-ellipsis-v"></i>
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div
                       ngbDropdownMenu
@@ -121,39 +124,36 @@
                         class="dropdown-item"
                         (click)="editUser(u, addUserModal)"
                       >
-                        <i class="ni ni-tag text-blue"></i> Modifier les infos
+                        <i class="fa-solid fa-tag text-blue"></i> Modifier les infos
                       </button>
-
                       <!-- <button class="dropdown-item" (click)="toggleStatus(u)">
-                        <i
-                          class="ni"
-                          [ngClass]="
-                            u.active
-                              ? 'ni-button-power text-warning'
-                              : 'ni-check-bold text-success'
-                          "
-                        ></i>
-                        {{
-                          u.active
-                            ? "Désactiver le compte"
-                            : "Réactiver le compte"
-                        }}
-                      </button> -->
-
+                                  <i
+                                    class="fa-solid"
+                          [class.fa-power-off]="u.active"
+                          [class.fa-circle-check]="!u.active"
+                                  ></i>
+                                  {{
+                                  u.active
+                                  ? "Désactiver le compte"
+                                  : "Réactiver le compte"
+                                  }}
+                                </button> -->
                       <div class="dropdown-divider"></div>
                       <button
                         class="dropdown-item text-danger"
                         (click)="delete(u.id)"
                       >
-                        <i class="ni ni-basket text-danger"></i> Supprimer
+                        <i class="fa-solid fa-basket-shopping text-danger"></i> Supprimer
                       </button>
                     </div>
                   </div>
                 </td>
               </tr>
+              }
             </tbody>
           </table>
         </div>
+        }
 
         <div class="card-footer py-4 bg-secondary">
           <p class="text-sm text-muted mb-0">

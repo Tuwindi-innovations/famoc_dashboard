@@ -17,21 +17,22 @@
           class="btn btn-sm btn-success btn-icon mr-2"
           (click)="openAddModal(addModalContent)"
         >
-          <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
+          <span class="btn-inner--icon"><i class="fa-solid fa-plus"></i></span>
           <span class="btn-inner--text">Ajouter une catégorie</span>
         </button>
         <button class="btn btn-sm btn-secondary btn-icon" (click)="reload()">
-          <span class="btn-inner--icon"><i class="fas fa-sync-alt"></i></span>
+          <span class="btn-inner--icon"><i class="fa-solid fa-rotate"></i></span>
         </button>
       </div>
     </div>
 
-    <div *ngIf="isLoading" class="text-center py-5">
+    @if (isLoading) {
+    <div class="text-center py-5">
       <div class="spinner-border text-primary" role="status"></div>
       <p class="mt-2 text-muted">Mise à jour de la liste...</p>
     </div>
-
-    <div class="table-responsive" *ngIf="!isLoading && categories.length > 0">
+    } @if (!isLoading && categories.length > 0) {
+    <div class="table-responsive">
       <table class="table align-items-center table-flush">
         <thead class="thead-light">
           <tr>
@@ -43,7 +44,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let cat of categories">
+          @for (cat of categories; track cat) {
+          <tr>
             <th scope="row">
               <div class="media align-items-center">
                 <div
@@ -52,8 +54,8 @@
                   <i
                     [class]="
                       cat.typeCategorie === 'BLOG'
-                        ? 'ni ni-books'
-                        : 'ni ni-calendar-grid-58'
+                        ? 'fa-solid fa-book'
+                        : 'fa-solid fa-calendar-days'
                     "
                   ></i>
                 </div>
@@ -65,16 +67,14 @@
               </div>
             </th>
             <!-- <td>
-              <span
-                class="badge badge-pill"
-                [ngClass]="{
-                  'badge-primary': cat.typeCategorie === 'BLOG',
-                  'badge-warning': cat.typeCategorie === 'EVENT'
-                }"
-              >
-                {{ cat.typeCategorie }}
-              </span>
-            </td> -->
+                <span
+                  class="badge badge-pill"
+                [class.badge-primary]="cat.typeCategorie === 'BLOG'"
+                [class.badge-warning]="cat.typeCategorie === 'EVENT'"
+                  >
+                  {{ cat.typeCategorie }}
+                </span>
+              </td> -->
             <td>
               <small
                 class="text-muted d-block"
@@ -100,7 +100,7 @@
                   class="btn btn-sm btn-icon-only text-light"
                   ngbDropdownToggle
                 >
-                  <i class="fas fa-ellipsis-v"></i>
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
                 </a>
                 <div
                   ngbDropdownMenu
@@ -110,34 +110,33 @@
                     class="dropdown-item"
                     (click)="editCategorie(cat, addModalContent)"
                   >
-                    <i class="ni ni-settings text-primary"></i> Modifier
+                    <i class="fa-solid fa-sliders text-primary"></i> Modifier
                   </a>
                   <div class="dropdown-divider"></div>
                   <a
                     class="dropdown-item text-danger"
                     (click)="deleteCategorie(cat.id)"
                   >
-                    <i class="ni ni-fat-remove"></i> Supprimer
+                    <i class="fa-solid fa-xmark"></i> Supprimer
                   </a>
                 </div>
               </div>
             </td>
           </tr>
+          }
         </tbody>
       </table>
     </div>
-
-    <div
-      *ngIf="!isLoading && categories.length === 0"
-      class="card-body text-center py-5"
-    >
+    } @if (!isLoading && categories.length === 0) {
+    <div class="card-body text-center py-5">
       <div class="avatar avatar-lg bg-soft-secondary mb-3">
-        <i class="ni ni-folder-17 text-muted"></i>
+        <i class="fa-solid fa-folder text-muted"></i>
       </div>
       <p class="text-muted">
         Aucune catégorie n'est configurée pour le moment.
       </p>
     </div>
+    }
   </div>
 </div>
 

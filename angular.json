@@ -9,10 +9,10 @@
       "projectType": "application",
       "prefix": "app",
       "schematics": {
-  "@schematics/angular:component": {
-    "style": "scss"
-  }
-},
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
@@ -30,13 +30,17 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss",
-              "src/assets/scss/argon.scss"
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "src/assets/scss/argon.scss",
+              "src/styles.scss"
             ],
-            "scripts": [
-              "node_modules/chart.js/dist/Chart.min.js",
-              "node_modules/clipboard/dist/clipboard.min.js"
-            ]
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules",
+                "src/assets/scss"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -82,14 +86,14 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "argon-dashboard-angular:build"
+            "buildTarget": "argon-dashboard-angular:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "argon-dashboard-angular:build:production"
+              "buildTarget": "argon-dashboard-angular:build:production"
             },
             "development": {
-              "browserTarget": "argon-dashboard-angular:build:development"
+              "buildTarget": "argon-dashboard-angular:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -97,7 +101,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "argon-dashboard-angular:build"
+            "buildTarget": "argon-dashboard-angular:build"
           }
         },
         "test": {
@@ -108,13 +112,21 @@
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
             "styles": [
-              "src/styles.css"
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "src/assets/scss/argon.scss",
+              "src/styles.scss"
             ],
             "scripts": [],
             "assets": [
               "src/favicon.ico",
               "src/assets"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules",
+                "src/assets/scss"
+              ]
+            }
           }
         },
         "lint": {
@@ -159,12 +171,11 @@
       }
     }
   },
-  "defaultProject": "argon-dashboard-angular",
-"schematics": {
-  "@schematics/angular:component": {
-    "style": "scss"
-  }
-},
+  "schematics": {
+    "@schematics/angular:component": {
+      "style": "scss"
+    }
+  },
   "cli": {
     "analytics": false
   }
