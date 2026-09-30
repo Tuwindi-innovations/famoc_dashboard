@@ -102,44 +102,33 @@
         </div>
 
         <div class="form-group">
-          <label for="image">Image de couverture</label>
-
-          @if (modeEdition()) {
-            <!-- L'API n'accepte que du JSON sur PUT /formation/{id} et remet
-                 imageUrl à null à chaque mise à jour : on prévient plutôt que
-                 de laisser l'administrateur perdre la couverture sans le
-                 savoir. -->
-            <p class="data-notice" role="alert">
-              <i class="data-notice__icon fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-              <span>
-                <strong>L'image sera retirée en enregistrant.</strong>
-                L'API ne permet pas de conserver ni de remplacer la couverture
-                lors d'une modification : il faudra recréer la formation pour
-                lui redonner une image.
+          <label for="image">
+            Image de couverture
+            @if (modeEdition()) {
+              <span class="form-hint" style="display: inline">
+                (conservée si vous ne choisissez rien)
               </span>
-            </p>
-
-            @if (apercu(); as image) {
-              <img class="apercu" [src]="image" alt="Couverture actuelle" />
             }
-          } @else {
-            <input
-              id="image"
-              class="form-control"
-              type="file"
-              accept="image/*"
-              multiple
-              (change)="surImageChoisie($event)"
-              [attr.aria-invalid]="!!erreurImage()"
+          </label>
+          <input
+            id="image"
+            class="form-control"
+            type="file"
+            accept="image/*"
+            (change)="surImageChoisie($event)"
+            [attr.aria-invalid]="!!erreurImage()"
+          />
+          <span class="form-hint">Format paysage conseillé, 5 Mo maximum.</span>
+          @if (erreurImage()) {
+            <span class="form-error" role="alert">{{ erreurImage() }}</span>
+          }
+
+          @if (apercu(); as image) {
+            <img
+              class="apercu"
+              [src]="image"
+              [alt]="modeEdition() ? 'Couverture actuelle' : 'Aperçu de la couverture'"
             />
-            <span class="form-hint">Format paysage conseillé, 5 Mo maximum.</span>
-            @if (erreurImage()) {
-              <span class="form-error" role="alert">{{ erreurImage() }}</span>
-            }
-
-            @if (apercu(); as image) {
-              <img class="apercu" [src]="image" alt="Aperçu de la couverture" />
-            }
           }
         </div>
       </div>

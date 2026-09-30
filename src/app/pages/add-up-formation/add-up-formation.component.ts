@@ -127,7 +127,7 @@ export class AddUpFormationComponent {
     };
 
     const operation = this.modeEdition()
-      ? this.formationService.modifier(Number(this.id()), requete)
+      ? this.formationService.modifier(Number(this.id()), requete, this.fichiers[0])
       : this.formationService.ajouterFormation(requete, this.fichiers);
 
     operation.subscribe({

@@ -119,13 +119,21 @@
   background-image: none !important;
 }
 
-// `text-white` hors de l'en-tête (écrans de chargement, états vides) : sans le
-// fond coloré d'Argon, ces textes s'écrivaient en blanc sur blanc, donc
-// invisibles. On les ramène à une encre lisible.
-.app-content .text-white,
-.app-content .spinner-border.text-white,
-.app-content .text-light {
-  color: var(--ink-secondary) !important;
+// Les utilitaires de couleur fixe de Bootstrap (`text-white`, `text-dark`,
+// `text-light`) supposaient un fond connu d'avance. Sans le thème Argon, ils
+// produisent du blanc sur blanc en clair et du noir sur noir en sombre. On les
+// fait suivre l'encre du thème plutôt qu'une couleur figée.
+.app-content {
+  .text-white,
+  .text-dark,
+  .text-body {
+    color: var(--ink) !important;
+  }
+
+  .text-light,
+  .spinner-border.text-white {
+    color: var(--ink-secondary) !important;
+  }
 }
 
 // Le spinner Bootstrap reprend la couleur d'accent.
@@ -222,4 +230,67 @@
 img[src=''],
 img:not([src]) {
   visibility: hidden;
+}
+
+// --- Encres atténuées -------------------------------------------------------
+// Argon comptait sur ses propres gris. Avec nos surfaces, `text-muted` et
+// `opacity-8` tombaient sous le seuil de lisibilité, surtout en mode sombre où
+// les descriptions de cartes devenaient presque invisibles.
+.app-content {
+  .text-muted {
+    color: var(--ink-secondary) !important;
+  }
+
+  // Ces utilitaires ne servaient qu'à pâlir un texte déjà gris.
+  .opacity-8,
+  .opacity-7 {
+    opacity: 1;
+  }
+
+  // Intitulés de section en petites capitales : ils doivent rester lisibles
+  // tout en restant secondaires.
+  .text-uppercase.ls-1,
+  .text-uppercase.text-muted {
+    color: var(--ink-muted) !important;
+    letter-spacing: 0.06em;
+  }
+}
+
+// --- Pastilles posées sur une image ----------------------------------------
+// Elles flottent au-dessus de la vignette. Quand le fichier manque, elles se
+// retrouvaient sur la surface nue : du blanc sur blanc. On leur donne un fond
+// opaque pour qu'elles se lisent dans les deux cas.
+.position-relative > .position-absolute {
+  .badge,
+  &.badge {
+    background: var(--surface-raised);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .text-white {
+    color: var(--ink) !important;
+  }
+}
+
+.badge.badge-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.25rem 0.625rem;
+
+  i {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+// --- Cartes de statistiques Argon ------------------------------------------
+.card-stats {
+  .card-body {
+    padding: var(--space-4) var(--space-5);
+  }
 }
