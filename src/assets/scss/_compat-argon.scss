@@ -294,3 +294,48 @@ img:not([src]) {
     padding: var(--space-4) var(--space-5);
   }
 }
+
+// --- Utilitaires Bootstrap 5 absents de Bootstrap 4 -------------------------
+// Certains templates ont été écrits avec les conventions de Bootstrap 5 alors
+// que le projet embarque la 4. Les classes inconnues sont simplement ignorées
+// par le navigateur : une pastille en `position-absolute top-0 end-0` se
+// retrouvait sans décalage, donc posée sur le titre de la carte.
+.top-0 {
+  top: 0;
+}
+.bottom-0 {
+  bottom: 0;
+}
+.start-0 {
+  left: 0;
+}
+.end-0 {
+  right: 0;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}
+
+.fw-bold {
+  font-weight: var(--weight-semibold);
+}
+.fw-normal {
+  font-weight: var(--weight-normal);
+}
+
+// Marges logiques : `ms-*` (start) et `me-*` (end) remplacent `ml-*` / `mr-*`.
+@each $taille, $valeur in (0: 0, 1: 0.25rem, 2: 0.5rem, 3: 1rem, 4: 1.5rem, 5: 3rem) {
+  .ms-#{$taille} {
+    margin-left: $valeur;
+  }
+  .me-#{$taille} {
+    margin-right: $valeur;
+  }
+  .ps-#{$taille} {
+    padding-left: $valeur;
+  }
+  .pe-#{$taille} {
+    padding-right: $valeur;
+  }
+}

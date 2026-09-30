@@ -6,6 +6,13 @@ import { AlerteResponse } from "src/app/models/Alerte";
 import { AlertService } from "src/app/services/alert.service";
 import { environment } from "src/environments/environment";
 
+/** Libellés lisibles des statuts renvoyés par l'API. */
+const LIBELLE_STATUT: Record<string, string> = {
+  ENVOYER: 'En attente',
+  ENCOURSDETRAITEMENT: 'En cours',
+  RESOLUE: 'Résolue',
+};
+
 @Component({
     imports: [DatePipe],
     selector: "app-alerte",
@@ -84,9 +91,21 @@ export class AlerteComponent implements OnInit {
     return this.alertes.filter((a) => a.statut !== "RESOLUE");
   }
 
+  /** Libellé lisible d'un statut, ou « En attente » si l'API n'en donne pas. */
+  libelleStatut(statut: string | null | undefined): string {
+    return LIBELLE_STATUT[statut ?? ''] ?? 'En attente';
+  }
+
+  /**
+   * URL de la photo jointe, ou chaîne vide si l'alerte n'en a pas.
+   *
+   * On ne renvoie plus d'image de remplacement : le fichier référencé
+   * n'existe pas dans le projet, et le gestionnaire global masque de toute
+   * façon les vignettes en échec.
+   */
   getAlerteImage(imageUrl: string | null | undefined): string {
     if (!imageUrl || imageUrl.trim() === "") {
-      return "assets/img/theme/img-1-1000x600.jpg";
+      return "";
     }
 
     //éviter les doubles slashes ou les slashes manquants

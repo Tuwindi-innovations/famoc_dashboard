@@ -60,7 +60,7 @@
                 [class.fa-hourglass-half]="alerte.statut !== 'RESOLUE'"
                 aria-hidden="true"
               ></i>
-              {{ alerte.statut || "EN ATTENTE" }}
+              {{ libelleStatut(alerte.statut) }}
             </span>
           </div>
         </div>
@@ -69,9 +69,9 @@
             <h5 class="card-title fw-bold mb-0 text-dark">
               {{ alerte.titre }}
             </h5>
-            <span class="badge bg-light text-muted">{{
-              alerte.categorie
-            }}</span>
+            @if (alerte.categorie) {
+              <span class="badge bg-light text-muted">{{ alerte.categorie }}</span>
+            }
           </div>
           <p class="card-text text-muted small mb-4" style="min-height: 50px">
             {{ alerte.description }}
