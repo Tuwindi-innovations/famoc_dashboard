@@ -12,10 +12,22 @@
 :root {
   color-scheme: light;
 
+  // --- Le trio ---------------------------------------------------------------
+  // Trois teintes voisines sur le cercle chromatique — 190°, 232°, 263°. Étant
+  // adjacentes, elles se fondent l'une dans l'autre sans jamais virer au gris,
+  // ce que ferait un mélange de complémentaires. L'indigo reste la couleur
+  // d'action ; les deux autres n'existent que dans les aplats profonds.
+  --sarcelle: #0e5c6b;
+  --violet: #55308f;
+  --aurore: linear-gradient(135deg, #0e5c6b 0%, #2d3a8c 52%, #55308f 100%);
+  --aurore-voile: linear-gradient(135deg, #0e5c6b 0%, #2d3a8c 60%, #55308f 100%);
+
   // --- Fondations ----------------------------------------------------------
-  --papier: #f6f6f4; // fond de l'espace de travail
+  // Le papier est légèrement refroidi et assombri : les panneaux blancs se
+  // détachent enfin au lieu de se fondre dans le fond.
+  --papier: #eceef2; // fond de l'espace de travail
   --surface: #ffffff; // panneaux, lignes de registre
-  --surface-creuse: #efefec; // en-têtes de tableau, zones en retrait
+  --surface-creuse: #f2f3f6; // en-têtes de tableau, zones en retrait
   --surface-survol: rgba(20, 22, 43, 0.04);
   --surface-active: rgba(20, 22, 43, 0.08);
 
@@ -24,8 +36,8 @@
   --encre-tenue: #7c7f93;
   --encre-inverse: #ffffff;
 
-  --trait: #ddddd8;
-  --trait-appuye: #c4c4bd;
+  --trait: #dcdfe6;
+  --trait-appuye: #bcc1cd;
 
   // --- Indigo --------------------------------------------------------------
   --indigo: #2d3a8c;
@@ -122,7 +134,12 @@
 @mixin tokens-sombres {
   color-scheme: dark;
 
-  --papier: #0d0e18;
+  --sarcelle: #1b8b9f;
+  --violet: #7d55c7;
+  --aurore: linear-gradient(135deg, #0b3d47 0%, #1e2860 52%, #3a2263 100%);
+  --aurore-voile: linear-gradient(135deg, #0b3d47 0%, #1e2860 60%, #3a2263 100%);
+
+  --papier: #0b0c14;
   --surface: #12131f;
   --surface-creuse: #191b2a;
   --surface-survol: rgba(255, 255, 255, 0.05);

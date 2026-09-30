@@ -16,8 +16,11 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  background: var(--surface);
-  border-right: 1px solid var(--trait);
+  // Le rail passe en aplat profond : c'est lui qui donne son assise à la
+  // page et qui fait reculer le blanc. Le dégradé y est presque immobile —
+  // une teinte qui respire, pas une décoration.
+  background: var(--aurore);
+  border-right: 0;
   overflow: hidden;
 
   &__brand {
@@ -26,7 +29,7 @@
     gap: var(--e-3);
     height: var(--barre);
     padding: 0 var(--e-4);
-    border-bottom: 1px solid var(--trait);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
     flex: none;
 
     &:hover {
@@ -40,7 +43,7 @@
   }
 
   &__brand-text {
-    color: var(--encre);
+    color: #ffffff;
     font-size: var(--t-md);
     font-weight: var(--g-appuye);
     letter-spacing: -0.01em;
@@ -60,7 +63,7 @@
   &__group-title {
     margin: 0 0 var(--e-2);
     padding: 0 var(--e-3);
-    color: var(--encre-tenue);
+    color: rgba(255, 255, 255, 0.5);
     font-size: var(--t-2xs);
     font-weight: var(--g-appuye);
     letter-spacing: 0.01em;
@@ -78,7 +81,7 @@
     gap: var(--e-3);
     padding: var(--e-2) var(--e-3);
     border-radius: var(--r-md);
-    color: var(--encre-douce);
+    color: rgba(255, 255, 255, 0.72);
     font-size: var(--t-base);
     font-weight: var(--g-moyen);
     transition:
@@ -86,16 +89,16 @@
       color var(--duree-breve) var(--sortie);
 
     &:hover {
-      background: var(--surface-survol);
-      color: var(--encre);
+      background: rgba(255, 255, 255, 0.09);
+      color: #ffffff;
       text-decoration: none;
     }
 
     // `aria-current="page"` porte l'information pour les lecteurs d'écran ;
     // le fond et l'encre ne font que la rendre visible.
     &[aria-current='page'] {
-      background: var(--indigo-voile);
-      color: var(--indigo-actif);
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
       font-weight: var(--g-appuye);
     }
   }
@@ -110,7 +113,7 @@
   &__footer {
     flex: none;
     padding: var(--e-3);
-    border-top: 1px solid var(--trait);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
   }
 }
 
@@ -124,7 +127,7 @@
   border: 0;
   border-radius: var(--r-md);
   background: transparent;
-  color: var(--encre-douce);
+  color: rgba(255, 255, 255, 0.72);
   font-family: inherit;
   font-size: var(--t-base);
   font-weight: var(--g-moyen);
@@ -132,8 +135,8 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--surface-survol);
-    color: var(--statut-critique-texte);
+    background: rgba(255, 255, 255, 0.09);
+    color: #ffffff;
   }
 }
 
